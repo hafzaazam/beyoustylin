@@ -81,7 +81,7 @@ const InvoicesPage = () => {
                     <td className="px-4 py-3">{customer?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{staffMember?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{inv.items.map(i => i.name).join(', ')}</td>
-                    <td className="px-4 py-3 font-semibold">${inv.totalAmount}</td>
+                    <td className="px-4 py-3 font-semibold">Rs. {inv.totalAmount}</td>
                     <td className="px-4 py-3 text-xs">{new Date(inv.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
                     <td className="px-4 py-3">
