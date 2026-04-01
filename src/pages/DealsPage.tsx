@@ -101,7 +101,7 @@ const DealsPage = () => {
                 {dealServices.map(s => s && <span key={s.id} className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{s.name}</span>)}
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span className="font-semibold text-primary">${d.discountedPrice}</span>
+                <span className="font-semibold text-primary">Rs. {d.discountedPrice}</span>
                 <span className="text-muted-foreground">{d.totalDuration} min</span>
               </div>
               <div className="flex gap-1 mt-auto">

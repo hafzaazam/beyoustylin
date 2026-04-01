@@ -211,7 +211,7 @@ const BookingsPage = () => {
                     <td className="px-4 py-3">{staffMember?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{chair?.name || 'Unknown'}</td>
                     <td className="px-4 py-3 text-xs">{new Date(b.startTime).toLocaleString()}</td>
-                    <td className="px-4 py-3 font-semibold">${b.totalPrice}</td>
+                    <td className="px-4 py-3 font-semibold">Rs. {b.totalPrice}</td>
                     <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
