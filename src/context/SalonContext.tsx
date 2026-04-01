@@ -23,13 +23,65 @@ const sampleStaff: Staff[] = [
 ];
 
 const sampleServices: Service[] = [
-  { id: genId(), name: 'Haircut', category: 'Hair', price: 35, duration: 30, status: 'active' },
-  { id: genId(), name: 'Hair Coloring', category: 'Hair', price: 80, duration: 60, status: 'active' },
-  { id: genId(), name: 'Blowout', category: 'Hair', price: 25, duration: 20, status: 'active' },
-  { id: genId(), name: 'Classic Facial', category: 'Facial', price: 60, duration: 45, status: 'active' },
-  { id: genId(), name: 'Bridal Makeup', category: 'Makeup', price: 120, duration: 90, status: 'active' },
-  { id: genId(), name: 'Manicure', category: 'Nails', price: 25, duration: 30, status: 'active' },
-  { id: genId(), name: 'Pedicure', category: 'Nails', price: 35, duration: 40, status: 'active' },
+  // Makeup
+  { id: genId(), name: 'Additional Signature Makeup', category: 'Makeup', price: 20000, duration: 60, status: 'active' },
+  { id: genId(), name: 'Barat Without Package', category: 'Makeup', price: 29000, duration: 120, status: 'active' },
+  { id: genId(), name: 'Walima Makeup', category: 'Makeup', price: 29000, duration: 120, status: 'active' },
+  { id: genId(), name: 'Nikah Makeup', category: 'Makeup', price: 29000, duration: 120, status: 'active' },
+  { id: genId(), name: 'Engagement Makeup', category: 'Makeup', price: 26000, duration: 90, status: 'active' },
+  { id: genId(), name: 'Model Makeup', category: 'Makeup', price: 25000, duration: 90, status: 'active' },
+  { id: genId(), name: 'Only Hairstyle & Lashes', category: 'Makeup', price: 20000, duration: 60, status: 'active' },
+  { id: genId(), name: 'Mehndi Makeup', category: 'Makeup', price: 20000, duration: 90, status: 'active' },
+  { id: genId(), name: 'Party Makeup', category: 'Makeup', price: 7000, duration: 60, status: 'active' },
+  // Hair Cutting
+  { id: genId(), name: 'Additional Signature Haircut', category: 'Hair Cutting', price: 1000, duration: 30, status: 'active' },
+  { id: genId(), name: 'Steps Cutting', category: 'Hair Cutting', price: 2000, duration: 40, status: 'active' },
+  { id: genId(), name: 'Long Layer Cut', category: 'Hair Cutting', price: 2000, duration: 40, status: 'active' },
+  { id: genId(), name: 'Feather Layer Cut', category: 'Hair Cutting', price: 1800, duration: 35, status: 'active' },
+  { id: genId(), name: 'Butterfly Cut', category: 'Hair Cutting', price: 1900, duration: 35, status: 'active' },
+  { id: genId(), name: 'Classic Bob Cut', category: 'Hair Cutting', price: 1800, duration: 30, status: 'active' },
+  { id: genId(), name: 'Front Steps Front Bob Cut', category: 'Hair Cutting', price: 1800, duration: 30, status: 'active' },
+  { id: genId(), name: 'Back Forward Cut', category: 'Hair Cutting', price: 800, duration: 20, status: 'active' },
+  { id: genId(), name: 'Back Straight Cut', category: 'Hair Cutting', price: 700, duration: 20, status: 'active' },
+  { id: genId(), name: 'Kids Back Steps Front Bob Cut', category: 'Hair Cutting', price: 800, duration: 20, status: 'active' },
+  { id: genId(), name: 'Kids V Cut', category: 'Hair Cutting', price: 800, duration: 20, status: 'active' },
+  { id: genId(), name: 'Kids Bob Cut', category: 'Hair Cutting', price: 800, duration: 20, status: 'active' },
+  // Hair Treatment (custom price = 0)
+  { id: genId(), name: 'Rebonding', category: 'Hair Treatment', price: 0, duration: 120, status: 'active' },
+  { id: genId(), name: 'Hair Perming', category: 'Hair Treatment', price: 0, duration: 90, status: 'active' },
+  { id: genId(), name: 'Hair Streaking', category: 'Hair Treatment', price: 0, duration: 90, status: 'active' },
+  { id: genId(), name: 'Fashion Color Dye', category: 'Hair Treatment', price: 0, duration: 90, status: 'active' },
+  { id: genId(), name: 'Extenso Treatment', category: 'Hair Treatment', price: 0, duration: 120, status: 'active' },
+  { id: genId(), name: 'Hair Split Ends Treatment', category: 'Hair Treatment', price: 0, duration: 60, status: 'active' },
+  { id: genId(), name: 'Keratin Treatment', category: 'Hair Treatment', price: 0, duration: 120, status: 'active' },
+  // Mehndi
+  { id: genId(), name: 'Bridal Sodani Mehndi', category: 'Mehndi', price: 7500, duration: 120, status: 'active' },
+  { id: genId(), name: 'Bridal Simple Mehndi', category: 'Mehndi', price: 7000, duration: 90, status: 'active' },
+  // Wax
+  { id: genId(), name: 'Bridal Full Body Wax', category: 'Wax', price: 7000, duration: 90, status: 'active' },
+  { id: genId(), name: 'Full Legs Wax', category: 'Wax', price: 2500, duration: 45, status: 'active' },
+  { id: genId(), name: 'Half Legs Wax', category: 'Wax', price: 1200, duration: 25, status: 'active' },
+  { id: genId(), name: 'Full Arms Wax', category: 'Wax', price: 1200, duration: 30, status: 'active' },
+  { id: genId(), name: 'Half Arm Wax', category: 'Wax', price: 600, duration: 15, status: 'active' },
+  // Threading
+  { id: genId(), name: 'Eyebrows', category: 'Threading', price: 150, duration: 10, status: 'active' },
+  { id: genId(), name: 'Upper Lips', category: 'Threading', price: 50, duration: 5, status: 'active' },
+  { id: genId(), name: 'Forehead Threading', category: 'Threading', price: 100, duration: 10, status: 'active' },
+  // Nails
+  { id: genId(), name: 'Manicure', category: 'Nails', price: 1500, duration: 45, status: 'active' },
+  { id: genId(), name: 'Pedicure', category: 'Nails', price: 700, duration: 30, status: 'active' },
+  // Facial
+  { id: genId(), name: 'Hydra Facial', category: 'Facial', price: 6500, duration: 60, status: 'active' },
+  { id: genId(), name: 'Bridal Full Body Polish', category: 'Facial', price: 6500, duration: 90, status: 'active' },
+  { id: genId(), name: '3D Facial', category: 'Facial', price: 4000, duration: 60, status: 'active' },
+  { id: genId(), name: 'Bridal Gold Facial', category: 'Facial', price: 3000, duration: 60, status: 'active' },
+  { id: genId(), name: 'Whitening Facial', category: 'Facial', price: 2100, duration: 45, status: 'active' },
+  { id: genId(), name: 'Anti-Aging Facial', category: 'Facial', price: 2100, duration: 45, status: 'active' },
+  { id: genId(), name: 'Herbal Polisher Facial', category: 'Facial', price: 2000, duration: 45, status: 'active' },
+  { id: genId(), name: 'Herbal Simple Facial', category: 'Facial', price: 1900, duration: 40, status: 'active' },
+  { id: genId(), name: 'Bleach + Massage + Mask', category: 'Facial', price: 1700, duration: 40, status: 'active' },
+  // Add-ons
+  { id: genId(), name: 'Artificial Lashes & Extensions', category: 'Add-on', price: 0, duration: 30, status: 'active' },
 ];
 
 const sampleCustomers: Customer[] = [
