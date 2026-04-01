@@ -114,7 +114,7 @@ const BookingsPage = () => {
           <Label>Deal</Label>
           <Select value={form.dealId} onValueChange={v => setForm(p => ({ ...p, dealId: v }))}>
             <SelectTrigger><SelectValue placeholder="Select deal" /></SelectTrigger>
-            <SelectContent>{activeDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} - ${d.discountedPrice}</SelectItem>)}</SelectContent>
+            <SelectContent>{activeDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} - Rs. {d.discountedPrice}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       ) : (
