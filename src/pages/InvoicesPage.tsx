@@ -118,7 +118,7 @@ const InvoicesPage = () => {
                 <thead><tr><th>Item</th><th>Type</th><th>Price</th></tr></thead>
                 <tbody>
                   {inv.items.map((item, idx) => (
-                    <tr key={idx}><td>{item.name}</td><td>{item.type}</td><td>${item.price}</td></tr>
+                    <tr key={idx}><td>{item.name}</td><td>{item.type}</td><td>Rs. {item.price}</td></tr>
                   ))}
                 </tbody>
               </table>
