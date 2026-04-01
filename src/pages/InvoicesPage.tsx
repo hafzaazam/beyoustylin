@@ -105,7 +105,7 @@ const InvoicesPage = () => {
           return (
             <div key={inv.id} id={`invoice-print-${inv.id}`}>
               <div className="header">
-                <h1>GlowSalon</h1>
+                <h1>BeYou Stylin</h1>
                 <p>Invoice #{inv.invoiceNumber}</p>
               </div>
               <div className="meta">
