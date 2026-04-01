@@ -84,6 +84,21 @@ const sampleServices: Service[] = [
   { id: genId(), name: 'Artificial Lashes & Extensions', category: 'Add-on', price: 0, duration: 30, status: 'active' },
 ];
 
+const svcId = (name: string) => sampleServices.find(s => s.name === name)?.id || '';
+const svcDur = (names: string[]) => names.reduce((sum, n) => sum + (sampleServices.find(s => s.name === n)?.duration || 0), 0);
+
+const baratSodaniNames = ['Herbal Simple Facial', 'Bleach + Massage + Mask', 'Eyebrows', 'Artificial Lashes & Extensions', 'Manicure', 'Full Arms Wax', 'Full Legs Wax', 'Bridal Sodani Mehndi'];
+const baratSimpleNames = ['Herbal Simple Facial', 'Bleach + Massage + Mask', 'Eyebrows', 'Artificial Lashes & Extensions', 'Manicure', 'Full Arms Wax', 'Full Legs Wax', 'Bridal Simple Mehndi'];
+const baratWithWaxNames = ['Herbal Simple Facial', 'Bleach + Massage + Mask', 'Eyebrows', 'Artificial Lashes & Extensions', 'Manicure', 'Full Arms Wax', 'Full Legs Wax'];
+const baratWithoutWaxNames = ['Herbal Simple Facial', 'Bleach + Massage + Mask', 'Eyebrows', 'Artificial Lashes & Extensions', 'Manicure'];
+
+const sampleDeals: Deal[] = [
+  { id: genId(), name: 'Barat Package (Sodani Mehndi)', serviceIds: baratSodaniNames.map(svcId), discountedPrice: 39000, totalDuration: svcDur(baratSodaniNames), status: 'active' },
+  { id: genId(), name: 'Barat Package (Simple Mehndi)', serviceIds: baratSimpleNames.map(svcId), discountedPrice: 38000, totalDuration: svcDur(baratSimpleNames), status: 'active' },
+  { id: genId(), name: 'Barat Package (With Wax)', serviceIds: baratWithWaxNames.map(svcId), discountedPrice: 32000, totalDuration: svcDur(baratWithWaxNames), status: 'active' },
+  { id: genId(), name: 'Barat Package (Without Wax)', serviceIds: baratWithoutWaxNames.map(svcId), discountedPrice: 31000, totalDuration: svcDur(baratWithoutWaxNames), status: 'active' },
+];
+
 const sampleCustomers: Customer[] = [
   { id: genId(), name: 'Alice Williams', phone: '555-1001', email: 'alice@email.com', status: 'active', createdAt: now() },
   { id: genId(), name: 'Jessica Brown', phone: '555-1002', status: 'active', createdAt: now() },
