@@ -168,7 +168,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const [staff, setStaff] = useState<Staff[]>(sampleStaff);
   const [customers, setCustomers] = useState<Customer[]>(sampleCustomers);
   const [services, setServices] = useState<Service[]>(sampleServices);
-  const [deals, setDeals] = useState<Deal[]>([]);
+  const [deals, setDeals] = useState<Deal[]>(sampleDeals);
   const [chairs] = useState<Chair[]>(sampleChairs);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
