@@ -78,7 +78,7 @@ export interface InvoiceItem {
 }
 
 export const SERVICE_CATEGORIES = [
-  'Hair', 'Facial', 'Makeup', 'Nails', 'Spa', 'Waxing', 'Skincare', 'Other'
+  'Makeup', 'Hair Cutting', 'Hair Treatment', 'Mehndi', 'Wax', 'Threading', 'Nails', 'Facial', 'Add-on', 'Other'
 ];
 
 export const STAFF_ROLES = [

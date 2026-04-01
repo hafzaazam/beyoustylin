@@ -70,14 +70,14 @@ const DealsPage = () => {
                     <button key={s.id} type="button" onClick={() => toggleService(s.id)}
                       className={`p-2 rounded-lg border text-left text-sm transition-colors ${form.serviceIds.includes(s.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:bg-muted'}`}>
                       <span className="font-medium">{s.name}</span>
-                      <span className="block text-xs text-muted-foreground">${s.price} · {s.duration}min</span>
+                      <span className="block text-xs text-muted-foreground">Rs. {s.price} · {s.duration}min</span>
                     </button>
                   ))}
                 </div>
               </div>
               {form.serviceIds.length > 0 && (
                 <div className="p-3 rounded-lg bg-muted text-sm">
-                  <p>Original total: <strong>${totalOriginal}</strong></p>
+                  <p>Original total: <strong>Rs. {totalOriginal}</strong></p>
                   <p>Total duration: <strong>{totalDuration} min</strong></p>
                 </div>
               )}
@@ -101,7 +101,7 @@ const DealsPage = () => {
                 {dealServices.map(s => s && <span key={s.id} className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{s.name}</span>)}
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <span className="font-semibold text-primary">${d.discountedPrice}</span>
+                <span className="font-semibold text-primary">Rs. {d.discountedPrice}</span>
                 <span className="text-muted-foreground">{d.totalDuration} min</span>
               </div>
               <div className="flex gap-1 mt-auto">

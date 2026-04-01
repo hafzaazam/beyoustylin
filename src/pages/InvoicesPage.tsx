@@ -81,7 +81,7 @@ const InvoicesPage = () => {
                     <td className="px-4 py-3">{customer?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{staffMember?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{inv.items.map(i => i.name).join(', ')}</td>
-                    <td className="px-4 py-3 font-semibold">${inv.totalAmount}</td>
+                    <td className="px-4 py-3 font-semibold">Rs. {inv.totalAmount}</td>
                     <td className="px-4 py-3 text-xs">{new Date(inv.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
                     <td className="px-4 py-3">
@@ -105,7 +105,7 @@ const InvoicesPage = () => {
           return (
             <div key={inv.id} id={`invoice-print-${inv.id}`}>
               <div className="header">
-                <h1>GlowSalon</h1>
+                <h1>BeYou Stylin</h1>
                 <p>Invoice #{inv.invoiceNumber}</p>
               </div>
               <div className="meta">
@@ -118,11 +118,11 @@ const InvoicesPage = () => {
                 <thead><tr><th>Item</th><th>Type</th><th>Price</th></tr></thead>
                 <tbody>
                   {inv.items.map((item, idx) => (
-                    <tr key={idx}><td>{item.name}</td><td>{item.type}</td><td>${item.price}</td></tr>
+                    <tr key={idx}><td>{item.name}</td><td>{item.type}</td><td>Rs. {item.price}</td></tr>
                   ))}
                 </tbody>
               </table>
-              <div className="total">Total: ${inv.totalAmount}</div>
+              <div className="total">Total: Rs. {inv.totalAmount}</div>
             </div>
           );
         })}

@@ -83,7 +83,7 @@ const ServicesPage = () => {
               <StatusBadge status={s.status} />
             </div>
             <div className="flex items-center gap-4 text-sm">
-              <span className="font-semibold text-primary">${s.price}</span>
+              <span className="font-semibold text-primary">{s.price > 0 ? `Rs. ${s.price}` : 'Custom Price'}</span>
               <span className="text-muted-foreground">{s.duration} min</span>
             </div>
             <div className="flex gap-1 mt-auto">

@@ -114,7 +114,7 @@ const BookingsPage = () => {
           <Label>Deal</Label>
           <Select value={form.dealId} onValueChange={v => setForm(p => ({ ...p, dealId: v }))}>
             <SelectTrigger><SelectValue placeholder="Select deal" /></SelectTrigger>
-            <SelectContent>{activeDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} - ${d.discountedPrice}</SelectItem>)}</SelectContent>
+            <SelectContent>{activeDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} - Rs. {d.discountedPrice}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       ) : (
@@ -131,7 +131,7 @@ const BookingsPage = () => {
                 }`}
               >
                 <span className="font-medium">{s.name}</span>
-                <span className="block text-xs text-muted-foreground">${s.price} · {s.duration}min</span>
+                <span className="block text-xs text-muted-foreground">Rs. {s.price} · {s.duration}min</span>
               </button>
             ))}
           </div>
@@ -211,7 +211,7 @@ const BookingsPage = () => {
                     <td className="px-4 py-3">{staffMember?.name || 'Unknown'}</td>
                     <td className="px-4 py-3">{chair?.name || 'Unknown'}</td>
                     <td className="px-4 py-3 text-xs">{new Date(b.startTime).toLocaleString()}</td>
-                    <td className="px-4 py-3 font-semibold">${b.totalPrice}</td>
+                    <td className="px-4 py-3 font-semibold">Rs. {b.totalPrice}</td>
                     <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
