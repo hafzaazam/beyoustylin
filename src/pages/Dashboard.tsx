@@ -65,7 +65,7 @@ const Dashboard = () => {
                     <p className="text-xs text-muted-foreground">{new Date(b.startTime).toLocaleString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-foreground">${b.totalPrice}</p>
+                    <p className="text-sm font-semibold text-foreground">Rs. {b.totalPrice}</p>
                     <span className={`status-badge status-${b.status}`}>
                       {b.status.charAt(0).toUpperCase() + b.status.slice(1)}
                     </span>
