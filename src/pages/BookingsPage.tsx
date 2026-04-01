@@ -131,7 +131,7 @@ const BookingsPage = () => {
                 }`}
               >
                 <span className="font-medium">{s.name}</span>
-                <span className="block text-xs text-muted-foreground">${s.price} · {s.duration}min</span>
+                <span className="block text-xs text-muted-foreground">Rs. {s.price} · {s.duration}min</span>
               </button>
             ))}
           </div>
