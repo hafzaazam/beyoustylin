@@ -77,7 +77,7 @@ const DealsPage = () => {
               </div>
               {form.serviceIds.length > 0 && (
                 <div className="p-3 rounded-lg bg-muted text-sm">
-                  <p>Original total: <strong>${totalOriginal}</strong></p>
+                  <p>Original total: <strong>Rs. {totalOriginal}</strong></p>
                   <p>Total duration: <strong>{totalDuration} min</strong></p>
                 </div>
               )}
