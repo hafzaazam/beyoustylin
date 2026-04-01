@@ -70,7 +70,7 @@ const DealsPage = () => {
                     <button key={s.id} type="button" onClick={() => toggleService(s.id)}
                       className={`p-2 rounded-lg border text-left text-sm transition-colors ${form.serviceIds.includes(s.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:bg-muted'}`}>
                       <span className="font-medium">{s.name}</span>
-                      <span className="block text-xs text-muted-foreground">${s.price} · {s.duration}min</span>
+                      <span className="block text-xs text-muted-foreground">Rs. {s.price} · {s.duration}min</span>
                     </button>
                   ))}
                 </div>
