@@ -122,7 +122,7 @@ const InvoicesPage = () => {
                   ))}
                 </tbody>
               </table>
-              <div className="total">Total: ${inv.totalAmount}</div>
+              <div className="total">Total: Rs. {inv.totalAmount}</div>
             </div>
           );
         })}

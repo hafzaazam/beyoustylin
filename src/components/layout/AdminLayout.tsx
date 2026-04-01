@@ -38,7 +38,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             <Scissors className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-semibold text-sidebar-primary-foreground">GlowSalon</h1>
+            <h1 className="font-heading text-lg font-semibold text-sidebar-primary-foreground">BeYou Stylin</h1>
             <p className="text-xs text-sidebar-foreground/60">Admin Panel</p>
           </div>
           <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
