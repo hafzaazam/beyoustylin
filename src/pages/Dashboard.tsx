@@ -21,8 +21,8 @@ const Dashboard = () => {
   const stats = [
     { label: "Today's Bookings", value: todayBookings.length, icon: CalendarCheck, color: 'text-primary' },
     { label: 'Active Orders', value: activeBookings.length, icon: Clock, color: 'text-accent' },
-    { label: "Today's Revenue", value: `$${dailyRevenue}`, icon: DollarSign, color: 'text-success' },
-    { label: 'Total Revenue', value: `$${totalRevenue}`, icon: TrendingUp, color: 'text-info' },
+     { label: "Today's Revenue", value: `Rs. ${dailyRevenue}`, icon: DollarSign, color: 'text-success' },
+     { label: 'Total Revenue', value: `Rs. ${totalRevenue}`, icon: TrendingUp, color: 'text-info' },
     { label: 'Active Staff', value: staff.filter(s => s.status === 'active').length, icon: Users, color: 'text-primary' },
     { label: 'Chairs Available', value: `${chairs.length - occupiedChairs}/${chairs.length}`, icon: Armchair, color: 'text-accent' },
   ];
