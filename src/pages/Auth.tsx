@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Scissors, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import brandLogo from '@/assets/logo.png';
 
 const Auth = () => {
   const { user, loading, signIn, signUp } = useAuth();
