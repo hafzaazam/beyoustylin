@@ -320,6 +320,18 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
 
   const updateBookingStatus = (id: string, status: BookingStatus) => {
     setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+    if (status === 'confirmed') {
+      setInvoices(prev => prev.map(inv => {
+        if (inv.bookingId !== id || inv.pdfDataUrl) return inv;
+        const booking = bookings.find(b => b.id === id);
+        const customer = customers.find(c => c.id === inv.customerId);
+        const staffMember = staff.find(s => s.id === inv.staffId);
+        try {
+          const pdfDataUrl = buildInvoicePdf({ invoice: inv, booking, customer, staff: staffMember });
+          return { ...inv, pdfDataUrl, pdfGeneratedAt: now() };
+        } catch { return inv; }
+      }));
+    }
   };
 
   const deleteBooking = (id: string) => setBookings(prev => prev.filter(b => b.id !== id));
