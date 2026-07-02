@@ -326,15 +326,31 @@ const Landing = () => {
       <section id="book" className="py-24 px-4 lg:px-8 bg-muted/40 scroll-mt-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-10 items-start">
           <div className="lg:col-span-2">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Request Appointment</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Reserve Your Glow Session</h2>
+            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">
+              {mode === 'booking' ? 'Book Appointment' : 'Request a Quote'}
+            </p>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
+              {mode === 'booking' ? 'Reserve Your Glow Session' : 'Get a Personalised Quote'}
+            </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              Share your preferred date and service, and our team will personally confirm your slot within a few hours.
+              {mode === 'booking'
+                ? 'Pick a package or service, share your preferred date, and our team will personally confirm your slot within a few hours.'
+                : 'Not sure what you need? Tell us about your occasion and we\'ll craft a custom quote tailored to your event and budget.'}
             </p>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Personal consultation before every booking</li>
-              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Confirmation via WhatsApp or phone call</li>
-              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Flexible rescheduling — no hidden fees</li>
+              {mode === 'booking' ? (
+                <>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Personal consultation before every booking</li>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Confirmation via WhatsApp or phone call</li>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Flexible rescheduling — no hidden fees</li>
+                </>
+              ) : (
+                <>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Tailored pricing for weddings, events & groups</li>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Custom bundles beyond our listed packages</li>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Quote shared within 24 hours, no obligation</li>
+                </>
+              )}
             </ul>
             <div className="mt-8 p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-2 text-sm font-medium mb-1"><Phone className="w-4 h-4 text-primary" /> Prefer to call?</div>
@@ -343,44 +359,65 @@ const Landing = () => {
           </div>
 
           <div className="lg:col-span-3">
+            {/* Mode tabs */}
+            <div className="inline-flex p-1 rounded-full bg-card border border-border mb-5">
+              {(['booking', 'quote'] as const).map(m => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => { setMode(m); setSubmitted(null); }}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
+                    mode === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {m === 'booking' ? 'Book Appointment' : 'Request a Quote'}
+                </button>
+              ))}
+            </div>
+
             {submitted ? (
               <div className="p-10 rounded-3xl border border-primary/30 bg-card text-center">
                 <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
                   <CheckCircle2 className="w-7 h-7 text-primary" />
                 </div>
-                <h3 className="font-heading text-2xl font-bold mb-2">Request received</h3>
+                <h3 className="font-heading text-2xl font-bold mb-2">
+                  {submitted === 'booking' ? 'Booking received' : 'Quote request received'}
+                </h3>
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  Thank you! Our team will review your appointment request and reach out shortly to confirm your slot.
+                  {submitted === 'booking'
+                    ? 'Thank you! Our team will review your appointment and reach out shortly to confirm your slot.'
+                    : "Thank you! We'll review your requirements and share a personalised quote within 24 hours."}
                 </p>
-                <Button variant="outline" onClick={() => setSubmitted(false)}>Submit another request</Button>
+                <Button variant="outline" onClick={() => setSubmitted(null)}>Submit another request</Button>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="p-6 md:p-8 rounded-3xl border border-border bg-card shadow-sm space-y-5">
+            ) : mode === 'booking' ? (
+              <form onSubmit={handleBookingSubmit} className="p-6 md:p-8 rounded-3xl border border-border bg-card shadow-sm space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="req-name">Full name *</Label>
-                    <Input id="req-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} maxLength={100} placeholder="Your name" required />
+                    <Label htmlFor="bk-name">Full name *</Label>
+                    <Input id="bk-name" value={bookingForm.name} onChange={e => setBookingForm({ ...bookingForm, name: e.target.value })} maxLength={100} placeholder="Your name" required />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="req-phone">Phone *</Label>
-                    <Input id="req-phone" type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} maxLength={20} placeholder="03XX XXXXXXX" required />
+                    <Label htmlFor="bk-phone">Phone *</Label>
+                    <Input id="bk-phone" type="tel" value={bookingForm.phone} onChange={e => setBookingForm({ ...bookingForm, phone: e.target.value })} maxLength={20} placeholder="03XX XXXXXXX" required />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="req-email">Email (optional)</Label>
-                  <Input id="req-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} maxLength={150} placeholder="you@email.com" />
+                  <Label htmlFor="bk-email">Email (optional)</Label>
+                  <Input id="bk-email" type="email" value={bookingForm.email} onChange={e => setBookingForm({ ...bookingForm, email: e.target.value })} maxLength={150} placeholder="you@email.com" />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="req-service">Service or package</Label>
+                  <Label htmlFor="bk-service">Select package or service *</Label>
                   <select
-                    id="req-service"
-                    value={form.selection}
-                    onChange={e => setForm({ ...form, selection: e.target.value })}
+                    id="bk-service"
+                    value={bookingForm.selection}
+                    onChange={e => setBookingForm({ ...bookingForm, selection: e.target.value })}
+                    required
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    <option value="">General inquiry</option>
+                    <option value="">— Choose one —</option>
                     {activeDeals.length > 0 && (
                       <optgroup label="Bridal Packages">
                         {activeDeals.map(d => (
@@ -396,29 +433,98 @@ const Landing = () => {
                       ))}
                     </optgroup>
                   </select>
+                  <p className="text-xs text-muted-foreground">
+                    Need something custom?{' '}
+                    <button type="button" onClick={() => setMode('quote')} className="text-primary font-medium hover:underline">Request a quote instead</button>.
+                  </p>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label htmlFor="req-date">Preferred date *</Label>
-                    <Input id="req-date" type="date" min={todayStr} value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} required />
+                    <Label htmlFor="bk-date">Preferred date *</Label>
+                    <Input id="bk-date" type="date" min={todayStr} value={bookingForm.date} onChange={e => setBookingForm({ ...bookingForm, date: e.target.value })} required />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="req-time">Preferred time *</Label>
-                    <Input id="req-time" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} required />
+                    <Label htmlFor="bk-time">Preferred time *</Label>
+                    <Input id="bk-time" type="time" value={bookingForm.time} onChange={e => setBookingForm({ ...bookingForm, time: e.target.value })} required />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="req-notes">Notes (optional)</Label>
-                  <Textarea id="req-notes" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} maxLength={500} rows={3} placeholder="Any special requests, occasion details, etc." />
+                  <Label htmlFor="bk-notes">Notes (optional)</Label>
+                  <Textarea id="bk-notes" value={bookingForm.notes} onChange={e => setBookingForm({ ...bookingForm, notes: e.target.value })} maxLength={500} rows={3} placeholder="Any special requests, occasion details, etc." />
                 </div>
 
                 <Button type="submit" size="lg" className="w-full">
-                  <Send className="w-4 h-4" /> Submit Request
+                  <Send className="w-4 h-4" /> Submit Booking Request
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  Requests are subject to availability. Our team confirms every booking manually.
+                  Bookings are subject to availability. Our team confirms every appointment manually.
+                </p>
+              </form>
+            ) : (
+              <form onSubmit={handleQuoteSubmit} className="p-6 md:p-8 rounded-3xl border border-border bg-card shadow-sm space-y-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="qt-name">Full name *</Label>
+                    <Input id="qt-name" value={quoteForm.name} onChange={e => setQuoteForm({ ...quoteForm, name: e.target.value })} maxLength={100} placeholder="Your name" required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="qt-phone">Phone *</Label>
+                    <Input id="qt-phone" type="tel" value={quoteForm.phone} onChange={e => setQuoteForm({ ...quoteForm, phone: e.target.value })} maxLength={20} placeholder="03XX XXXXXXX" required />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="qt-email">Email (optional)</Label>
+                  <Input id="qt-email" type="email" value={quoteForm.email} onChange={e => setQuoteForm({ ...quoteForm, email: e.target.value })} maxLength={150} placeholder="you@email.com" />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="qt-service">Interested in (optional)</Label>
+                  <select
+                    id="qt-service"
+                    value={quoteForm.selection}
+                    onChange={e => setQuoteForm({ ...quoteForm, selection: e.target.value })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">Not sure — need guidance</option>
+                    {activeDeals.length > 0 && (
+                      <optgroup label="Bridal Packages">
+                        {activeDeals.map(d => (
+                          <option key={d.id} value={`deal:${d.id}`}>{d.name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label="Services">
+                      {activeServices.map(s => (
+                        <option key={s.id} value={`service:${s.id}`}>{s.name}</option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="qt-event">Event date (optional)</Label>
+                    <Input id="qt-event" type="date" min={todayStr} value={quoteForm.eventDate} onChange={e => setQuoteForm({ ...quoteForm, eventDate: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="qt-budget">Budget range (optional)</Label>
+                    <Input id="qt-budget" value={quoteForm.budget} onChange={e => setQuoteForm({ ...quoteForm, budget: e.target.value })} maxLength={50} placeholder="e.g. Rs. 50,000 – 80,000" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="qt-notes">Tell us what you need *</Label>
+                  <Textarea id="qt-notes" value={quoteForm.notes} onChange={e => setQuoteForm({ ...quoteForm, notes: e.target.value })} maxLength={1000} rows={4} placeholder="Describe your event, group size, services you're considering, timing preferences, etc." required />
+                </div>
+
+                <Button type="submit" size="lg" className="w-full">
+                  <Send className="w-4 h-4" /> Request Quote
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  We'll respond within 24 hours with a personalised quote — no obligation.
                 </p>
               </form>
             )}
