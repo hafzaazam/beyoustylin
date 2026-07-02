@@ -53,6 +53,26 @@ const Landing = () => {
   const [quoteForm, setQuoteForm] = useState(initialQuote);
   const [submitted, setSubmitted] = useState<null | FormMode>(null);
 
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const svc = params.get('service');
+    const deal = params.get('deal');
+    if (svc) {
+      setMode('booking');
+      setBookingForm(f => ({ ...f, selection: `service:${svc}` }));
+    } else if (deal) {
+      setMode('booking');
+      setBookingForm(f => ({ ...f, selection: `deal:${deal}` }));
+    }
+    if ((svc || deal) || location.hash === '#book') {
+      setTimeout(() => {
+        document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [location.search, location.hash]);
+
+
   const parseSelection = (sel: string): { serviceId?: string; dealId?: string } => {
     if (sel.startsWith('service:')) return { serviceId: sel.slice(8) };
     if (sel.startsWith('deal:')) return { dealId: sel.slice(5) };
