@@ -160,17 +160,32 @@ const Dashboard = () => {
               {topStaff.map((s, idx) => {
                 const medal = ['bg-primary/15 text-primary', 'bg-accent/15 text-accent', 'bg-muted text-muted-foreground'][idx] || 'bg-muted text-muted-foreground';
                 return (
-                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${medal}`}>
-                      {idx + 1}
+                  <div key={s.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${medal}`}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {s.role} · {s.bookingsCount} completed · {fmtHours(s.minutes)}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-success whitespace-nowrap">Rs. {s.revenue.toLocaleString()}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {s.role} · {s.bookingsCount} completed · {fmtHours(s.minutes)}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold text-success whitespace-nowrap">Rs. {s.revenue.toLocaleString()}</p>
+                    {s.categoryBreakdown.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pl-11">
+                        {s.categoryBreakdown.map(c => (
+                          <span
+                            key={c.category}
+                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+                          >
+                            {c.category}
+                            <span className="text-primary/70">· {c.count}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
