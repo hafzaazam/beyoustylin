@@ -113,6 +113,7 @@ interface SalonContextType {
   chairs: Chair[];
   bookings: Booking[];
   invoices: Invoice[];
+  appointmentRequests: AppointmentRequest[];
 
   // Staff
   addStaff: (s: Omit<Staff, 'id' | 'createdAt'>) => void;
