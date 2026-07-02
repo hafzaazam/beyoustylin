@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Inbox } from 'lucide-react';
+import { MailOpen } from 'lucide-react';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
