@@ -1,6 +1,9 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Scissors, Instagram, Facebook } from 'lucide-react';
+import {
+  Instagram, Facebook, Sparkles, MapPin, Phone, Mail, Clock,
+  ArrowRight, Heart, Crown, Flower2,
+} from 'lucide-react';
 import Logo from '@/components/Logo';
 import { ReactNode } from 'react';
 
