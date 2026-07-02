@@ -25,7 +25,7 @@ const BookingsPage = () => {
 
   const resetForm = () => setForm({ customerId: '', staffId: '', chairId: '', serviceIds: [], dealId: '', startTime: '', useDeal: false });
 
-  const handleSubmit = (isWalkIn = false) => {
+  const handleSubmit = async (isWalkIn = false) => {
     if (!form.customerId || !form.staffId || !form.chairId || !form.startTime) {
       toast({ title: 'Missing fields', description: 'Fill all required fields.', variant: 'destructive' });
       return;
@@ -45,8 +45,8 @@ const BookingsPage = () => {
     };
 
     const result = isWalkIn
-      ? salon.createWalkIn(bookingData)
-      : salon.addBooking({ ...bookingData, status: 'pending' as BookingStatus });
+      ? await salon.createWalkIn(bookingData)
+      : await salon.addBooking({ ...bookingData, status: 'pending' as BookingStatus });
 
     if (typeof result === 'string') {
       toast({ title: 'Booking Conflict', description: result, variant: 'destructive' });
