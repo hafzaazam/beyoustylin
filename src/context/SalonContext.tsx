@@ -3,6 +3,7 @@ import {
   Staff, Customer, Service, Deal, Chair, Booking, Invoice,
   BookingStatus, EntityStatus, InvoiceItem, AppointmentRequest, AppointmentRequestStatus,
 } from '@/types/salon';
+import { buildInvoicePdf } from '@/lib/invoicePdf';
 
 // Helpers
 const genId = () => crypto.randomUUID();
