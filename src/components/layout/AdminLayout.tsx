@@ -123,20 +123,38 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-border/60 px-4 lg:px-8 py-4 flex items-center gap-4 shadow-[0_1px_0_hsl(335_30%_88%/0.6),0_8px_24px_-16px_hsl(328_85%_55%/0.25)]">
+        <header className="sticky top-0 z-30 px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
+          {/* Top hairline gradient */}
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          {/* Soft pink glow */}
+          <span className="pointer-events-none absolute -top-16 left-1/4 h-32 w-64 rounded-full bg-primary/20 blur-3xl" />
+
           <button
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+            className="relative lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
             onClick={() => setSidebarOpen(true)}
           >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
-          <div className="relative flex-1 min-w-0 pl-3">
+          <div className="relative flex-1 min-w-0 pl-4">
             <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1.5 rounded-full shadow-[0_0_12px_hsl(328_85%_55%/0.6)]"
               style={{ background: 'var(--gradient-primary)' }}
             />
-            <p className="text-[11px] uppercase tracking-[0.2em] font-semibold bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>BeYou Stylin</p>
-            <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">{title}</h2>
+            <p
+              className="text-[10px] uppercase tracking-[0.28em] font-bold bg-clip-text text-transparent leading-none mb-1.5"
+              style={{ backgroundImage: 'var(--gradient-primary)' }}
+            >
+              BeYou Stylin
+            </p>
+            <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">
+              {title}
+            </h2>
+          </div>
+
+          {/* Decorative right-side chip */}
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]" />
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Live</span>
           </div>
         </header>
 
