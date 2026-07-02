@@ -155,7 +155,7 @@ const Landing = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <a href="#book"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></a>
-              <a href="#packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></a>
+              <Link to="/packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></Link>
             </div>
             <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {perks.map(p => (
