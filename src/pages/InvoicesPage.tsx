@@ -3,7 +3,7 @@ import { useSalon } from '@/context/SalonContext';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Printer, Search } from 'lucide-react';
+import { Printer, Search, Download } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 const InvoicesPage = () => {
@@ -85,9 +85,18 @@ const InvoicesPage = () => {
                     <td className="px-4 py-3 text-xs">{new Date(inv.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
                     <td className="px-4 py-3">
-                      <Button variant="ghost" size="sm" onClick={() => handlePrint(inv.id)}>
-                        <Printer className="w-3.5 h-3.5 mr-1" />Print
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handlePrint(inv.id)}>
+                          <Printer className="w-3.5 h-3.5 mr-1" />Print
+                        </Button>
+                        {inv.pdfDataUrl && (
+                          <a href={inv.pdfDataUrl} download={`${inv.invoiceNumber}.pdf`}>
+                            <Button variant="ghost" size="sm">
+                              <Download className="w-3.5 h-3.5 mr-1" />PDF
+                            </Button>
+                          </a>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
