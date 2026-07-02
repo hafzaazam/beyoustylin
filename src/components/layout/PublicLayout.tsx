@@ -18,10 +18,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <Scissors className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-heading text-xl font-semibold">BeYou Stylin</span>
+            <img src={brandLogo} alt="BeYou Stylin" className="h-10 w-auto object-contain" />
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             {navLinks.map(l =>
