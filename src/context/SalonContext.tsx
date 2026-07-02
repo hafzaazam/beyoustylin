@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import {
   Staff, Customer, Service, Deal, Chair, Booking, Invoice,
-  BookingStatus, EntityStatus, InvoiceItem
+  BookingStatus, EntityStatus, InvoiceItem, AppointmentRequest, AppointmentRequestStatus,
 } from '@/types/salon';
 
 // Helpers
@@ -113,6 +113,7 @@ interface SalonContextType {
   chairs: Chair[];
   bookings: Booking[];
   invoices: Invoice[];
+  appointmentRequests: AppointmentRequest[];
 
   // Staff
   addStaff: (s: Omit<Staff, 'id' | 'createdAt'>) => void;
@@ -147,6 +148,11 @@ interface SalonContextType {
   // Walk-in
   createWalkIn: (b: Omit<Booking, 'id' | 'createdAt' | 'endTime' | 'totalPrice' | 'totalDuration' | 'status'>) => Booking | string;
 
+  // Appointment Requests (public)
+  addAppointmentRequest: (r: Omit<AppointmentRequest, 'id' | 'createdAt' | 'status'>) => AppointmentRequest;
+  updateAppointmentRequestStatus: (id: string, status: AppointmentRequestStatus) => void;
+  deleteAppointmentRequest: (id: string) => void;
+
   // Helpers
   getStaffById: (id: string) => Staff | undefined;
   getCustomerById: (id: string) => Customer | undefined;
@@ -172,6 +178,27 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const [chairs] = useState<Chair[]>(sampleChairs);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem('beyou_appointment_requests');
+      return raw ? (JSON.parse(raw) as AppointmentRequest[]) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('beyou_appointment_requests', JSON.stringify(appointmentRequests)); } catch { /* noop */ }
+  }, [appointmentRequests]);
+
+  const addAppointmentRequest = (r: Omit<AppointmentRequest, 'id' | 'createdAt' | 'status'>): AppointmentRequest => {
+    const req: AppointmentRequest = { ...r, id: genId(), createdAt: now(), status: 'pending' };
+    setAppointmentRequests(prev => [req, ...prev]);
+    return req;
+  };
+  const updateAppointmentRequestStatus = (id: string, status: AppointmentRequestStatus) =>
+    setAppointmentRequests(prev => prev.map(x => x.id === id ? { ...x, status } : x));
+  const deleteAppointmentRequest = (id: string) =>
+    setAppointmentRequests(prev => prev.filter(x => x.id !== id));
 
   // Helpers
   const getStaffById = useCallback((id: string) => staff.find(s => s.id === id), [staff]);
@@ -304,13 +331,14 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <SalonContext.Provider value={{
-      staff, customers, services, deals, chairs, bookings, invoices,
+      staff, customers, services, deals, chairs, bookings, invoices, appointmentRequests,
       addStaff, updateStaff, toggleStaffStatus, deleteStaff,
       addCustomer, updateCustomer, toggleCustomerStatus, deleteCustomer,
       addService, updateService, toggleServiceStatus, deleteService,
       addDeal, updateDeal, toggleDealStatus, deleteDeal,
       addBooking, updateBookingStatus, deleteBooking, checkOverlap,
       createWalkIn,
+      addAppointmentRequest, updateAppointmentRequestStatus, deleteAppointmentRequest,
       getStaffById, getCustomerById, getServiceById, getDealById, getChairById, getInvoiceByBookingId,
     }}>
       {children}

@@ -77,6 +77,22 @@ export interface InvoiceItem {
   type: 'service' | 'deal';
 }
 
+export type AppointmentRequestStatus = 'pending' | 'approved' | 'dismissed';
+
+export interface AppointmentRequest {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  serviceId?: string;
+  dealId?: string;
+  preferredDate: string; // YYYY-MM-DD
+  preferredTime: string; // HH:MM
+  notes?: string;
+  status: AppointmentRequestStatus;
+  createdAt: string;
+}
+
 export const SERVICE_CATEGORIES = [
   'Makeup', 'Hair Cutting', 'Hair Treatment', 'Mehndi', 'Wax', 'Threading', 'Nails', 'Facial', 'Add-on', 'Other'
 ];
