@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
+import brandLogo from '@/assets/logo.png';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
