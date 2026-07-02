@@ -45,12 +45,27 @@ const Dashboard = () => {
     { label: 'Chairs Available', value: `${chairs.length - occupiedChairs}/${chairs.length}`, sub: `${occupiedChairs} in use`, icon: Armchair, color: 'text-accent' },
   ];
 
-  // Staff performance
+  // Staff performance — filterable by today vs this month
+  const [perfRange, setPerfRange] = useState<'today' | 'month'>('today');
+  const rangeStart = perfRange === 'today'
+    ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    : startOfMonth;
+
   const staffPerformance = staff.filter(s => s.status === 'active').map(s => {
-    const staffBookings = completedBookings.filter(b => b.staffId === s.id);
+    const staffBookings = completedBookings.filter(b =>
+      b.staffId === s.id && new Date(b.endTime) >= rangeStart
+    );
     const revenue = staffBookings.reduce((sum, b) => sum + b.totalPrice, 0);
-    return { ...s, bookingsCount: staffBookings.length, revenue };
-  }).sort((a, b) => b.revenue - a.revenue);
+    const minutes = staffBookings.reduce((sum, b) => sum + (b.totalDuration || 0), 0);
+    return { ...s, bookingsCount: staffBookings.length, revenue, minutes };
+  }).sort((a, b) => b.bookingsCount - a.bookingsCount || b.minutes - a.minutes);
+
+  const topStaff = staffPerformance.filter(s => s.bookingsCount > 0).slice(0, 5);
+  const fmtHours = (m: number) => {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    return h > 0 ? `${h}h ${min}m` : `${min}m`;
+  };
 
   return (
     <AdminLayout title="Dashboard">
