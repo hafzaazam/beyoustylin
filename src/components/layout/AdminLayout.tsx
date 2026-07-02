@@ -85,7 +85,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           })}
         </nav>
 
-        <div className="absolute bottom-0 inset-x-0 p-3 border-t border-sidebar-border">
+        <div className="mt-auto p-3 border-t border-sidebar-border">
           <div className="px-3 py-2 mb-2">
             <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
             <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
