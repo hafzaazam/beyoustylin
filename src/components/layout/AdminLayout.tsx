@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarCheck, Scissors, Gift, Users, UserCircle,
-  FileText, Menu, X, ChevronRight, Inbox
+  FileText, Menu, X, ChevronRight, Inbox, LogOut
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
