@@ -123,7 +123,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
+        <header className="sticky top-0 z-30 relative overflow-hidden px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
           {/* Top hairline gradient */}
           <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
           {/* Soft pink glow */}
