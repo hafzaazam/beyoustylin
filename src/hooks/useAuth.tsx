@@ -9,10 +9,12 @@ interface AuthContextType {
   session: Session | null;
   roles: AppRole[];
   loading: boolean;
+  rolesLoaded: boolean;
   isStaff: boolean;
+  isCustomer: boolean;
   hasRole: (role: AppRole) => boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -29,10 +31,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
 
   const loadRoles = async (uid: string) => {
     const { data } = await supabase.from('user_roles').select('role').eq('user_id', uid);
     setRoles((data || []).map(r => r.role as AppRole));
+    setRolesLoaded(true);
   };
 
   useEffect(() => {
@@ -40,9 +44,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
+        setRolesLoaded(false);
         setTimeout(() => loadRoles(sess.user.id), 0);
       } else {
         setRoles([]);
+        setRolesLoaded(true);
       }
     });
 
@@ -50,6 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) loadRoles(sess.user.id);
+      else setRolesLoaded(true);
       setLoading(false);
     });
 
@@ -61,13 +68,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error: error?.message ?? null };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/admin`,
-        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/account`,
+        data: { full_name: fullName, phone: phone ?? null },
       },
     });
     return { error: error?.message ?? null };
@@ -77,10 +84,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const isStaff = roles.length > 0;
+
   return (
     <AuthContext.Provider value={{
-      user, session, roles, loading,
-      isStaff: roles.length > 0,
+      user, session, roles, loading, rolesLoaded,
+      isStaff,
+      isCustomer: !!user && rolesLoaded && !isStaff,
       hasRole: (r) => roles.includes(r),
       signIn, signUp, signOut,
     }}>
@@ -88,3 +98,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
