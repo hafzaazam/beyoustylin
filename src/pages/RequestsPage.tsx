@@ -80,6 +80,15 @@ const RequestsPage = () => {
               <div key={r.id} className="p-5 rounded-2xl border border-border bg-card">
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold border ${
+                        r.type === 'quote'
+                          ? 'bg-violet-100 text-violet-800 border-violet-200'
+                          : 'bg-primary/10 text-primary border-primary/20'
+                      }`}>
+                        {r.type === 'quote' ? 'Quote' : 'Booking'}
+                      </span>
+                    </div>
                     <h3 className="font-heading text-lg font-semibold">{r.name}</h3>
                     <p className="text-sm text-primary font-medium">{labelForItem(r)}</p>
                   </div>
@@ -91,12 +100,21 @@ const RequestsPage = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> {r.phone}</div>
                   {r.email && <div className="flex items-center gap-2 truncate"><Mail className="w-3.5 h-3.5" /> <span className="truncate">{r.email}</span></div>}
-                  <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {r.preferredDate}</div>
-                  <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> {r.preferredTime}</div>
+                  {r.type !== 'quote' ? (
+                    <>
+                      {r.preferredDate && <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {r.preferredDate}</div>}
+                      {r.preferredTime && <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> {r.preferredTime}</div>}
+                    </>
+                  ) : (
+                    <>
+                      {r.eventDate && <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> Event: {r.eventDate}</div>}
+                      {r.budget && <div className="flex items-center gap-2 truncate">💰 <span className="truncate">{r.budget}</span></div>}
+                    </>
+                  )}
                 </div>
 
                 {r.notes && (
-                  <p className="text-sm bg-muted/50 rounded-lg p-3 mb-4 border border-border/60">
+                  <p className="text-sm bg-muted/50 rounded-lg p-3 mb-4 border border-border/60 whitespace-pre-wrap">
                     {r.notes}
                   </p>
                 )}
