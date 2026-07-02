@@ -288,6 +288,110 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Booking Request Form */}
+      <section id="book" className="py-24 px-4 lg:px-8 bg-muted/40 scroll-mt-20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-10 items-start">
+          <div className="lg:col-span-2">
+            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Request Appointment</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Reserve Your Glow Session</h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              Share your preferred date and service, and our team will personally confirm your slot within a few hours.
+            </p>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Personal consultation before every booking</li>
+              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Confirmation via WhatsApp or phone call</li>
+              <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Flexible rescheduling — no hidden fees</li>
+            </ul>
+            <div className="mt-8 p-5 rounded-2xl bg-card border border-border">
+              <div className="flex items-center gap-2 text-sm font-medium mb-1"><Phone className="w-4 h-4 text-primary" /> Prefer to call?</div>
+              <p className="text-sm text-muted-foreground">Reach us at <a href="tel:+923001234567" className="text-primary font-medium">+92 300 1234567</a> — Mon–Sat, 10am–8pm.</p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-3">
+            {submitted ? (
+              <div className="p-10 rounded-3xl border border-primary/30 bg-card text-center">
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
+                  <CheckCircle2 className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-heading text-2xl font-bold mb-2">Request received</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Thank you! Our team will review your appointment request and reach out shortly to confirm your slot.
+                </p>
+                <Button variant="outline" onClick={() => setSubmitted(false)}>Submit another request</Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="p-6 md:p-8 rounded-3xl border border-border bg-card shadow-sm space-y-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="req-name">Full name *</Label>
+                    <Input id="req-name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} maxLength={100} placeholder="Your name" required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="req-phone">Phone *</Label>
+                    <Input id="req-phone" type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} maxLength={20} placeholder="03XX XXXXXXX" required />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="req-email">Email (optional)</Label>
+                  <Input id="req-email" type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} maxLength={150} placeholder="you@email.com" />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="req-service">Service or package</Label>
+                  <select
+                    id="req-service"
+                    value={form.selection}
+                    onChange={e => setForm({ ...form, selection: e.target.value })}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <option value="">General inquiry</option>
+                    {activeDeals.length > 0 && (
+                      <optgroup label="Bridal Packages">
+                        {activeDeals.map(d => (
+                          <option key={d.id} value={`deal:${d.id}`}>{d.name} — Rs. {d.discountedPrice.toLocaleString()}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label="Services">
+                      {activeServices.map(s => (
+                        <option key={s.id} value={`service:${s.id}`}>
+                          {s.name}{s.price > 0 ? ` — Rs. ${s.price.toLocaleString()}` : ' — Custom price'}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="req-date">Preferred date *</Label>
+                    <Input id="req-date" type="date" min={todayStr} value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="req-time">Preferred time *</Label>
+                    <Input id="req-time" type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} required />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="req-notes">Notes (optional)</Label>
+                  <Textarea id="req-notes" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} maxLength={500} rows={3} placeholder="Any special requests, occasion details, etc." />
+                </div>
+
+                <Button type="submit" size="lg" className="w-full">
+                  <Send className="w-4 h-4" /> Submit Request
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Requests are subject to availability. Our team confirms every booking manually.
+                </p>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section id="contact" className="py-24 px-4 lg:px-8">
         <div className="max-w-5xl mx-auto rounded-3xl p-10 md:p-16 bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground text-center relative overflow-hidden">
