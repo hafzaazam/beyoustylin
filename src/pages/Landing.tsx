@@ -122,8 +122,9 @@ const Landing = () => {
             <span className="font-heading text-xl font-semibold">BeYou Stylin</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#services" className="hover:text-foreground transition-colors">Services</a>
-            <a href="#packages" className="hover:text-foreground transition-colors">Packages</a>
+            <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
+            <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
+
             <a href="#book" className="hover:text-foreground transition-colors">Book</a>
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
             <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
