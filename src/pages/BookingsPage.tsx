@@ -25,6 +25,31 @@ const BookingsPage = () => {
 
   const resetForm = () => setForm({ customerId: '', staffId: '', chairId: '', serviceIds: [], dealId: '', startTime: '', useDeal: false });
 
+  const nowLocalInput = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+  const openWalkIn = () => { resetForm(); setForm(p => ({ ...p, startTime: nowLocalInput() })); setWalkInOpen(true); };
+
+  // Live preview of computed duration/price + overlap warning
+  const preview = (() => {
+    let duration = 0, price = 0;
+    if (form.useDeal && form.dealId) {
+      const deal = salon.getDealById(form.dealId);
+      if (deal) { duration = deal.totalDuration; price = deal.discountedPrice; }
+    } else {
+      form.serviceIds.forEach(sid => {
+        const svc = salon.getServiceById(sid);
+        if (svc) { duration += svc.duration; price += svc.price; }
+      });
+    }
+    const conflict = form.staffId && form.chairId && form.startTime && duration > 0
+      ? salon.checkOverlap(form.staffId, form.chairId, new Date(form.startTime).toISOString(), duration)
+      : false;
+    return { duration, price, conflict };
+  })();
+
   const handleSubmit = async (isWalkIn = false) => {
     if (!form.customerId || !form.staffId || !form.chairId || !form.startTime) {
       toast({ title: 'Missing fields', description: 'Fill all required fields.', variant: 'destructive' });
@@ -78,7 +103,7 @@ const BookingsPage = () => {
   const activeCustomers = salon.customers.filter(c => c.status === 'active');
   const activeChairs = salon.chairs.filter(c => c.status === 'active');
 
-  const BookingForm = ({ isWalkIn = false }: { isWalkIn?: boolean }) => (
+  const renderForm = (isWalkIn: boolean) => (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
       <div>
         <Label>Customer *</Label>
@@ -107,7 +132,7 @@ const BookingsPage = () => {
       </div>
       <div className="flex items-center gap-3">
         <Label>Use Deal?</Label>
-        <input type="checkbox" checked={form.useDeal} onChange={e => setForm(p => ({ ...p, useDeal: e.target.checked }))} className="rounded" />
+        <input type="checkbox" checked={form.useDeal} onChange={e => setForm(p => ({ ...p, useDeal: e.target.checked, serviceIds: [], dealId: '' }))} className="rounded" />
       </div>
       {form.useDeal ? (
         <div>
@@ -137,7 +162,26 @@ const BookingsPage = () => {
           </div>
         </div>
       )}
-      <Button className="w-full" onClick={() => handleSubmit(isWalkIn)}>
+
+      {preview.duration > 0 && (
+        <div className={`rounded-lg border p-3 text-sm ${preview.conflict ? 'border-destructive/60 bg-destructive/5' : 'border-border bg-muted/40'}`}>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Duration</span>
+            <span className="font-medium">{preview.duration} min</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total</span>
+            <span className="font-semibold">Rs. {preview.price}</span>
+          </div>
+          {preview.conflict && (
+            <div className="mt-2 text-destructive font-medium">
+              ⚠ Conflicts with an existing booking (staff or chair overlap).
+            </div>
+          )}
+        </div>
+      )}
+
+      <Button className="w-full" disabled={preview.conflict} onClick={() => handleSubmit(isWalkIn)}>
         {isWalkIn ? 'Create Walk-in & Invoice' : 'Create Booking'}
       </Button>
     </div>
@@ -154,16 +198,16 @@ const BookingsPage = () => {
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle className="font-heading">Create Booking</DialogTitle></DialogHeader>
-            <BookingForm />
+            {renderForm(false)}
           </DialogContent>
         </Dialog>
-        <Dialog open={walkInOpen} onOpenChange={setWalkInOpen}>
+        <Dialog open={walkInOpen} onOpenChange={(o) => { if (!o) setWalkInOpen(false); }}>
           <DialogTrigger asChild>
-            <Button variant="outline" onClick={resetForm}><Zap className="w-4 h-4 mr-2" />Walk-in Order</Button>
+            <Button variant="outline" onClick={openWalkIn}><Zap className="w-4 h-4 mr-2" />Walk-in Order</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle className="font-heading">Walk-in Order (Live)</DialogTitle></DialogHeader>
-            <BookingForm isWalkIn />
+            {renderForm(true)}
           </DialogContent>
         </Dialog>
       </div>
