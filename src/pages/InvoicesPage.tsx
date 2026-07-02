@@ -3,7 +3,7 @@ import { useSalon } from '@/context/SalonContext';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Printer, Search } from 'lucide-react';
+import { Printer, Search, Download } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 const InvoicesPage = () => {
