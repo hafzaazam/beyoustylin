@@ -44,34 +44,68 @@ const Landing = () => {
   const activeServices = useMemo(() => services.filter(s => s.status === 'active'), [services]);
   const activeDeals = useMemo(() => deals.filter(d => d.status === 'active'), [deals]);
 
-  const initialForm = { name: '', phone: '', email: '', selection: '', date: '', time: '', notes: '' };
-  const [form, setForm] = useState(initialForm);
-  const [submitted, setSubmitted] = useState(false);
+  type FormMode = 'booking' | 'quote';
+  const initialBooking = { name: '', phone: '', email: '', selection: '', date: '', time: '', notes: '' };
+  const initialQuote = { name: '', phone: '', email: '', selection: '', eventDate: '', budget: '', notes: '' };
+  const [mode, setMode] = useState<FormMode>('booking');
+  const [bookingForm, setBookingForm] = useState(initialBooking);
+  const [quoteForm, setQuoteForm] = useState(initialQuote);
+  const [submitted, setSubmitted] = useState<null | FormMode>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const parseSelection = (sel: string): { serviceId?: string; dealId?: string } => {
+    if (sel.startsWith('service:')) return { serviceId: sel.slice(8) };
+    if (sel.startsWith('deal:')) return { dealId: sel.slice(5) };
+    return {};
+  };
+
+  const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.phone.trim() || !form.date || !form.time) {
+    if (!bookingForm.name.trim() || !bookingForm.phone.trim() || !bookingForm.date || !bookingForm.time) {
       toast({ title: 'Please fill in your name, phone, date and time', variant: 'destructive' });
       return;
     }
-    let serviceId: string | undefined;
-    let dealId: string | undefined;
-    if (form.selection.startsWith('service:')) serviceId = form.selection.slice(8);
-    else if (form.selection.startsWith('deal:')) dealId = form.selection.slice(5);
-
+    if (!bookingForm.selection) {
+      toast({ title: 'Please select a package or service', description: 'For custom inquiries, switch to "Request a Quote".', variant: 'destructive' });
+      return;
+    }
+    const { serviceId, dealId } = parseSelection(bookingForm.selection);
     addAppointmentRequest({
-      name: form.name.trim(),
-      phone: form.phone.trim(),
-      email: form.email.trim() || undefined,
+      type: 'booking',
+      name: bookingForm.name.trim(),
+      phone: bookingForm.phone.trim(),
+      email: bookingForm.email.trim() || undefined,
       serviceId,
       dealId,
-      preferredDate: form.date,
-      preferredTime: form.time,
-      notes: form.notes.trim() || undefined,
+      preferredDate: bookingForm.date,
+      preferredTime: bookingForm.time,
+      notes: bookingForm.notes.trim() || undefined,
     });
-    setSubmitted(true);
-    setForm(initialForm);
-    toast({ title: 'Request submitted', description: 'Our team will contact you shortly to confirm.' });
+    setSubmitted('booking');
+    setBookingForm(initialBooking);
+    toast({ title: 'Booking request submitted', description: 'Our team will contact you shortly to confirm.' });
+  };
+
+  const handleQuoteSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quoteForm.name.trim() || !quoteForm.phone.trim() || !quoteForm.notes.trim()) {
+      toast({ title: 'Please fill in your name, phone and describe what you need', variant: 'destructive' });
+      return;
+    }
+    const { serviceId, dealId } = parseSelection(quoteForm.selection);
+    addAppointmentRequest({
+      type: 'quote',
+      name: quoteForm.name.trim(),
+      phone: quoteForm.phone.trim(),
+      email: quoteForm.email.trim() || undefined,
+      serviceId,
+      dealId,
+      eventDate: quoteForm.eventDate || undefined,
+      budget: quoteForm.budget.trim() || undefined,
+      notes: quoteForm.notes.trim(),
+    });
+    setSubmitted('quote');
+    setQuoteForm(initialQuote);
+    toast({ title: 'Quote request submitted', description: "We'll get back to you with a personalised quote soon." });
   };
 
   const todayStr = new Date().toISOString().slice(0, 10);
