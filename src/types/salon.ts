@@ -69,6 +69,8 @@ export interface Invoice {
   totalAmount: number;
   createdAt: string;
   status: 'paid' | 'unpaid';
+  pdfDataUrl?: string;
+  pdfGeneratedAt?: string;
 }
 
 export interface InvoiceItem {
