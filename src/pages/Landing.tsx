@@ -220,9 +220,9 @@ const Landing = () => {
                       ) : null;
                     })}
                   </ul>
-                  <Link to="/admin/bookings" className="block">
+                  <a href="#book" onClick={() => setForm(f => ({ ...f, selection: `deal:${d.id}` }))} className="block">
                     <Button className="w-full" variant={isPopular ? 'default' : 'outline'}>Book This Package</Button>
-                  </Link>
+                  </a>
                 </div>
               );
             })}
