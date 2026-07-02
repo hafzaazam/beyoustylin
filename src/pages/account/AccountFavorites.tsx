@@ -64,13 +64,13 @@ const AccountFavorites = () => {
                         </div>
                         <h3 className="font-heading text-lg font-semibold">{d.name}</h3>
                       </div>
-                      <button onClick={() => toggle({ dealId: d.id })} className="text-primary hover:scale-110 transition-transform">
+                      <button onClick={() => toggle('deal', d.id)} className="text-primary hover:scale-110 transition-transform">
                         <Heart className="w-5 h-5 fill-current" />
                       </button>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{d.description}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{d.serviceIds.length} services · {d.totalDuration} min</p>
                     <div className="flex items-center justify-between">
-                      <span className="font-heading text-xl font-bold text-primary">Rs. {d.price.toLocaleString()}</span>
+                      <span className="font-heading text-xl font-bold text-primary">Rs. {d.discountedPrice.toLocaleString()}</span>
                       <Link to={`/?deal=${d.id}#book`} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:opacity-90">Book</Link>
                     </div>
                   </div>
