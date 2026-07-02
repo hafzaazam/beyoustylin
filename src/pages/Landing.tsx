@@ -118,7 +118,7 @@ const Landing = () => {
               Signature bridal makeup, hair styling, mehndi and skincare — thoughtfully crafted for your most beautiful moments.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link to="/admin/bookings"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></Link>
+              <a href="#book"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></a>
               <a href="#packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></a>
             </div>
             <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
