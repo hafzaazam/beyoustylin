@@ -100,7 +100,7 @@ const RequestsPage = () => {
                 <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground mb-4">
                   <div className="flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> {r.phone}</div>
                   {r.email && <div className="flex items-center gap-2 truncate"><Mail className="w-3.5 h-3.5" /> <span className="truncate">{r.email}</span></div>}
-                  {r.type === 'booking' ? (
+                  {r.type !== 'quote' ? (
                     <>
                       {r.preferredDate && <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {r.preferredDate}</div>}
                       {r.preferredTime && <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5" /> {r.preferredTime}</div>}
