@@ -3,14 +3,19 @@ import { useSalon } from '@/context/SalonContext';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Printer, Search, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Printer, Search, Download, Eye } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 const InvoicesPage = () => {
   const salon = useSalon();
   const [search, setSearch] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const previewInvoice = previewId ? salon.invoices.find(i => i.id === previewId) : null;
+
 
   const filtered = salon.invoices.filter(inv => {
     if (!search) return true;
