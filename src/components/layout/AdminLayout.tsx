@@ -84,6 +84,19 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             );
           })}
         </nav>
+
+        <div className="absolute bottom-0 inset-x-0 p-3 border-t border-sidebar-border">
+          <div className="px-3 py-2 mb-2">
+            <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
+            <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        </div>
       </aside>
 
       {/* Main */}
@@ -94,6 +107,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           </button>
           <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
         </header>
+
 
         <main className="flex-1 p-4 lg:p-8 animate-fade-in">
           {children}
