@@ -331,13 +331,14 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <SalonContext.Provider value={{
-      staff, customers, services, deals, chairs, bookings, invoices,
+      staff, customers, services, deals, chairs, bookings, invoices, appointmentRequests,
       addStaff, updateStaff, toggleStaffStatus, deleteStaff,
       addCustomer, updateCustomer, toggleCustomerStatus, deleteCustomer,
       addService, updateService, toggleServiceStatus, deleteService,
       addDeal, updateDeal, toggleDealStatus, deleteDeal,
       addBooking, updateBookingStatus, deleteBooking, checkOverlap,
       createWalkIn,
+      addAppointmentRequest, updateAppointmentRequestStatus, deleteAppointmentRequest,
       getStaffById, getCustomerById, getServiceById, getDealById, getChairById, getInvoiceByBookingId,
     }}>
       {children}
