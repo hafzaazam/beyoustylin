@@ -74,22 +74,43 @@ const ServicesPage = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map(s => (
-          <div key={s.id} className="bg-card rounded-xl border p-5 flex flex-col gap-3">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-heading font-semibold text-foreground">{s.name}</h3>
-                <p className="text-xs text-muted-foreground">{s.category}</p>
+          <div key={s.id} className="group relative bg-card rounded-2xl border border-border/70 p-5 flex flex-col gap-3 shadow-[0_1px_2px_hsl(335_40%_20%/0.04),0_8px_24px_-14px_hsl(334_32%_42%/0.15)] hover:shadow-[0_12px_32px_-12px_hsl(334_32%_42%/0.28)] hover:-translate-y-0.5 hover:border-primary/30 transition-all duration-300">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="font-heading font-semibold text-foreground truncate">{s.name}</h3>
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5">{s.category}</p>
               </div>
               <StatusBadge status={s.status} />
             </div>
-            <div className="flex items-center gap-4 text-sm">
-              <span className="font-semibold text-primary">{s.price > 0 ? `Rs. ${s.price}` : 'Custom Price'}</span>
-              <span className="text-muted-foreground">{s.duration} min</span>
+            <div className="flex items-baseline gap-3 text-sm">
+              <span className="font-heading text-xl font-semibold text-primary">{s.price > 0 ? `Rs. ${s.price.toLocaleString()}` : 'On Request'}</span>
+              <span className="text-xs text-muted-foreground">· {s.duration} min</span>
             </div>
-            <div className="flex gap-1 mt-auto">
-              <Button variant="ghost" size="sm" onClick={() => startEdit(s)}><Pencil className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" onClick={() => salon.toggleServiceStatus(s.id)}><ToggleLeft className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => salon.deleteService(s.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+            <div className="mt-auto pt-3 border-t border-border/60 flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => startEdit(s)}
+                aria-label="Edit service"
+                title="Edit"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => salon.toggleServiceStatus(s.id)}
+                aria-label={s.status === 'active' ? 'Deactivate service' : 'Activate service'}
+                title={s.status === 'active' ? 'Deactivate' : 'Activate'}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-info/10 hover:text-info transition-colors"
+              >
+                <ToggleLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => salon.deleteService(s.id)}
+                aria-label="Delete service"
+                title="Delete"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         ))}
