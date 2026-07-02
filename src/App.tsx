@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SalonProvider } from "@/context/SalonContext";
 import { AuthProvider } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute, { CustomerRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import ServicesPublic from "./pages/ServicesPublic";
 import PackagesPublic from "./pages/PackagesPublic";
@@ -20,6 +20,14 @@ import StaffPage from "./pages/StaffPage";
 import CustomersPage from "./pages/CustomersPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import RequestsPage from "./pages/RequestsPage";
+
+import AccountDashboard from "./pages/account/AccountDashboard";
+import AccountAppointments from "./pages/account/AccountAppointments";
+import AccountRequests from "./pages/account/AccountRequests";
+import AccountInvoices from "./pages/account/AccountInvoices";
+import AccountFavorites from "./pages/account/AccountFavorites";
+import AccountProfile from "./pages/account/AccountProfile";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
