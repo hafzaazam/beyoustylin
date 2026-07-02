@@ -95,17 +95,23 @@ const InvoicesPage = () => {
                           <Printer className="w-3.5 h-3.5 mr-1" />Print
                         </Button>
                         {inv.pdfDataUrl && (
-                          <a href={inv.pdfDataUrl} download={`${inv.invoiceNumber}.pdf`}>
-                            <Button variant="ghost" size="sm">
-                              <Download className="w-3.5 h-3.5 mr-1" />PDF
+                          <>
+                            <Button variant="ghost" size="sm" onClick={() => setPreviewId(inv.id)}>
+                              <Eye className="w-3.5 h-3.5 mr-1" />Preview
                             </Button>
-                          </a>
+                            <a href={inv.pdfDataUrl} download={`${inv.invoiceNumber}.pdf`}>
+                              <Button variant="ghost" size="sm">
+                                <Download className="w-3.5 h-3.5 mr-1" />PDF
+                              </Button>
+                            </a>
+                          </>
                         )}
                       </div>
                     </td>
                   </tr>
                 );
               })}
+
             </tbody>
           </table>
         </div>
