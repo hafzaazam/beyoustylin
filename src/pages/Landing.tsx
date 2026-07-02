@@ -1,11 +1,16 @@
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
-  Instagram, Facebook, ArrowRight, Check
+  Instagram, Facebook, ArrowRight, Check, Send, CheckCircle2
 } from 'lucide-react';
 
 const featureCards = [
