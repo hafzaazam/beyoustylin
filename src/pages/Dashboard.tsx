@@ -4,7 +4,7 @@ import { useSalon } from '@/context/SalonContext';
 import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy } from 'lucide-react';
 
 const Dashboard = () => {
-  const { bookings, staff, chairs, invoices } = useSalon();
+  const { bookings, staff, chairs, invoices, services, deals } = useSalon();
 
   const now = new Date();
   const today = now.toDateString();
@@ -51,13 +51,32 @@ const Dashboard = () => {
     ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
     : startOfMonth;
 
+  const serviceCategoryMap = new Map(services.map(s => [s.id, s.category]));
+  const dealServiceMap = new Map(deals.map(d => [d.id, d.serviceIds]));
+
   const staffPerformance = staff.filter(s => s.status === 'active').map(s => {
     const staffBookings = completedBookings.filter(b =>
       b.staffId === s.id && new Date(b.endTime) >= rangeStart
     );
     const revenue = staffBookings.reduce((sum, b) => sum + b.totalPrice, 0);
     const minutes = staffBookings.reduce((sum, b) => sum + (b.totalDuration || 0), 0);
-    return { ...s, bookingsCount: staffBookings.length, revenue, minutes };
+
+    // Count completed bookings per service category
+    const categoryCounts = new Map<string, number>();
+    staffBookings.forEach(b => {
+      const ids = b.dealId ? (dealServiceMap.get(b.dealId) || []) : b.serviceIds;
+      const cats = new Set<string>();
+      ids.forEach(sid => {
+        const cat = serviceCategoryMap.get(sid);
+        if (cat) cats.add(cat);
+      });
+      cats.forEach(c => categoryCounts.set(c, (categoryCounts.get(c) || 0) + 1));
+    });
+    const categoryBreakdown = Array.from(categoryCounts.entries())
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return { ...s, bookingsCount: staffBookings.length, revenue, minutes, categoryBreakdown };
   }).sort((a, b) => b.bookingsCount - a.bookingsCount || b.minutes - a.minutes);
 
   const topStaff = staffPerformance.filter(s => s.bookingsCount > 0).slice(0, 5);
@@ -141,17 +160,32 @@ const Dashboard = () => {
               {topStaff.map((s, idx) => {
                 const medal = ['bg-primary/15 text-primary', 'bg-accent/15 text-accent', 'bg-muted text-muted-foreground'][idx] || 'bg-muted text-muted-foreground';
                 return (
-                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${medal}`}>
-                      {idx + 1}
+                  <div key={s.id} className="p-3 rounded-lg bg-muted/50 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${medal}`}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {s.role} · {s.bookingsCount} completed · {fmtHours(s.minutes)}
+                        </p>
+                      </div>
+                      <p className="text-sm font-semibold text-success whitespace-nowrap">Rs. {s.revenue.toLocaleString()}</p>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {s.role} · {s.bookingsCount} completed · {fmtHours(s.minutes)}
-                      </p>
-                    </div>
-                    <p className="text-sm font-semibold text-success whitespace-nowrap">Rs. {s.revenue.toLocaleString()}</p>
+                    {s.categoryBreakdown.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pl-11">
+                        {s.categoryBreakdown.map(c => (
+                          <span
+                            key={c.category}
+                            className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+                          >
+                            {c.category}
+                            <span className="text-primary/70">· {c.count}</span>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 );
               })}
