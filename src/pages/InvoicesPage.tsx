@@ -3,14 +3,19 @@ import { useSalon } from '@/context/SalonContext';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Printer, Search, Download } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Printer, Search, Download, Eye } from 'lucide-react';
 import { useState, useRef } from 'react';
 
 const InvoicesPage = () => {
   const salon = useSalon();
   const [search, setSearch] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
+
+  const previewInvoice = previewId ? salon.invoices.find(i => i.id === previewId) : null;
+
 
   const filtered = salon.invoices.filter(inv => {
     if (!search) return true;
@@ -90,17 +95,23 @@ const InvoicesPage = () => {
                           <Printer className="w-3.5 h-3.5 mr-1" />Print
                         </Button>
                         {inv.pdfDataUrl && (
-                          <a href={inv.pdfDataUrl} download={`${inv.invoiceNumber}.pdf`}>
-                            <Button variant="ghost" size="sm">
-                              <Download className="w-3.5 h-3.5 mr-1" />PDF
+                          <>
+                            <Button variant="ghost" size="sm" onClick={() => setPreviewId(inv.id)}>
+                              <Eye className="w-3.5 h-3.5 mr-1" />Preview
                             </Button>
-                          </a>
+                            <a href={inv.pdfDataUrl} download={`${inv.invoiceNumber}.pdf`}>
+                              <Button variant="ghost" size="sm">
+                                <Download className="w-3.5 h-3.5 mr-1" />PDF
+                              </Button>
+                            </a>
+                          </>
                         )}
                       </div>
                     </td>
                   </tr>
                 );
               })}
+
             </tbody>
           </table>
         </div>
@@ -136,8 +147,40 @@ const InvoicesPage = () => {
           );
         })}
       </div>
+
+      <Dialog open={!!previewId} onOpenChange={(open) => !open && setPreviewId(null)}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Invoice Preview {previewInvoice ? `— ${previewInvoice.invoiceNumber}` : ''}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 rounded-lg border bg-muted overflow-hidden">
+            {previewInvoice?.pdfDataUrl ? (
+              <iframe
+                src={previewInvoice.pdfDataUrl}
+                title="Invoice PDF Preview"
+                className="w-full h-full"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                No PDF available for this invoice.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewId(null)}>Close</Button>
+            {previewInvoice?.pdfDataUrl && (
+              <a href={previewInvoice.pdfDataUrl} download={`${previewInvoice.invoiceNumber}.pdf`}>
+                <Button>
+                  <Download className="w-4 h-4 mr-2" />Download PDF
+                </Button>
+              </a>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
+
 
 export default InvoicesPage;
