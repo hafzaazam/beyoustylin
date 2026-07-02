@@ -109,24 +109,32 @@ const ServicesPublic = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {items.map(s => (
-                    <div key={s.id} className="bg-card p-6 rounded-2xl border border-border flex flex-col gap-3 hover:shadow-md hover:border-primary/40 transition-all">
+                    <div key={s.id} className="group bg-card p-6 rounded-2xl border border-border flex flex-col gap-3 hover:shadow-md hover:border-primary/40 transition-all">
                       <div className="flex items-start justify-between">
                         <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{s.category}</span>
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" /> {s.duration} min
                         </span>
                       </div>
-                      <h3 className="font-heading text-lg font-semibold">{s.name}</h3>
+                      <Link to={`/services/${s.id}`} className="font-heading text-lg font-semibold hover:text-primary transition-colors">
+                        {s.name}
+                      </Link>
                       <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
                         <span className="text-primary font-bold text-lg">
                           {s.price > 0 ? `Rs. ${s.price.toLocaleString()}` : 'On Request'}
                         </span>
-                        <Link to="/#book" className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-                          Book <ArrowRight className="w-3 h-3" />
-                        </Link>
+                        <div className="flex items-center gap-3">
+                          <Link to={`/services/${s.id}`} className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors">
+                            Details
+                          </Link>
+                          <Link to={`/?service=${s.id}#book`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
+                            Book <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}
+
                 </div>
               </div>
             ))

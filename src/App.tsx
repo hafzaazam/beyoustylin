@@ -7,6 +7,8 @@ import { SalonProvider } from "@/context/SalonContext";
 import Landing from "./pages/Landing";
 import ServicesPublic from "./pages/ServicesPublic";
 import PackagesPublic from "./pages/PackagesPublic";
+import ServiceDetail from "./pages/ServiceDetail";
+
 
 import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
@@ -30,6 +32,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/services" element={<ServicesPublic />} />
+            <Route path="/services/:id" element={<ServiceDetail />} />
+
             <Route path="/packages" element={<PackagesPublic />} />
 
             <Route path="/admin" element={<Dashboard />} />
