@@ -36,9 +36,45 @@ const testimonials = [
 ];
 
 const Landing = () => {
-  const { deals, services } = useSalon();
+  const { deals, services, addAppointmentRequest } = useSalon();
+  const { toast } = useToast();
   const featuredDeals = deals.filter(d => d.status === 'active').slice(0, 4);
   const featuredServices = services.filter(s => s.status === 'active' && s.price > 0).slice(0, 6);
+
+  const activeServices = useMemo(() => services.filter(s => s.status === 'active'), [services]);
+  const activeDeals = useMemo(() => deals.filter(d => d.status === 'active'), [deals]);
+
+  const initialForm = { name: '', phone: '', email: '', selection: '', date: '', time: '', notes: '' };
+  const [form, setForm] = useState(initialForm);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.phone.trim() || !form.date || !form.time) {
+      toast({ title: 'Please fill in your name, phone, date and time', variant: 'destructive' });
+      return;
+    }
+    let serviceId: string | undefined;
+    let dealId: string | undefined;
+    if (form.selection.startsWith('service:')) serviceId = form.selection.slice(8);
+    else if (form.selection.startsWith('deal:')) dealId = form.selection.slice(5);
+
+    addAppointmentRequest({
+      name: form.name.trim(),
+      phone: form.phone.trim(),
+      email: form.email.trim() || undefined,
+      serviceId,
+      dealId,
+      preferredDate: form.date,
+      preferredTime: form.time,
+      notes: form.notes.trim() || undefined,
+    });
+    setSubmitted(true);
+    setForm(initialForm);
+    toast({ title: 'Request submitted', description: 'Our team will contact you shortly to confirm.' });
+  };
+
+  const todayStr = new Date().toISOString().slice(0, 10);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
