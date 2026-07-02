@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Scissors, Instagram, Facebook } from 'lucide-react';
+import brandLogo from '@/assets/logo.png';
 import { ReactNode } from 'react';
 
 const navLinks = [
