@@ -59,10 +59,8 @@ const PackagesPublic = () => {
                         Most Popular
                       </div>
                     )}
-                    <h3 className="font-heading text-2xl font-bold mb-2">{d.name}</h3>
-                    {d.description && (
-                      <p className="text-sm text-muted-foreground mb-5">{d.description}</p>
-                    )}
+                    <h3 className="font-heading text-2xl font-bold mb-4">{d.name}</h3>
+
 
                     <div className="flex items-baseline gap-2 mb-2">
                       <span className="text-4xl font-heading font-bold text-primary">
