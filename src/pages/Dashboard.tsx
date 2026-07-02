@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useSalon } from '@/context/SalonContext';
-import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy } from 'lucide-react';
+import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy, Download } from 'lucide-react';
 
 const Dashboard = () => {
   const { bookings, staff, chairs, invoices, services, deals } = useSalon();
@@ -86,6 +86,45 @@ const Dashboard = () => {
     return h > 0 ? `${h}h ${min}m` : `${min}m`;
   };
 
+  const exportCsv = () => {
+    const rows = staffPerformance.filter(s => s.bookingsCount > 0);
+    const allCategories = Array.from(
+      new Set(rows.flatMap(s => s.categoryBreakdown.map(c => c.category)))
+    ).sort();
+    const escape = (v: string | number) => {
+      const s = String(v ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const header = ['Rank', 'Staff', 'Role', 'Completed Bookings', 'Total Hours', 'Total Minutes', 'Revenue (PKR)', ...allCategories];
+    const lines = [header.join(',')];
+    rows.forEach((s, idx) => {
+      const catMap = new Map(s.categoryBreakdown.map(c => [c.category, c.count]));
+      lines.push([
+        idx + 1,
+        escape(s.name),
+        escape(s.role),
+        s.bookingsCount,
+        escape(fmtHours(s.minutes)),
+        s.minutes,
+        s.revenue,
+        ...allCategories.map(c => catMap.get(c) ?? 0),
+      ].join(','));
+    });
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = perfRange === 'today'
+      ? now.toISOString().slice(0, 10)
+      : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    a.href = url;
+    a.download = `staff-performance-${perfRange}-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AdminLayout title="Dashboard">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
@@ -149,6 +188,15 @@ const Dashboard = () => {
                 </button>
               ))}
             </div>
+            <button
+              onClick={exportCsv}
+              disabled={topStaff.length === 0}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border bg-card text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Download CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              CSV
+            </button>
           </div>
 
           {topStaff.length === 0 ? (
