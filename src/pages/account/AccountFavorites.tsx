@@ -38,7 +38,7 @@ const AccountFavorites = () => {
                         <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{s.category}</p>
                         <h3 className="font-heading text-lg font-semibold">{s.name}</h3>
                       </div>
-                      <button onClick={() => toggle({ serviceId: s.id })} className="text-primary hover:scale-110 transition-transform">
+                      <button onClick={() => toggle('service', s.id)} className="text-primary hover:scale-110 transition-transform">
                         <Heart className="w-5 h-5 fill-current" />
                       </button>
                     </div>
