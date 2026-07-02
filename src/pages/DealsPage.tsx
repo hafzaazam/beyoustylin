@@ -91,23 +91,61 @@ const DealsPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {salon.deals.map(d => {
           const dealServices = d.serviceIds.map(id => salon.getServiceById(id)).filter(Boolean);
+          const originalTotal = dealServices.reduce((sum, s) => sum + (s?.price || 0), 0);
+          const savings = originalTotal - d.discountedPrice;
           return (
-            <div key={d.id} className="bg-card rounded-xl border p-5 flex flex-col gap-3">
-              <div className="flex items-start justify-between">
-                <h3 className="font-heading font-semibold text-foreground">{d.name}</h3>
+            <div key={d.id} className="group relative bg-card rounded-2xl border border-border/70 p-5 flex flex-col gap-3 shadow-[0_1px_2px_hsl(335_40%_20%/0.04),0_8px_24px_-14px_hsl(334_32%_42%/0.15)] hover:shadow-[0_12px_32px_-12px_hsl(334_32%_42%/0.28)] hover:-translate-y-0.5 hover:border-primary/30 transition-all duration-300">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-heading font-semibold text-foreground truncate">{d.name}</h3>
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5">Bundle · {dealServices.length} services</p>
+                </div>
                 <StatusBadge status={d.status} />
               </div>
               <div className="flex flex-wrap gap-1">
-                {dealServices.map(s => s && <span key={s.id} className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">{s.name}</span>)}
+                {dealServices.map(s => s && (
+                  <span key={s.id} className="text-[11px] bg-secondary/60 px-2 py-0.5 rounded-full text-secondary-foreground ring-1 ring-inset ring-border/60">
+                    {s.name}
+                  </span>
+                ))}
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="font-semibold text-primary">Rs. {d.discountedPrice}</span>
-                <span className="text-muted-foreground">{d.totalDuration} min</span>
+              <div className="flex items-baseline gap-3 text-sm">
+                <span className="font-heading text-xl font-semibold text-primary">Rs. {d.discountedPrice.toLocaleString()}</span>
+                {savings > 0 && (
+                  <span className="text-xs text-muted-foreground line-through">Rs. {originalTotal.toLocaleString()}</span>
+                )}
+                <span className="text-xs text-muted-foreground">· {d.totalDuration} min</span>
               </div>
-              <div className="flex gap-1 mt-auto">
-                <Button variant="ghost" size="sm" onClick={() => startEdit(d)}><Pencil className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="sm" onClick={() => salon.toggleDealStatus(d.id)}><ToggleLeft className="w-3.5 h-3.5" /></Button>
-                <Button variant="ghost" size="sm" className="text-destructive" onClick={() => salon.deleteDeal(d.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
+              {savings > 0 && (
+                <span className="inline-flex self-start text-[11px] font-semibold px-2 py-0.5 rounded-full bg-success/10 text-success ring-1 ring-inset ring-success/20">
+                  Save Rs. {savings.toLocaleString()}
+                </span>
+              )}
+              <div className="mt-auto pt-3 border-t border-border/60 flex items-center justify-end gap-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => startEdit(d)}
+                  aria-label="Edit deal"
+                  title="Edit"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => salon.toggleDealStatus(d.id)}
+                  aria-label={d.status === 'active' ? 'Deactivate deal' : 'Activate deal'}
+                  title={d.status === 'active' ? 'Deactivate' : 'Activate'}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-info/10 hover:text-info transition-colors"
+                >
+                  <ToggleLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => salon.deleteDeal(d.id)}
+                  aria-label="Delete deal"
+                  title="Delete"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           );
