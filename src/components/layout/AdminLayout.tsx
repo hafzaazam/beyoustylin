@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarCheck, Scissors, Gift, Users, UserCircle,
-  FileText, Menu, X, ChevronRight, Inbox
+  FileText, Menu, X, ChevronRight, Inbox, LogOut
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,8 +26,15 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { appointmentRequests } = useSalon();
+  const { user, roles, signOut } = useAuth();
   const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -36,7 +44,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
           <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
             <Scissors className="w-5 h-5 text-sidebar-primary-foreground" />
@@ -76,6 +84,19 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             );
           })}
         </nav>
+
+        <div className="mt-auto p-3 border-t border-sidebar-border">
+          <div className="px-3 py-2 mb-2">
+            <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
+            <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
+        </div>
       </aside>
 
       {/* Main */}
@@ -86,6 +107,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           </button>
           <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
         </header>
+
 
         <main className="flex-1 p-4 lg:p-8 animate-fade-in">
           {children}
