@@ -122,8 +122,9 @@ const Landing = () => {
             <span className="font-heading text-xl font-semibold">BeYou Stylin</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#services" className="hover:text-foreground transition-colors">Services</a>
-            <a href="#packages" className="hover:text-foreground transition-colors">Packages</a>
+            <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
+            <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
+
             <a href="#book" className="hover:text-foreground transition-colors">Book</a>
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
             <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
@@ -154,7 +155,7 @@ const Landing = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               <a href="#book"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></a>
-              <a href="#packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></a>
+              <Link to="/packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></Link>
             </div>
             <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {perks.map(p => (
@@ -198,9 +199,10 @@ const Landing = () => {
               <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Signature Menu</p>
               <h2 className="font-heading text-4xl md:text-5xl font-bold">Most Loved Services</h2>
             </div>
-            <Link to="/admin/services" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
+            <Link to="/services" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
               View all services <ArrowRight className="w-4 h-4" />
             </Link>
+
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {featuredServices.map(s => (

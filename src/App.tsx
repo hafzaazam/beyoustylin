@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SalonProvider } from "@/context/SalonContext";
 import Landing from "./pages/Landing";
+import ServicesPublic from "./pages/ServicesPublic";
+import PackagesPublic from "./pages/PackagesPublic";
+
 import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
 import ServicesPage from "./pages/ServicesPage";
@@ -26,6 +29,9 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/services" element={<ServicesPublic />} />
+            <Route path="/packages" element={<PackagesPublic />} />
+
             <Route path="/admin" element={<Dashboard />} />
             <Route path="/admin/bookings" element={<BookingsPage />} />
             <Route path="/admin/services" element={<ServicesPage />} />
