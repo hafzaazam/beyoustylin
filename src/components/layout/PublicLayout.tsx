@@ -10,7 +10,7 @@ import { ReactNode } from 'react';
 const navLinks = [
   { to: '/services', label: 'Services' },
   { to: '/packages', label: 'Packages' },
-  { to: '/#book', label: 'Book' },
+  { to: '/services', label: 'Book' },
   { to: '/#about', label: 'About' },
   { to: '/#contact', label: 'Contact' },
 ];
@@ -72,11 +72,11 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
                 </h3>
               </div>
             </div>
-            <a href="/#book" className="relative">
+            <Link to="/services" className="relative">
               <Button size="lg" variant="secondary" className="rounded-full font-semibold shadow-lg hover:shadow-xl">
                 Book Now <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
 
