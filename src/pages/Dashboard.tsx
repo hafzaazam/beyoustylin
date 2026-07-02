@@ -188,6 +188,15 @@ const Dashboard = () => {
                 </button>
               ))}
             </div>
+            <button
+              onClick={exportCsv}
+              disabled={topStaff.length === 0}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border bg-card text-foreground hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Download CSV"
+            >
+              <Download className="w-3.5 h-3.5" />
+              CSV
+            </button>
           </div>
 
           {topStaff.length === 0 ? (
