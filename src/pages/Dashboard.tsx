@@ -59,9 +59,10 @@ const Dashboard = () => {
             <div className={`p-3 rounded-xl bg-muted ${stat.color}`}>
               <stat.icon className="w-6 h-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="text-2xl font-heading font-bold text-foreground">{stat.value}</p>
+              <p className="text-2xl font-heading font-bold text-foreground truncate">{stat.value}</p>
+              {stat.sub && <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>}
             </div>
           </div>
         ))}
