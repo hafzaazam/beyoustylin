@@ -6,13 +6,13 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/bookings', label: 'Bookings', icon: CalendarCheck },
-  { path: '/services', label: 'Services', icon: Scissors },
-  { path: '/deals', label: 'Deals', icon: Gift },
-  { path: '/staff', label: 'Staff', icon: Users },
-  { path: '/customers', label: 'Customers', icon: UserCircle },
-  { path: '/invoices', label: 'Invoices', icon: FileText },
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+  { path: '/admin/services', label: 'Services', icon: Scissors },
+  { path: '/admin/deals', label: 'Deals', icon: Gift },
+  { path: '/admin/staff', label: 'Staff', icon: Users },
+  { path: '/admin/customers', label: 'Customers', icon: UserCircle },
+  { path: '/admin/invoices', label: 'Invoices', icon: FileText },
 ];
 
 interface AdminLayoutProps {
