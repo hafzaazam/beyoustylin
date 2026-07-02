@@ -44,21 +44,27 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-          <div className="w-9 h-9 rounded-lg bg-sidebar-primary flex items-center justify-center">
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'var(--gradient-sidebar)' }}
+      >
+        <div className="flex items-center gap-3 px-6 py-6 border-b border-sidebar-border">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ background: 'var(--gradient-primary)' }}
+          >
             <Scissors className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-semibold text-sidebar-primary-foreground">BeYou Stylin</h1>
-            <p className="text-xs text-sidebar-foreground/60">Admin Panel</p>
+            <h1 className="font-heading text-lg font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
+            <p className="text-[11px] uppercase tracking-widest text-sidebar-foreground/50">Admin</p>
           </div>
-          <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
+          <button className="ml-auto lg:hidden text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto">
           {navItems.map(item => {
             const active = location.pathname === item.path;
             return (
@@ -66,29 +72,37 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   active
-                    ? 'bg-sidebar-primary text-sidebar-primary-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    ? 'bg-sidebar-primary/15 text-sidebar-primary-foreground'
+                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                 }`}
               >
-                <item.icon className="w-4.5 h-4.5" />
+                {active && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-sidebar-primary" />
+                )}
+                <item.icon className={`w-4 h-4 ${active ? 'text-sidebar-primary' : ''}`} />
                 <span className="flex-1">{item.label}</span>
                 {item.path === '/admin/requests' && pendingRequests > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-sidebar-primary-foreground text-sidebar-primary' : 'bg-primary text-primary-foreground'}`}>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
                     {pendingRequests}
                   </span>
                 )}
-                {active && <ChevronRight className="w-4 h-4" />}
+                {active && <ChevronRight className="w-3.5 h-3.5 text-sidebar-primary" />}
               </Link>
             );
           })}
         </nav>
 
         <div className="mt-auto p-3 border-t border-sidebar-border">
-          <div className="px-3 py-2 mb-2">
-            <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
-            <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-lg bg-sidebar-accent/40">
+            <div className="w-8 h-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary-foreground">
+              {(user?.email?.[0] || 'A').toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
+              <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
+            </div>
           </div>
           <button
             onClick={handleSignOut}
@@ -101,11 +115,14 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b px-4 lg:px-8 py-4 flex items-center gap-4">
+        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-border/60 px-4 lg:px-8 py-4 flex items-center gap-4">
           <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="w-5 h-5 text-foreground" />
           </button>
-          <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground">{title}</h2>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground/80">BeYou Stylin</p>
+            <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">{title}</h2>
+          </div>
         </header>
 
 
