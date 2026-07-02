@@ -147,8 +147,40 @@ const InvoicesPage = () => {
           );
         })}
       </div>
+
+      <Dialog open={!!previewId} onOpenChange={(open) => !open && setPreviewId(null)}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Invoice Preview {previewInvoice ? `— ${previewInvoice.invoiceNumber}` : ''}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 rounded-lg border bg-muted overflow-hidden">
+            {previewInvoice?.pdfDataUrl ? (
+              <iframe
+                src={previewInvoice.pdfDataUrl}
+                title="Invoice PDF Preview"
+                className="w-full h-full"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
+                No PDF available for this invoice.
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPreviewId(null)}>Close</Button>
+            {previewInvoice?.pdfDataUrl && (
+              <a href={previewInvoice.pdfDataUrl} download={`${previewInvoice.invoiceNumber}.pdf`}>
+                <Button>
+                  <Download className="w-4 h-4 mr-2" />Download PDF
+                </Button>
+              </a>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 };
+
 
 export default InvoicesPage;
