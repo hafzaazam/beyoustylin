@@ -45,26 +45,30 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col overflow-hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: 'var(--gradient-sidebar)' }}
       >
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-sidebar-border">
+        {/* Ambient pink glow accents */}
+        <div className="pointer-events-none absolute -top-24 -right-16 h-56 w-56 rounded-full bg-sidebar-primary/25 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 -left-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
+
+        <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            className="w-11 h-11 rounded-2xl flex items-center justify-center ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)]"
             style={{ background: 'var(--gradient-primary)' }}
           >
-            <Scissors className="w-5 h-5 text-sidebar-primary-foreground" />
+            <span className="font-heading text-lg font-bold text-sidebar-primary-foreground tracking-tight">BU</span>
           </div>
           <div>
             <h1 className="font-heading text-lg font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
-            <p className="text-[11px] uppercase tracking-widest text-sidebar-foreground/50">Admin</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">Admin Suite</p>
           </div>
-          <button className="ml-auto lg:hidden text-sidebar-foreground" onClick={() => setSidebarOpen(false)}>
+          <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto">
+        <nav className="relative p-3 space-y-1 flex-1 overflow-y-auto">
           {navItems.map(item => {
             const active = location.pathname === item.path;
             return (
@@ -72,55 +76,66 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
-                    ? 'bg-sidebar-primary/15 text-sidebar-primary-foreground'
-                    : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    ? 'text-sidebar-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.7)]'
+                    : 'text-sidebar-foreground/75 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
                 }`}
+                style={active ? { background: 'var(--gradient-primary)' } : undefined}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-sidebar-primary" />
+                  <span className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full bg-sidebar-primary shadow-[0_0_12px_hsl(335_92%_62%/0.9)]" />
                 )}
-                <item.icon className={`w-4 h-4 ${active ? 'text-sidebar-primary' : ''}`} />
+                <item.icon className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary group-hover:scale-110'}`} />
                 <span className="flex-1">{item.label}</span>
                 {item.path === '/admin/requests' && pendingRequests > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground">
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ${active ? 'bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground ring-sidebar-primary-foreground/30' : 'bg-primary text-primary-foreground ring-primary/40 shadow-[0_0_10px_hsl(328_85%_55%/0.5)]'}`}>
                     {pendingRequests}
                   </span>
                 )}
-                {active && <ChevronRight className="w-3.5 h-3.5 text-sidebar-primary" />}
+                {active && <ChevronRight className="w-3.5 h-3.5 text-sidebar-primary-foreground/90" />}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto p-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-lg bg-sidebar-accent/40">
-            <div className="w-8 h-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-xs font-semibold text-sidebar-primary-foreground">
+        <div className="relative mt-auto p-3 border-t border-sidebar-border/60">
+          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10 backdrop-blur-sm">
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
+              style={{ background: 'var(--gradient-primary)' }}
+            >
               {(user?.email?.[0] || 'A').toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
-              <p className="text-[10px] text-sidebar-foreground/60 capitalize">{roles[0] || 'staff'}</p>
+              <p className="text-[10px] text-sidebar-primary/80 uppercase tracking-wider font-semibold">{roles[0] || 'staff'}</p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-destructive-foreground transition-all group"
           >
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-border/60 px-4 lg:px-8 py-4 flex items-center gap-4">
-          <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+        <header className="sticky top-0 z-30 bg-background/70 backdrop-blur-xl border-b border-border/60 px-4 lg:px-8 py-4 flex items-center gap-4 shadow-[0_1px_0_hsl(335_30%_88%/0.6),0_8px_24px_-16px_hsl(328_85%_55%/0.25)]">
+          <button
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+            onClick={() => setSidebarOpen(true)}
+          >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] uppercase tracking-widest text-muted-foreground/80">BeYou Stylin</p>
+          <div className="relative flex-1 min-w-0 pl-3">
+            <span
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full"
+              style={{ background: 'var(--gradient-primary)' }}
+            />
+            <p className="text-[11px] uppercase tracking-[0.2em] font-semibold bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>BeYou Stylin</p>
             <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">{title}</h2>
           </div>
         </header>
