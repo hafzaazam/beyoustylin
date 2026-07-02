@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SalonProvider } from "@/context/SalonContext";
 import Landing from "./pages/Landing";
+import ServicesPublic from "./pages/ServicesPublic";
+import PackagesPublic from "./pages/PackagesPublic";
+
 import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
 import ServicesPage from "./pages/ServicesPage";
