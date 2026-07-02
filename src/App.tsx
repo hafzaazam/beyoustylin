@@ -59,6 +59,13 @@ const App = () => (
               <Route path="/admin/customers" element={<Protected><CustomersPage /></Protected>} />
               <Route path="/admin/invoices" element={<Protected><InvoicesPage /></Protected>} />
               <Route path="/admin/requests" element={<Protected><RequestsPage /></Protected>} />
+              <Route path="/account" element={<CustomerRoute><AccountDashboard /></CustomerRoute>} />
+              <Route path="/account/appointments" element={<CustomerRoute><AccountAppointments /></CustomerRoute>} />
+              <Route path="/account/requests" element={<CustomerRoute><AccountRequests /></CustomerRoute>} />
+              <Route path="/account/invoices" element={<CustomerRoute><AccountInvoices /></CustomerRoute>} />
+              <Route path="/account/favorites" element={<CustomerRoute><AccountFavorites /></CustomerRoute>} />
+              <Route path="/account/profile" element={<CustomerRoute><AccountProfile /></CustomerRoute>} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SalonProvider>
