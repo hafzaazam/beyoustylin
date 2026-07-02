@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useSalon } from '@/context/SalonContext';
-import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy } from 'lucide-react';
+import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy, Download } from 'lucide-react';
 
 const Dashboard = () => {
   const { bookings, staff, chairs, invoices, services, deals } = useSalon();
