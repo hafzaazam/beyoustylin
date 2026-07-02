@@ -42,8 +42,8 @@ const Auth = () => {
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background to-muted p-4">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 justify-center mb-8">
-          <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center">
-            <Scissors className="w-6 h-6 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-white ring-2 ring-primary/30 shadow-lg flex items-center justify-center overflow-hidden">
+            <img src={brandLogo} alt="BeYou Stylin" className="w-12 h-12 object-contain" />
           </div>
           <div>
             <h1 className="font-heading text-2xl font-semibold">BeYou Stylin</h1>
