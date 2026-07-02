@@ -148,6 +148,11 @@ interface SalonContextType {
   // Walk-in
   createWalkIn: (b: Omit<Booking, 'id' | 'createdAt' | 'endTime' | 'totalPrice' | 'totalDuration' | 'status'>) => Booking | string;
 
+  // Appointment Requests (public)
+  addAppointmentRequest: (r: Omit<AppointmentRequest, 'id' | 'createdAt' | 'status'>) => AppointmentRequest;
+  updateAppointmentRequestStatus: (id: string, status: AppointmentRequestStatus) => void;
+  deleteAppointmentRequest: (id: string) => void;
+
   // Helpers
   getStaffById: (id: string) => Staff | undefined;
   getCustomerById: (id: string) => Customer | undefined;
