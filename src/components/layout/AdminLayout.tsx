@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CalendarCheck, Scissors, Gift, Users, UserCircle,
-  FileText, Menu, X, ChevronRight
+  FileText, Menu, X, ChevronRight, Inbox
 } from 'lucide-react';
+import { useSalon } from '@/context/SalonContext';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/admin/requests', label: 'Requests', icon: Inbox },
   { path: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { path: '/admin/services', label: 'Services', icon: Scissors },
   { path: '/admin/deals', label: 'Deals', icon: Gift },
