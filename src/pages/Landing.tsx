@@ -199,9 +199,10 @@ const Landing = () => {
               <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Signature Menu</p>
               <h2 className="font-heading text-4xl md:text-5xl font-bold">Most Loved Services</h2>
             </div>
-            <Link to="/admin/services" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
+            <Link to="/services" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
               View all services <ArrowRight className="w-4 h-4" />
             </Link>
+
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {featuredServices.map(s => (
