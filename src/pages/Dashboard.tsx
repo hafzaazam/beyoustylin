@@ -5,26 +5,43 @@ import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock } from 'l
 const Dashboard = () => {
   const { bookings, staff, chairs, invoices } = useSalon();
 
-  const today = new Date().toDateString();
-  const todayBookings = bookings.filter(b => new Date(b.createdAt).toDateString() === today);
-  const activeBookings = bookings.filter(b => ['pending', 'confirmed', 'started'].includes(b.status));
+  const now = new Date();
+  const today = now.toDateString();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // Bookings scheduled today (by appointment start time)
+  const todayBookings = bookings.filter(b => new Date(b.startTime).toDateString() === today);
+
+  // Active live orders = walk-ins / in-progress work happening right now
+  const activeLiveOrders = bookings.filter(b => b.status === 'started');
+  const upcomingToday = todayBookings.filter(b => ['pending', 'confirmed'].includes(b.status));
+
   const completedBookings = bookings.filter(b => b.status === 'completed');
 
-  const dailyRevenue = todayBookings
-    .filter(b => b.status === 'completed')
-    .reduce((sum, b) => sum + b.totalPrice, 0);
+  // Revenue from paid invoices (falls back to unpaid totals if none paid yet)
+  const paidInvoices = invoices.filter(i => i.status === 'paid');
+  const revenueSource = paidInvoices.length > 0 ? paidInvoices : invoices;
 
-  const totalRevenue = completedBookings.reduce((sum, b) => sum + b.totalPrice, 0);
+  const dailyRevenue = revenueSource
+    .filter(i => new Date(i.createdAt).toDateString() === today)
+    .reduce((sum, i) => sum + i.totalAmount, 0);
 
+  const monthlyRevenue = revenueSource
+    .filter(i => new Date(i.createdAt) >= startOfMonth)
+    .reduce((sum, i) => sum + i.totalAmount, 0);
+
+  const activeBookings = bookings.filter(b => ['pending', 'confirmed', 'started'].includes(b.status));
   const occupiedChairs = new Set(activeBookings.map(b => b.chairId)).size;
 
+  const fmt = (n: number) => `Rs. ${n.toLocaleString()}`;
+
   const stats = [
-    { label: "Today's Bookings", value: todayBookings.length, icon: CalendarCheck, color: 'text-primary' },
-    { label: 'Active Orders', value: activeBookings.length, icon: Clock, color: 'text-accent' },
-     { label: "Today's Revenue", value: `Rs. ${dailyRevenue}`, icon: DollarSign, color: 'text-success' },
-     { label: 'Total Revenue', value: `Rs. ${totalRevenue}`, icon: TrendingUp, color: 'text-info' },
-    { label: 'Active Staff', value: staff.filter(s => s.status === 'active').length, icon: Users, color: 'text-primary' },
-    { label: 'Chairs Available', value: `${chairs.length - occupiedChairs}/${chairs.length}`, icon: Armchair, color: 'text-accent' },
+    { label: "Today's Bookings", value: todayBookings.length, sub: `${upcomingToday.length} upcoming`, icon: CalendarCheck, color: 'text-primary' },
+    { label: 'Active Live Orders', value: activeLiveOrders.length, sub: 'currently in progress', icon: Clock, color: 'text-accent' },
+    { label: "Today's Revenue", value: fmt(dailyRevenue), sub: `${revenueSource.filter(i => new Date(i.createdAt).toDateString() === today).length} invoices`, icon: DollarSign, color: 'text-success' },
+    { label: 'Monthly Revenue', value: fmt(monthlyRevenue), sub: now.toLocaleString('en-US', { month: 'long', year: 'numeric' }), icon: TrendingUp, color: 'text-info' },
+    { label: 'Active Staff', value: staff.filter(s => s.status === 'active').length, sub: `of ${staff.length} total`, icon: Users, color: 'text-primary' },
+    { label: 'Chairs Available', value: `${chairs.length - occupiedChairs}/${chairs.length}`, sub: `${occupiedChairs} in use`, icon: Armchair, color: 'text-accent' },
   ];
 
   // Staff performance
@@ -42,9 +59,10 @@ const Dashboard = () => {
             <div className={`p-3 rounded-xl bg-muted ${stat.color}`}>
               <stat.icon className="w-6 h-6" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="text-2xl font-heading font-bold text-foreground">{stat.value}</p>
+              <p className="text-2xl font-heading font-bold text-foreground truncate">{stat.value}</p>
+              {stat.sub && <p className="text-xs text-muted-foreground mt-0.5">{stat.sub}</p>}
             </div>
           </div>
         ))}
