@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Inbox } from 'lucide-react';
+import { MailOpen } from 'lucide-react';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -42,7 +42,7 @@ const AccountRequests = () => {
         <p className="text-muted-foreground">Loading…</p>
       ) : rows.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
-          <Inbox className="w-10 h-10 text-primary mx-auto mb-3" />
+          <MailOpen className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No requests yet</p>
           <p className="text-sm text-muted-foreground">Submit a booking or quote from the landing page.</p>
         </div>

@@ -1,22 +1,22 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, CalendarCheck, Scissors, Gift, Users, UserCircle,
-  FileText, Menu, X, ChevronRight, Inbox, LogOut
+  Gem, CalendarHeart, Scissors, Crown, Sparkles, HeartHandshake,
+  ReceiptText, Menu, X, ChevronRight, MailOpen, LogOut
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 
 const navItems = [
-  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/admin/requests', label: 'Requests', icon: Inbox },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
+  { path: '/admin', label: 'Dashboard', icon: Gem },
+  { path: '/admin/requests', label: 'Requests', icon: MailOpen },
+  { path: '/admin/bookings', label: 'Bookings', icon: CalendarHeart },
   { path: '/admin/services', label: 'Services', icon: Scissors },
-  { path: '/admin/deals', label: 'Deals', icon: Gift },
-  { path: '/admin/staff', label: 'Staff', icon: Users },
-  { path: '/admin/customers', label: 'Customers', icon: UserCircle },
-  { path: '/admin/invoices', label: 'Invoices', icon: FileText },
+  { path: '/admin/deals', label: 'Deals', icon: Crown },
+  { path: '/admin/staff', label: 'Staff', icon: Sparkles },
+  { path: '/admin/customers', label: 'Customers', icon: HeartHandshake },
+  { path: '/admin/invoices', label: 'Invoices', icon: ReceiptText },
 ];
 
 interface AdminLayoutProps {

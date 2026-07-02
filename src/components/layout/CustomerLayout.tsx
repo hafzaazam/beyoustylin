@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, CalendarCheck, Inbox, FileText, Heart, UserCircle,
+  Gem, CalendarHeart, MailOpen, ReceiptText, Flower2, UserRound,
   Menu, X, LogOut, Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const navItems = [
-  { path: '/account', label: 'Overview', icon: LayoutDashboard },
-  { path: '/account/appointments', label: 'Appointments', icon: CalendarCheck },
-  { path: '/account/requests', label: 'My Requests', icon: Inbox },
-  { path: '/account/invoices', label: 'Invoices', icon: FileText },
-  { path: '/account/favorites', label: 'Favorites', icon: Heart },
-  { path: '/account/profile', label: 'Profile', icon: UserCircle },
+  { path: '/account', label: 'Overview', icon: Gem },
+  { path: '/account/appointments', label: 'Appointments', icon: CalendarHeart },
+  { path: '/account/requests', label: 'My Requests', icon: MailOpen },
+  { path: '/account/invoices', label: 'Invoices', icon: ReceiptText },
+  { path: '/account/favorites', label: 'Favorites', icon: Flower2 },
+  { path: '/account/profile', label: 'Profile', icon: UserRound },
 ];
 
 interface Props {
