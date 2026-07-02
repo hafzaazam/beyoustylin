@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import brandLogo from '@/assets/logo.png';
+import Logo from '@/components/Logo';
 
 const Auth = () => {
   const { user, loading, signIn, signUp } = useAuth();
@@ -43,7 +43,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="flex items-center gap-3 justify-center mb-8">
           <div className="w-14 h-14 rounded-2xl bg-white ring-2 ring-primary/30 shadow-lg flex items-center justify-center overflow-hidden">
-            <img src={brandLogo} alt="BeYou Stylin" className="w-12 h-12 object-contain" />
+            <Logo className="w-12 h-12" />
           </div>
           <div>
             <h1 className="font-heading text-2xl font-semibold">BeYou Stylin</h1>
