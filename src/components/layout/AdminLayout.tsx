@@ -65,8 +65,13 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
                 }`}
               >
                 <item.icon className="w-4.5 h-4.5" />
-                {item.label}
-                {active && <ChevronRight className="w-4 h-4 ml-auto" />}
+                <span className="flex-1">{item.label}</span>
+                {item.path === '/admin/requests' && pendingRequests > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-sidebar-primary-foreground text-sidebar-primary' : 'bg-primary text-primary-foreground'}`}>
+                    {pendingRequests}
+                  </span>
+                )}
+                {active && <ChevronRight className="w-4 h-4" />}
               </Link>
             );
           })}
