@@ -25,6 +25,8 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { appointmentRequests } = useSalon();
+  const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
 
   return (
     <div className="flex min-h-screen">
