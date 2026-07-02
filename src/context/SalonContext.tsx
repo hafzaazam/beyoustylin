@@ -178,6 +178,27 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const [chairs] = useState<Chair[]>(sampleChairs);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem('beyou_appointment_requests');
+      return raw ? (JSON.parse(raw) as AppointmentRequest[]) : [];
+    } catch { return []; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem('beyou_appointment_requests', JSON.stringify(appointmentRequests)); } catch { /* noop */ }
+  }, [appointmentRequests]);
+
+  const addAppointmentRequest = (r: Omit<AppointmentRequest, 'id' | 'createdAt' | 'status'>): AppointmentRequest => {
+    const req: AppointmentRequest = { ...r, id: genId(), createdAt: now(), status: 'pending' };
+    setAppointmentRequests(prev => [req, ...prev]);
+    return req;
+  };
+  const updateAppointmentRequestStatus = (id: string, status: AppointmentRequestStatus) =>
+    setAppointmentRequests(prev => prev.map(x => x.id === id ? { ...x, status } : x));
+  const deleteAppointmentRequest = (id: string) =>
+    setAppointmentRequests(prev => prev.filter(x => x.id !== id));
 
   // Helpers
   const getStaffById = useCallback((id: string) => staff.find(s => s.id === id), [staff]);
