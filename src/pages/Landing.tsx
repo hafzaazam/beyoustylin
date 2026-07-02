@@ -255,7 +255,7 @@ const Landing = () => {
                       ) : null;
                     })}
                   </ul>
-                  <a href="#book" onClick={() => setForm(f => ({ ...f, selection: `deal:${d.id}` }))} className="block">
+                  <a href="#book" onClick={() => { setMode('booking'); setBookingForm(f => ({ ...f, selection: `deal:${d.id}` })); }} className="block">
                     <Button className="w-full" variant={isPopular ? 'default' : 'outline'}>Book This Package</Button>
                   </a>
                 </div>
