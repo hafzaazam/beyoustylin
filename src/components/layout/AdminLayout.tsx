@@ -26,8 +26,15 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children, title }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { appointmentRequests } = useSalon();
+  const { user, roles, signOut } = useAuth();
   const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <div className="flex min-h-screen">
