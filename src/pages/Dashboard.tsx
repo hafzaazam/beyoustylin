@@ -51,13 +51,32 @@ const Dashboard = () => {
     ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
     : startOfMonth;
 
+  const serviceCategoryMap = new Map(services.map(s => [s.id, s.category]));
+  const dealServiceMap = new Map(deals.map(d => [d.id, d.serviceIds]));
+
   const staffPerformance = staff.filter(s => s.status === 'active').map(s => {
     const staffBookings = completedBookings.filter(b =>
       b.staffId === s.id && new Date(b.endTime) >= rangeStart
     );
     const revenue = staffBookings.reduce((sum, b) => sum + b.totalPrice, 0);
     const minutes = staffBookings.reduce((sum, b) => sum + (b.totalDuration || 0), 0);
-    return { ...s, bookingsCount: staffBookings.length, revenue, minutes };
+
+    // Count completed bookings per service category
+    const categoryCounts = new Map<string, number>();
+    staffBookings.forEach(b => {
+      const ids = b.dealId ? (dealServiceMap.get(b.dealId) || []) : b.serviceIds;
+      const cats = new Set<string>();
+      ids.forEach(sid => {
+        const cat = serviceCategoryMap.get(sid);
+        if (cat) cats.add(cat);
+      });
+      cats.forEach(c => categoryCounts.set(c, (categoryCounts.get(c) || 0) + 1));
+    });
+    const categoryBreakdown = Array.from(categoryCounts.entries())
+      .map(([category, count]) => ({ category, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return { ...s, bookingsCount: staffBookings.length, revenue, minutes, categoryBreakdown };
   }).sort((a, b) => b.bookingsCount - a.bookingsCount || b.minutes - a.minutes);
 
   const topStaff = staffPerformance.filter(s => s.bookingsCount > 0).slice(0, 5);
