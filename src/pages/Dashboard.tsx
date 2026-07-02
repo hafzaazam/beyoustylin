@@ -4,7 +4,7 @@ import { useSalon } from '@/context/SalonContext';
 import { CalendarCheck, DollarSign, Users, Armchair, TrendingUp, Clock, Trophy } from 'lucide-react';
 
 const Dashboard = () => {
-  const { bookings, staff, chairs, invoices } = useSalon();
+  const { bookings, staff, chairs, invoices, services, deals } = useSalon();
 
   const now = new Date();
   const today = now.toDateString();
