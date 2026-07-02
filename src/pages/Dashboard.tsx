@@ -112,23 +112,49 @@ const Dashboard = () => {
 
         {/* Staff Performance */}
         <div className="bg-card rounded-xl border p-6">
-          <h3 className="font-heading text-lg font-semibold text-card-foreground mb-4">Staff Performance</h3>
-          {staffPerformance.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No data yet.</p>
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-primary" />
+              <h3 className="font-heading text-lg font-semibold text-card-foreground">Top Staff Performance</h3>
+            </div>
+            <div className="inline-flex rounded-lg border bg-muted p-0.5 text-xs font-medium">
+              {(['today', 'month'] as const).map(r => (
+                <button
+                  key={r}
+                  onClick={() => setPerfRange(r)}
+                  className={`px-3 py-1.5 rounded-md transition-colors ${
+                    perfRange === r ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {r === 'today' ? 'Today' : 'This Month'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {topStaff.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No completed bookings {perfRange === 'today' ? 'today' : 'this month'} yet.
+            </p>
           ) : (
             <div className="space-y-3">
-              {staffPerformance.map((s, idx) => (
-                <div key={s.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
-                    {idx + 1}
+              {topStaff.map((s, idx) => {
+                const medal = ['bg-primary/15 text-primary', 'bg-accent/15 text-accent', 'bg-muted text-muted-foreground'][idx] || 'bg-muted text-muted-foreground';
+                return (
+                  <div key={s.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${medal}`}>
+                      {idx + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {s.role} · {s.bookingsCount} completed · {fmtHours(s.minutes)}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold text-success whitespace-nowrap">Rs. {s.revenue.toLocaleString()}</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">{s.name}</p>
-                    <p className="text-xs text-muted-foreground">{s.role} · {s.bookingsCount} bookings</p>
-                  </div>
-                  <p className="text-sm font-semibold text-success">Rs. {s.revenue}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
