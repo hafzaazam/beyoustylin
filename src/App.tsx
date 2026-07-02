@@ -7,6 +7,8 @@ import { SalonProvider } from "@/context/SalonContext";
 import Landing from "./pages/Landing";
 import ServicesPublic from "./pages/ServicesPublic";
 import PackagesPublic from "./pages/PackagesPublic";
+import ServiceDetail from "./pages/ServiceDetail";
+
 
 import Dashboard from "./pages/Dashboard";
 import BookingsPage from "./pages/BookingsPage";
