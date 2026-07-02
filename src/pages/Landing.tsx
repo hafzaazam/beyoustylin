@@ -299,7 +299,7 @@ const Landing = () => {
             <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Ready to Look Iconic?</h2>
             <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">Book your consultation today. Our artists are ready to design a look that's uniquely you.</p>
             <div className="flex flex-wrap justify-center gap-3 mb-10">
-              <Link to="/admin/bookings"><Button size="lg" variant="secondary" className="px-8">Book Appointment</Button></Link>
+              <a href="#book"><Button size="lg" variant="secondary" className="px-8">Book Appointment</Button></a>
               <a href="tel:+923001234567"><Button size="lg" variant="outline" className="px-8 bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">Call Us</Button></a>
             </div>
             <div className="grid sm:grid-cols-3 gap-6 text-sm opacity-90 pt-8 border-t border-primary-foreground/20">
