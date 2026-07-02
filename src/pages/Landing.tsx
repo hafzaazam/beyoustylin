@@ -191,26 +191,59 @@ const Landing = () => {
       </section>
 
       {/* Features */}
-      <section id="services" className="py-24 px-4 lg:px-8">
+      <section id="services" className="relative py-28 px-4 lg:px-8 overflow-hidden">
+        {/* Ambient background */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 h-96 w-96 rounded-full bg-accent/40 blur-3xl" />
+        </div>
+
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">What We Offer</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Curated Beauty, Every Detail</h2>
-            <p className="text-muted-foreground">From your everyday glow-up to once-in-a-lifetime bridal moments — our services are designed to celebrate you.</p>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <p className="text-[11px] uppercase tracking-[0.25em] text-primary font-semibold">What We Offer</p>
+            </div>
+            <h2 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-5 tracking-tight">
+              Curated Beauty,{' '}
+              <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+                Every Detail
+              </span>
+            </h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">From your everyday glow-up to once-in-a-lifetime bridal moments — our services are designed to celebrate you.</p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featureCards.map(f => (
-              <div key={f.title} className="group p-8 rounded-2xl border border-border bg-card hover:border-primary/40 hover:shadow-lg transition-all">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                  <f.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors" />
+            {featureCards.map((f, i) => (
+              <div
+                key={f.title}
+                className="group relative p-8 rounded-3xl border border-border/60 bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:-translate-y-1 hover:shadow-[0_20px_50px_-20px_hsl(328_85%_55%/0.35)] transition-all duration-300 overflow-hidden"
+              >
+                {/* Hover gradient wash */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-0" style={{ background: 'linear-gradient(135deg, hsl(335 85% 96%), transparent 60%)' }} />
+                {/* Number badge */}
+                <span className="absolute top-6 right-6 font-heading text-5xl font-bold text-primary/10 group-hover:text-primary/20 transition-colors">
+                  0{i + 1}
+                </span>
+                <div
+                  className="relative w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.5)] ring-1 ring-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300"
+                  style={{ background: 'var(--gradient-primary)' }}
+                >
+                  <f.icon className="w-6 h-6 text-primary-foreground" />
                 </div>
-                <h3 className="font-heading text-xl font-semibold mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                <h3 className="relative font-heading text-xl font-semibold mb-3 tracking-tight">{f.title}</h3>
+                <p className="relative text-muted-foreground text-sm leading-relaxed">{f.desc}</p>
+                {/* Bottom accent line */}
+                <div className="relative mt-6 pt-5 border-t border-border/50 flex items-center gap-2 text-primary opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+                  <span className="text-xs font-semibold uppercase tracking-wider">Explore</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+
 
       {/* Popular services */}
       <section className="py-24 px-4 lg:px-8 bg-muted/40">
