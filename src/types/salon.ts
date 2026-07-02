@@ -78,20 +78,25 @@ export interface InvoiceItem {
 }
 
 export type AppointmentRequestStatus = 'pending' | 'approved' | 'dismissed';
+export type AppointmentRequestType = 'booking' | 'quote';
 
 export interface AppointmentRequest {
   id: string;
+  type: AppointmentRequestType;
   name: string;
   phone: string;
   email?: string;
   serviceId?: string;
   dealId?: string;
-  preferredDate: string; // YYYY-MM-DD
-  preferredTime: string; // HH:MM
+  preferredDate?: string; // YYYY-MM-DD
+  preferredTime?: string; // HH:MM
+  eventDate?: string; // for quotes — YYYY-MM-DD (optional)
+  budget?: string; // for quotes — freeform e.g. "50k-80k"
   notes?: string;
   status: AppointmentRequestStatus;
   createdAt: string;
 }
+
 
 export const SERVICE_CATEGORIES = [
   'Makeup', 'Hair Cutting', 'Hair Treatment', 'Mehndi', 'Wax', 'Threading', 'Nails', 'Facial', 'Add-on', 'Other'
