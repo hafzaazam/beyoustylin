@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import {
   Staff, Customer, Service, Deal, Chair, Booking, Invoice,
-  BookingStatus, EntityStatus, InvoiceItem
+  BookingStatus, EntityStatus, InvoiceItem, AppointmentRequest, AppointmentRequestStatus,
 } from '@/types/salon';
 
 // Helpers
