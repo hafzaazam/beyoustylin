@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
-import brandLogo from '@/assets/logo.png';
+import Logo from '@/components/Logo';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
@@ -138,7 +138,7 @@ const Landing = () => {
       <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={brandLogo} alt="BeYou Stylin" className="h-10 w-auto object-contain" />
+            <Logo className="h-10 w-auto" />
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
@@ -615,7 +615,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-lg bg-white ring-1 ring-primary/20 flex items-center justify-center overflow-hidden">
-              <img src={brandLogo} alt="BeYou Stylin" className="w-8 h-8 object-contain" />
+              <Logo className="w-8 h-8" />
             </div>
             <span className="font-heading font-semibold">BeYou Stylin</span>
             <span className="text-xs text-muted-foreground ml-2">© {new Date().getFullYear()}</span>

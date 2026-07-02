@@ -1,7 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Scissors, Instagram, Facebook } from 'lucide-react';
-import brandLogo from '@/assets/logo.png';
+import Logo from '@/components/Logo';
 import { ReactNode } from 'react';
 
 const navLinks = [
@@ -18,7 +18,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <img src={brandLogo} alt="BeYou Stylin" className="h-10 w-auto object-contain" />
+            <Logo className="h-10 w-auto" />
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             {navLinks.map(l =>
@@ -48,7 +48,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <footer className="py-12 px-4 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <img src={brandLogo} alt="BeYou Stylin" className="h-8 w-auto object-contain" />
+            <Logo className="h-8 w-auto" />
             <span className="text-xs text-muted-foreground ml-2">© {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-4 text-muted-foreground">

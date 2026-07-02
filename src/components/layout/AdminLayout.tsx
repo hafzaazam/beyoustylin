@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
-import brandLogo from '@/assets/logo.png';
+import Logo from '@/components/Logo';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -55,7 +55,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
 
         <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
-            <img src={brandLogo} alt="BeYou Stylin" className="w-10 h-10 object-contain" />
+            <Logo className="w-10 h-10" />
           </div>
           <div>
             <h1 className="font-heading text-lg font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
