@@ -357,11 +357,13 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
 
   // -------- Appointment Requests (public) --------
   const addAppointmentRequest = async (r: Omit<AppointmentRequest, 'id' | 'createdAt' | 'status'>) => {
+    const { data: userData } = await supabase.auth.getUser();
     const { data, error } = await supabase.from('appointment_requests').insert({
       type: r.type, name: r.name, phone: r.phone, email: r.email ?? null,
       service_id: r.serviceId ?? null, deal_id: r.dealId ?? null,
       preferred_date: r.preferredDate ?? null, preferred_time: r.preferredTime ?? null,
       event_date: r.eventDate ?? null, budget: r.budget ?? null, notes: r.notes ?? null,
+      user_id: userData.user?.id ?? null,
     }).select().single();
     if (error || !data) return null;
     const mapped = mapRequest(data);

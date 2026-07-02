@@ -31,6 +31,7 @@ export type Database = {
           status: Database["public"]["Enums"]["request_status"]
           type: Database["public"]["Enums"]["request_type"]
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           budget?: string | null
@@ -48,6 +49,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["request_status"]
           type?: Database["public"]["Enums"]["request_type"]
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           budget?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["request_status"]
           type?: Database["public"]["Enums"]["request_type"]
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -194,6 +197,7 @@ export type Database = {
           phone: string
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address?: string | null
@@ -204,6 +208,7 @@ export type Database = {
           phone: string
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string | null
@@ -214,6 +219,7 @@ export type Database = {
           phone?: string
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -249,6 +255,45 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          deal_id: string | null
+          id: string
+          service_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          service_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          deal_id?: string | null
+          id?: string
+          service_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invoices: {
         Row: {
@@ -319,26 +364,38 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          birthday: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
+          loyalty_points: number
           phone: string | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
+          loyalty_points?: number
           phone?: string | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
+          loyalty_points?: number
           phone?: string | null
           updated_at?: string
         }
