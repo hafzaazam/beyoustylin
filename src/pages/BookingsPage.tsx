@@ -25,6 +25,31 @@ const BookingsPage = () => {
 
   const resetForm = () => setForm({ customerId: '', staffId: '', chairId: '', serviceIds: [], dealId: '', startTime: '', useDeal: false });
 
+  const nowLocalInput = () => {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  };
+  const openWalkIn = () => { resetForm(); setForm(p => ({ ...p, startTime: nowLocalInput() })); setWalkInOpen(true); };
+
+  // Live preview of computed duration/price + overlap warning
+  const preview = (() => {
+    let duration = 0, price = 0;
+    if (form.useDeal && form.dealId) {
+      const deal = salon.getDealById(form.dealId);
+      if (deal) { duration = deal.totalDuration; price = deal.discountedPrice; }
+    } else {
+      form.serviceIds.forEach(sid => {
+        const svc = salon.getServiceById(sid);
+        if (svc) { duration += svc.duration; price += svc.price; }
+      });
+    }
+    const conflict = form.staffId && form.chairId && form.startTime && duration > 0
+      ? salon.checkOverlap(form.staffId, form.chairId, new Date(form.startTime).toISOString(), duration)
+      : false;
+    return { duration, price, conflict };
+  })();
+
   const handleSubmit = async (isWalkIn = false) => {
     if (!form.customerId || !form.staffId || !form.chairId || !form.startTime) {
       toast({ title: 'Missing fields', description: 'Fill all required fields.', variant: 'destructive' });
