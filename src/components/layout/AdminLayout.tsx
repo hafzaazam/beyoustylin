@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
+import brandLogo from '@/assets/logo.png';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
