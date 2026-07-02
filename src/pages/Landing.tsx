@@ -614,8 +614,8 @@ const Landing = () => {
       <footer className="py-12 px-4 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Scissors className="w-4 h-4 text-primary-foreground" />
+            <div className="w-9 h-9 rounded-lg bg-white ring-1 ring-primary/20 flex items-center justify-center overflow-hidden">
+              <img src={brandLogo} alt="BeYou Stylin" className="w-8 h-8 object-contain" />
             </div>
             <span className="font-heading font-semibold">BeYou Stylin</span>
             <span className="text-xs text-muted-foreground ml-2">© {new Date().getFullYear()}</span>
