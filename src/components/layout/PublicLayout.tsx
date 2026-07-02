@@ -48,10 +48,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       <footer className="py-12 px-4 lg:px-8 border-t border-border">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Scissors className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-heading font-semibold">BeYou Stylin</span>
+            <img src={brandLogo} alt="BeYou Stylin" className="h-8 w-auto object-contain" />
             <span className="text-xs text-muted-foreground ml-2">© {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-4 text-muted-foreground">
