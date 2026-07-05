@@ -117,12 +117,6 @@ const MehndiPublic = () => {
 
           <div className="relative max-w-6xl mx-auto px-4 lg:px-8 pt-24 pb-28 text-center">
             {/* crescent + star */}
-            <div className="flex items-center justify-center gap-3 mb-6" style={{ color: C.gold }}>
-              <span className="h-px w-16" style={{ background: `linear-gradient(90deg,transparent,${C.gold})` }} />
-              <Moon className="w-4 h-4" />
-              <Star className="w-3 h-3 fill-current" />
-              <span className="h-px w-16" style={{ background: `linear-gradient(90deg,${C.gold},transparent)` }} />
-            </div>
 
             <p className="uppercase tracking-[0.42em] text-[11px] font-semibold mb-5" style={{ color: C.gold }}>
               Bismillah · Mehndi Atelier
