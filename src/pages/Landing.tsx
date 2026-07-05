@@ -332,7 +332,7 @@ const Landing = () => {
           ['--mh-gold' as string]: '#c9a24a',
           ['--mh-gold-soft' as string]: '#f1dfa4',
           background:
-            'radial-gradient(1200px 500px at 10% 0%, rgba(201,162,74,0.10), transparent 60%), linear-gradient(180deg, #f7f4ea 0%, #eef3e8 100%)',
+            'radial-gradient(1200px 500px at 10% 0%, rgba(201,162,74,0.18), transparent 60%), radial-gradient(900px 500px at 90% 100%, rgba(45,90,61,0.55), transparent 60%), linear-gradient(180deg, #0b1a12 0%, #12241a 60%, #0b1a12 100%)',
         }}
       >
         {/* Ornamental corners */}
