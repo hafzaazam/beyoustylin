@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
+import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
