@@ -4,6 +4,10 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
+import mehndi1 from '@/assets/mehndi-1.jpg';
+import mehndi2 from '@/assets/mehndi-2.jpg';
+import mehndi3 from '@/assets/mehndi-3.jpg';
+const productImages = [mehndi1, mehndi2, mehndi3];
 import { Flower2, Crown, Clock, ArrowRight, Check, Palette, Sparkles, Moon, Star } from 'lucide-react';
 
 /* ─────────────── Royal palette ─────────────── */
@@ -330,34 +334,42 @@ const MehndiPublic = () => {
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {mehndiServices.map((svc) => (
+                {mehndiServices.map((svc, idx) => (
                   <div
                     key={svc.id}
-                    className="relative p-6 rounded-2xl transition-transform hover:-translate-y-1"
+                    className="relative rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
                     style={{
                       background: `linear-gradient(180deg, ${C.greenSoft} 0%, ${C.ink} 100%)`,
                       border: `1px solid ${C.greenLine}`,
                       boxShadow: '0 20px 50px -30px rgba(0,0,0,0.6)',
                     }}
                   >
+                    {/* image */}
+                    <div className="relative w-full aspect-[4/3] overflow-hidden">
+                      <img
+                        src={productImages[idx % productImages.length]}
+                        alt={svc.name}
+                        loading="lazy"
+                        width={1024}
+                        height={1024}
+                        className="w-full h-full object-cover"
+                      />
+                      <div
+                        className="absolute inset-0"
+                        style={{ background: `linear-gradient(180deg, transparent 40%, ${C.ink} 100%)` }}
+                      />
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-[0.28em] font-semibold"
+                        style={{ background: `${C.ink}cc`, color: C.gold, border: `1px solid ${C.gold}55` }}>
+                        {svc.category || 'Mehndi'}
+                      </span>
+                    </div>
+
+                    <div className="relative p-6">
                     <span className="absolute top-2 left-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
                     <span className="absolute top-2 right-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
                     <span className="absolute bottom-2 left-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
                     <span className="absolute bottom-2 right-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
 
-                    <div className="flex items-center gap-3 mb-4">
-                      <div
-                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${C.gold}, ${C.goldSoft})`,
-                        }}
-                      >
-                        <Flower2 className="w-5 h-5" style={{ color: C.ink }} />
-                      </div>
-                      <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: C.gold }}>
-                        {svc.category || 'Mehndi'}
-                      </span>
-                    </div>
 
                     <h3 className="font-heading text-xl font-bold mb-2" style={{ color: C.parchment }}>
                       {svc.name}
@@ -388,8 +400,10 @@ const MehndiPublic = () => {
                         Book Now <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                     </Link>
+                    </div>
                   </div>
                 ))}
+
               </div>
             )}
           </div>
