@@ -196,16 +196,6 @@ const MehndiPublic = () => {
                   className="w-full h-[520px] object-cover"
                 />
               </div>
-              {/* medallion */}
-              <div
-                className="absolute -bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full flex items-center gap-3 backdrop-blur"
-                style={{ background: C.ink, border: `1px solid ${C.gold}` }}
-              >
-                <Flower2 className="w-4 h-4" style={{ color: C.gold }} />
-                <span className="font-heading text-sm tracking-[0.2em] uppercase" style={{ color: C.goldSoft }}>
-                  Sodani · Since Tradition
-                </span>
-              </div>
             </div>
           </div>
         </section>
