@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import { Flower2, Crown, Clock, ArrowRight, Check, Palette, Sparkles, Moon, Star } from 'lucide-react';
 
