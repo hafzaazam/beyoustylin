@@ -400,8 +400,10 @@ const MehndiPublic = () => {
                         Book Now <ArrowRight className="w-4 h-4 ml-1" />
                       </Button>
                     </Link>
+                    </div>
                   </div>
                 ))}
+
               </div>
             )}
           </div>
