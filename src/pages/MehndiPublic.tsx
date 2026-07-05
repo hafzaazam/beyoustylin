@@ -240,7 +240,7 @@ const MehndiPublic = () => {
 
                   {s.highlight && (
                     <div
-                      className="absolute -top-2.5 left-5 px-2 py-0.5 rounded-full text-[9px] uppercase tracking-[0.24em] font-bold"
+                      className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] uppercase tracking-[0.24em] font-bold"
                       style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldSoft})`, color: C.ink }}
                     >
                       Signature
