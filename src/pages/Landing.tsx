@@ -143,6 +143,7 @@ const Landing = () => {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
             <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
+            <Link to="/mehndi" className="hover:text-foreground transition-colors">Mehndi</Link>
 
             <a href="#book" className="hover:text-foreground transition-colors">Book</a>
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
