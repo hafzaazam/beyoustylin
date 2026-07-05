@@ -9,6 +9,7 @@ import ProtectedRoute, { CustomerRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import ServicesPublic from "./pages/ServicesPublic";
 import PackagesPublic from "./pages/PackagesPublic";
+import MehndiPublic from "./pages/MehndiPublic";
 import ServiceDetail from "./pages/ServiceDetail";
 import Auth from "./pages/Auth";
 
