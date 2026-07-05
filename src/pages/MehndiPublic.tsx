@@ -111,7 +111,6 @@ const MehndiPublic = () => {
           }}
         >
           {/* faint tile pattern */}
-          <StarPattern className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.18]" />
           {/* gold hairlines */}
           <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg,transparent,${C.gold},transparent)` }} />
           <div className="absolute inset-x-0 bottom-0 h-px" style={{ background: `linear-gradient(90deg,transparent,${C.gold},transparent)` }} />
@@ -327,7 +326,6 @@ const MehndiPublic = () => {
             background: `linear-gradient(180deg, ${C.ink} 0%, ${C.green} 50%, ${C.ink} 100%)`,
           }}
         >
-          <StarPattern className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.12]" />
           <div className="relative max-w-6xl mx-auto">
             <div className="text-center mb-16">
               <p className="uppercase tracking-[0.4em] text-[11px] font-semibold mb-4" style={{ color: C.gold }}>
@@ -389,7 +387,6 @@ const MehndiPublic = () => {
                 boxShadow: `inset 0 0 0 6px ${C.ink}, inset 0 0 0 7px ${C.gold}55`,
               }}
             >
-              <StarPattern className="pointer-events-none absolute inset-0 w-full h-full opacity-10" />
 
               <div className="relative flex items-center justify-center gap-3 mb-6" style={{ color: C.gold }}>
                 <span className="h-px w-12" style={{ background: `linear-gradient(90deg,transparent,${C.gold})` }} />
