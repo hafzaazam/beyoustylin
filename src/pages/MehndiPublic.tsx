@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import { Flower2, Crown, Clock, ArrowRight, Check, Palette, Sparkles, Moon, Star } from 'lucide-react';
 
@@ -99,7 +101,30 @@ const ritual = [
 ];
 
 /* ─────────────── Page ─────────────── */
+type MehndiService = {
+  id: string;
+  name: string;
+  category: string | null;
+  duration: number | null;
+  price: number | null;
+  description: string | null;
+};
+
 const MehndiPublic = () => {
+  const [mehndiServices, setMehndiServices] = useState<MehndiService[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('services')
+        .select('id,name,category,duration,price,description,status')
+        .eq('status', 'active')
+        .or('category.ilike.%mehndi%,category.ilike.%henna%,name.ilike.%mehndi%,name.ilike.%henna%')
+        .order('price', { ascending: true });
+      if (data) setMehndiServices(data as MehndiService[]);
+    })();
+  }, []);
+
   return (
     <PublicLayout>
       <div style={{ background: C.ink, color: C.parchment }}>
@@ -280,7 +305,98 @@ const MehndiPublic = () => {
           </div>
         </section>
 
+        {/* ALL MEHNDI PRODUCTS (from database) */}
+        <section id="mehndi-products" className="relative py-28 px-4 lg:px-8" style={{ background: C.green }}>
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="uppercase tracking-[0.4em] text-[11px] font-semibold mb-4" style={{ color: C.gold }}>
+                Full Catalogue
+              </p>
+              <h2 className="font-heading text-4xl md:text-5xl font-bold" style={{ color: C.parchment }}>
+                All Mehndi{' '}
+                <span
+                  className="italic bg-clip-text text-transparent"
+                  style={{ backgroundImage: `linear-gradient(90deg, ${C.gold}, ${C.goldSoft})` }}
+                >
+                  Offerings
+                </span>
+              </h2>
+              <Arabesque className="w-56 h-6 mx-auto mt-6" />
+            </div>
+
+            {mehndiServices.length === 0 ? (
+              <p className="text-center text-sm" style={{ color: C.mute }}>
+                No mehndi services published yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {mehndiServices.map((svc) => (
+                  <div
+                    key={svc.id}
+                    className="relative p-6 rounded-2xl transition-transform hover:-translate-y-1"
+                    style={{
+                      background: `linear-gradient(180deg, ${C.greenSoft} 0%, ${C.ink} 100%)`,
+                      border: `1px solid ${C.greenLine}`,
+                      boxShadow: '0 20px 50px -30px rgba(0,0,0,0.6)',
+                    }}
+                  >
+                    <span className="absolute top-2 left-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
+                    <span className="absolute top-2 right-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
+                    <span className="absolute bottom-2 left-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
+                    <span className="absolute bottom-2 right-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
+
+                    <div className="flex items-center gap-3 mb-4">
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${C.gold}, ${C.goldSoft})`,
+                        }}
+                      >
+                        <Flower2 className="w-5 h-5" style={{ color: C.ink }} />
+                      </div>
+                      <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: C.gold }}>
+                        {svc.category || 'Mehndi'}
+                      </span>
+                    </div>
+
+                    <h3 className="font-heading text-xl font-bold mb-2" style={{ color: C.parchment }}>
+                      {svc.name}
+                    </h3>
+
+                    {svc.description && (
+                      <p className="text-sm mb-4 leading-relaxed" style={{ color: C.mute }}>
+                        {svc.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between mt-6 pt-4" style={{ borderTop: `1px solid ${C.greenLine}` }}>
+                      <span className="font-heading text-lg" style={{ color: C.gold }}>
+                        Rs. {Number(svc.price ?? 0).toLocaleString('en-PK')}
+                      </span>
+                      {svc.duration != null && (
+                        <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: C.mute }}>
+                          <Clock className="w-3.5 h-3.5" /> {svc.duration} min
+                        </span>
+                      )}
+                    </div>
+
+                    <Link to="/services?category=Mehndi" className="block mt-5">
+                      <Button
+                        className="w-full rounded-full border-0"
+                        style={{ background: 'transparent', color: C.goldSoft, border: `1px solid ${C.gold}` }}
+                      >
+                        Book Now <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* RITUAL */}
+
         <section
           className="relative py-28 px-4 lg:px-8 overflow-hidden"
           style={{
