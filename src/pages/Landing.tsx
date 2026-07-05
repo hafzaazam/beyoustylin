@@ -441,7 +441,7 @@ const Landing = () => {
                   size="lg"
                   variant="outline"
                   className="bg-transparent hover:bg-transparent"
-                  style={{ borderColor: '#c9a24a', color: '#1f3a2b' }}
+                  style={{ borderColor: '#c9a24a', color: '#f1dfa4' }}
                 >
                   Book a Session
                 </Button>
