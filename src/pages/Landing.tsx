@@ -321,12 +321,36 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Mehndi highlight */}
-      <section id="mehndi" className="py-24 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      {/* Mehndi highlight — henna green + gold palette */}
+      <section
+        id="mehndi"
+        className="relative py-24 px-4 lg:px-8 overflow-hidden"
+        style={{
+          ['--mh-green' as string]: '#1f3a2b',
+          ['--mh-green-deep' as string]: '#12241a',
+          ['--mh-green-soft' as string]: '#e8f0e5',
+          ['--mh-gold' as string]: '#c9a24a',
+          ['--mh-gold-soft' as string]: '#f1dfa4',
+          background:
+            'radial-gradient(1200px 500px at 10% 0%, rgba(201,162,74,0.10), transparent 60%), linear-gradient(180deg, #f7f4ea 0%, #eef3e8 100%)',
+        }}
+      >
+        {/* Ornamental corners */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #c9a24a, transparent)' }} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #c9a24a, transparent)' }} />
+        <div className="pointer-events-none absolute -top-24 -left-16 h-72 w-72 rounded-full blur-3xl opacity-40" style={{ background: '#1f3a2b' }} />
+        <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full blur-3xl opacity-40" style={{ background: '#c9a24a' }} />
+
+        <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div className="relative order-2 md:order-1">
-            <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl -z-10" />
-            <div className="relative overflow-hidden rounded-3xl border border-primary/20 shadow-[0_20px_60px_-20px_hsl(328_85%_55%/0.35)]">
+            <div className="absolute -inset-4 rounded-3xl blur-2xl -z-10" style={{ background: 'rgba(31,58,43,0.18)' }} />
+            <div
+              className="relative overflow-hidden rounded-3xl"
+              style={{
+                border: '1px solid rgba(201,162,74,0.55)',
+                boxShadow: '0 20px 60px -20px rgba(18,36,26,0.55), inset 0 0 0 1px rgba(241,223,164,0.25)',
+              }}
+            >
               <img
                 src={mehndiHero}
                 alt="Bridal mehndi henna artistry"
@@ -336,25 +360,48 @@ const Landing = () => {
                 className="w-full h-full object-cover aspect-[4/5]"
               />
             </div>
-            <div className="absolute -bottom-6 -right-4 md:-right-6 bg-card border border-border rounded-2xl px-5 py-4 shadow-lg flex items-center gap-3">
+            <div
+              className="absolute -bottom-6 -right-4 md:-right-6 rounded-2xl px-5 py-4 shadow-lg flex items-center gap-3 backdrop-blur"
+              style={{ background: 'rgba(255,252,244,0.95)', border: '1px solid rgba(201,162,74,0.55)' }}
+            >
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-primary/20"
-                style={{ background: 'var(--gradient-primary)' }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg, #1f3a2b, #2d5a3d)',
+                  boxShadow: '0 6px 18px -8px rgba(31,58,43,0.7), inset 0 0 0 1px rgba(241,223,164,0.6)',
+                }}
               >
-                <Flower2 className="w-5 h-5 text-primary-foreground" />
+                <Flower2 className="w-5 h-5" style={{ color: '#f1dfa4' }} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Bridal Sodani</p>
-                <p className="font-heading font-semibold">From Rs. 25,000</p>
+                <p className="text-xs" style={{ color: '#7a6a3a' }}>Bridal Sodani</p>
+                <p className="font-heading font-semibold" style={{ color: '#12241a' }}>From Rs. 25,000</p>
               </div>
             </div>
           </div>
+
           <div className="order-1 md:order-2">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Mehndi Artistry</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight">
-              Delicate Motifs, <span className="text-primary italic">Deep Stain</span>
+            <p
+              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] font-semibold mb-4 px-3 py-1 rounded-full"
+              style={{
+                color: '#12241a',
+                background: 'linear-gradient(90deg, rgba(201,162,74,0.20), rgba(201,162,74,0.05))',
+                border: '1px solid rgba(201,162,74,0.55)',
+              }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#c9a24a' }} />
+              Mehndi Artistry
+            </p>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight" style={{ color: '#12241a' }}>
+              Delicate Motifs,{' '}
+              <span
+                className="italic bg-clip-text text-transparent"
+                style={{ backgroundImage: 'linear-gradient(90deg, #c9a24a, #f1dfa4, #c9a24a)' }}
+              >
+                Deep Stain
+              </span>
             </h2>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            <p className="mb-6 leading-relaxed" style={{ color: '#3a4a3f' }}>
               From intricate Sodani bridal work to modern Arabic flow — our senior mehndi artists design every pattern around your outfit, hands and event.
             </p>
             <ul className="space-y-3 mb-8">
@@ -364,19 +411,46 @@ const Landing = () => {
                 'Custom design consult for brides & guests',
                 'Party & Eid bookings welcome',
               ].map(item => (
-                <li key={item} className="flex items-start gap-2.5 text-sm">
-                  <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <li key={item} className="flex items-start gap-2.5 text-sm" style={{ color: '#22332a' }}>
+                  <span
+                    className="mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ background: '#1f3a2b', boxShadow: 'inset 0 0 0 1px rgba(241,223,164,0.6)' }}
+                  >
+                    <Check className="w-3 h-3" style={{ color: '#f1dfa4' }} />
+                  </span>
                   <span>{item}</span>
                 </li>
               ))}
             </ul>
             <div className="flex flex-wrap gap-3">
-              <Link to="/mehndi"><Button size="lg">Explore Mehndi <ArrowRight className="ml-1 w-4 h-4" /></Button></Link>
-              <Link to="/services?category=Mehndi"><Button size="lg" variant="outline">Book a Session</Button></Link>
+              <Link to="/mehndi">
+                <Button
+                  size="lg"
+                  className="border-0 hover:opacity-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #1f3a2b, #2d5a3d)',
+                    color: '#f1dfa4',
+                    boxShadow: '0 10px 30px -12px rgba(18,36,26,0.7), inset 0 0 0 1px rgba(201,162,74,0.5)',
+                  }}
+                >
+                  Explore Mehndi <ArrowRight className="ml-1 w-4 h-4" />
+                </Button>
+              </Link>
+              <Link to="/services?category=Mehndi">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-transparent hover:bg-transparent"
+                  style={{ borderColor: '#c9a24a', color: '#1f3a2b' }}
+                >
+                  Book a Session
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* About */}
       <section id="about" className="py-24 px-4 lg:px-8 bg-muted/40">
