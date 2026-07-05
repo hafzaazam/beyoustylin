@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
+import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
@@ -143,6 +144,7 @@ const Landing = () => {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
             <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
+            <Link to="/mehndi" className="hover:text-foreground transition-colors">Mehndi</Link>
 
             <a href="#book" className="hover:text-foreground transition-colors">Book</a>
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
@@ -315,6 +317,63 @@ const Landing = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Mehndi highlight */}
+      <section id="mehndi" className="py-24 px-4 lg:px-8">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="relative order-2 md:order-1">
+            <div className="absolute -inset-4 rounded-3xl bg-primary/10 blur-2xl -z-10" />
+            <div className="relative overflow-hidden rounded-3xl border border-primary/20 shadow-[0_20px_60px_-20px_hsl(328_85%_55%/0.35)]">
+              <img
+                src={mehndiHero}
+                alt="Bridal mehndi henna artistry"
+                loading="lazy"
+                width={1600}
+                height={1024}
+                className="w-full h-full object-cover aspect-[4/5]"
+              />
+            </div>
+            <div className="absolute -bottom-6 -right-4 md:-right-6 bg-card border border-border rounded-2xl px-5 py-4 shadow-lg flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-primary/20"
+                style={{ background: 'var(--gradient-primary)' }}
+              >
+                <Flower2 className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Bridal Sodani</p>
+                <p className="font-heading font-semibold">From Rs. 25,000</p>
+              </div>
+            </div>
+          </div>
+          <div className="order-1 md:order-2">
+            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Mehndi Artistry</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight">
+              Delicate Motifs, <span className="text-primary italic">Deep Stain</span>
+            </h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              From intricate Sodani bridal work to modern Arabic flow — our senior mehndi artists design every pattern around your outfit, hands and event.
+            </p>
+            <ul className="space-y-3 mb-8">
+              {[
+                'Bridal Sodani, Classic & Contemporary styles',
+                'Premium organic cones for rich, lasting colour',
+                'Custom design consult for brides & guests',
+                'Party & Eid bookings welcome',
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2.5 text-sm">
+                  <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/mehndi"><Button size="lg">Explore Mehndi <ArrowRight className="ml-1 w-4 h-4" /></Button></Link>
+              <Link to="/services?category=Mehndi"><Button size="lg" variant="outline">Book a Session</Button></Link>
+            </div>
           </div>
         </div>
       </section>

@@ -10,6 +10,7 @@ import { ReactNode } from 'react';
 const navLinks = [
   { to: '/services', label: 'Services' },
   { to: '/packages', label: 'Packages' },
+  { to: '/mehndi', label: 'Mehndi' },
   { to: '/services', label: 'Book' },
   { to: '/#about', label: 'About' },
   { to: '/#contact', label: 'Contact' },
