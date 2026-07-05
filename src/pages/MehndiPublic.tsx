@@ -219,28 +219,28 @@ const MehndiPublic = () => {
               <Arabesque className="w-56 h-6 mx-auto mt-6" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {styles.map((s) => (
                 <div
                   key={s.name}
-                  className="relative p-8 rounded-3xl overflow-hidden transition-transform hover:-translate-y-1"
+                  className="relative p-5 rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
                   style={{
                     background: `linear-gradient(180deg, ${C.greenSoft} 0%, ${C.green} 100%)`,
                     border: `1px solid ${s.highlight ? C.gold : C.greenLine}`,
                     boxShadow: s.highlight
-                      ? `0 30px 80px -30px rgba(0,0,0,0.7), inset 0 0 0 1px ${C.gold}55`
-                      : '0 20px 60px -30px rgba(0,0,0,0.5)',
+                      ? `0 20px 60px -30px rgba(0,0,0,0.7), inset 0 0 0 1px ${C.gold}55`
+                      : '0 14px 40px -30px rgba(0,0,0,0.5)',
                   }}
                 >
                   {/* corner ornaments */}
-                  <span className="absolute top-3 left-3 w-6 h-6" style={{ borderTop: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
-                  <span className="absolute top-3 right-3 w-6 h-6" style={{ borderTop: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
-                  <span className="absolute bottom-3 left-3 w-6 h-6" style={{ borderBottom: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
-                  <span className="absolute bottom-3 right-3 w-6 h-6" style={{ borderBottom: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
+                  <span className="absolute top-2 left-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
+                  <span className="absolute top-2 right-2 w-4 h-4" style={{ borderTop: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
+                  <span className="absolute bottom-2 left-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderLeft: `1px solid ${C.gold}` }} />
+                  <span className="absolute bottom-2 right-2 w-4 h-4" style={{ borderBottom: `1px solid ${C.gold}`, borderRight: `1px solid ${C.gold}` }} />
 
                   {s.highlight && (
                     <div
-                      className="absolute -top-3 left-8 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.28em] font-bold"
+                      className="absolute -top-2.5 left-5 px-2 py-0.5 rounded-full text-[9px] uppercase tracking-[0.24em] font-bold"
                       style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.goldSoft})`, color: C.ink }}
                     >
                       Signature
@@ -248,37 +248,35 @@ const MehndiPublic = () => {
                   )}
 
                   <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
                     style={{
                       background: `linear-gradient(135deg, ${C.gold}, ${C.goldSoft})`,
-                      boxShadow: `inset 0 0 0 1px ${C.goldSoft}, 0 10px 30px -10px ${C.goldGlow}`,
+                      boxShadow: `inset 0 0 0 1px ${C.goldSoft}, 0 8px 20px -10px ${C.goldGlow}`,
                     }}
                   >
-                    <s.icon className="w-6 h-6" style={{ color: C.ink }} />
+                    <s.icon className="w-5 h-5" style={{ color: C.ink }} />
                   </div>
 
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <h3 className="font-heading text-2xl font-bold" style={{ color: C.parchment }}>
-                      {s.name}
-                    </h3>
-                    <span className="inline-flex items-center gap-1 text-xs shrink-0 mt-2" style={{ color: C.mute }}>
-                      <Clock className="w-3.5 h-3.5" /> {s.duration}
-                    </span>
+                  <h3 className="font-heading text-lg font-bold leading-tight mb-1" style={{ color: C.parchment }}>
+                    {s.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mb-3 text-[11px]" style={{ color: C.mute }}>
+                    <Clock className="w-3 h-3" /> {s.duration}
                   </div>
-                  <p className="font-heading text-lg mb-4" style={{ color: C.gold }}>
+                  <p className="font-heading text-sm mb-3" style={{ color: C.gold }}>
                     {s.price}
                   </p>
-                  <p className="text-sm leading-relaxed mb-6" style={{ color: C.mute }}>
+                  <p className="text-xs leading-relaxed mb-4" style={{ color: C.mute }}>
                     {s.desc}
                   </p>
-                  <ul className="space-y-2.5 mb-8">
+                  <ul className="space-y-1.5 mb-5">
                     {s.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: C.parchment }}>
+                      <li key={f} className="flex items-start gap-2 text-xs" style={{ color: C.parchment }}>
                         <span
-                          className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center"
+                          className="mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center"
                           style={{ background: C.gold }}
                         >
-                          <Check className="w-2.5 h-2.5" style={{ color: C.ink }} />
+                          <Check className="w-2 h-2" style={{ color: C.ink }} />
                         </span>
                         <span>{f}</span>
                       </li>
@@ -286,7 +284,8 @@ const MehndiPublic = () => {
                   </ul>
                   <Link to="/services?category=Mehndi">
                     <Button
-                      className="w-full rounded-full border-0"
+                      size="sm"
+                      className="w-full rounded-full border-0 text-xs"
                       style={
                         s.highlight
                           ? {
@@ -304,6 +303,7 @@ const MehndiPublic = () => {
                     </Button>
                   </Link>
                 </div>
+
               ))}
             </div>
           </div>
