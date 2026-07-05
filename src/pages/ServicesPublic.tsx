@@ -12,7 +12,7 @@ const ServicesPublic = () => {
   const [activeCat, setActiveCat] = useState<string>('All');
 
   const activeServices = useMemo(
-    () => services.filter(s => s.status === 'active'),
+    () => services.filter(s => s.status === 'active' && s.category.toLowerCase() !== 'mehndi'),
     [services]
   );
 
