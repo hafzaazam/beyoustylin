@@ -168,29 +168,6 @@ const MehndiPublic = () => {
               </a>
             </div>
 
-            {/* Arch-framed image */}
-            <div className="relative mt-20 mx-auto max-w-3xl">
-              <div
-                className="pointer-events-none absolute -inset-8 rounded-[999px_999px_40px_40px] blur-3xl opacity-60"
-                style={{ background: `radial-gradient(closest-side, ${C.gold}30, transparent 70%)` }}
-              />
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  borderRadius: '50% 50% 24px 24px / 40% 40% 24px 24px',
-                  border: `1px solid ${C.gold}`,
-                  boxShadow: `inset 0 0 0 6px ${C.ink}, inset 0 0 0 7px ${C.gold}, 0 40px 80px -30px rgba(0,0,0,0.6)`,
-                }}
-              >
-                <img
-                  src={mehndiHero}
-                  alt="Bridal mehndi henna artistry"
-                  width={1600}
-                  height={1024}
-                  className="w-full h-[520px] object-cover"
-                />
-              </div>
-            </div>
           </div>
         </section>
 
