@@ -50,6 +50,7 @@ const App = () => (
               <Route path="/services" element={<ServicesPublic />} />
               <Route path="/services/:id" element={<ServiceDetail />} />
               <Route path="/packages" element={<PackagesPublic />} />
+              <Route path="/mehndi" element={<MehndiPublic />} />
               <Route path="/auth" element={<Auth />} />
 
               <Route path="/admin" element={<Protected><Dashboard /></Protected>} />
