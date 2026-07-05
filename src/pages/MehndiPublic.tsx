@@ -101,7 +101,30 @@ const ritual = [
 ];
 
 /* ─────────────── Page ─────────────── */
+type MehndiService = {
+  id: string;
+  name: string;
+  category: string | null;
+  duration: number | null;
+  price: number | null;
+  description: string | null;
+};
+
 const MehndiPublic = () => {
+  const [mehndiServices, setMehndiServices] = useState<MehndiService[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('services')
+        .select('id,name,category,duration,price,description,status')
+        .eq('status', 'active')
+        .or('category.ilike.%mehndi%,category.ilike.%henna%,name.ilike.%mehndi%,name.ilike.%henna%')
+        .order('price', { ascending: true });
+      if (data) setMehndiServices(data as MehndiService[]);
+    })();
+  }, []);
+
   return (
     <PublicLayout>
       <div style={{ background: C.ink, color: C.parchment }}>
