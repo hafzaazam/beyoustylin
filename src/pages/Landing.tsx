@@ -332,7 +332,7 @@ const Landing = () => {
           ['--mh-gold' as string]: '#c9a24a',
           ['--mh-gold-soft' as string]: '#f1dfa4',
           background:
-            'radial-gradient(1200px 500px at 10% 0%, rgba(201,162,74,0.10), transparent 60%), linear-gradient(180deg, #f7f4ea 0%, #eef3e8 100%)',
+            'radial-gradient(1200px 500px at 10% 0%, rgba(201,162,74,0.18), transparent 60%), radial-gradient(900px 500px at 90% 100%, rgba(45,90,61,0.55), transparent 60%), linear-gradient(180deg, #0b1a12 0%, #12241a 60%, #0b1a12 100%)',
         }}
       >
         {/* Ornamental corners */}
@@ -384,15 +384,15 @@ const Landing = () => {
             <p
               className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] font-semibold mb-4 px-3 py-1 rounded-full"
               style={{
-                color: '#12241a',
-                background: 'linear-gradient(90deg, rgba(201,162,74,0.20), rgba(201,162,74,0.05))',
+                color: '#f1dfa4',
+                background: 'linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.05))',
                 border: '1px solid rgba(201,162,74,0.55)',
               }}
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#c9a24a' }} />
               Mehndi Artistry
             </p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight" style={{ color: '#12241a' }}>
+            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight" style={{ color: '#f5efdf' }}>
               Delicate Motifs,{' '}
               <span
                 className="italic bg-clip-text text-transparent"
@@ -401,7 +401,7 @@ const Landing = () => {
                 Deep Stain
               </span>
             </h2>
-            <p className="mb-6 leading-relaxed" style={{ color: '#3a4a3f' }}>
+            <p className="mb-6 leading-relaxed" style={{ color: 'rgba(232,240,229,0.75)' }}>
               From intricate Sodani bridal work to modern Arabic flow — our senior mehndi artists design every pattern around your outfit, hands and event.
             </p>
             <ul className="space-y-3 mb-8">
@@ -411,7 +411,7 @@ const Landing = () => {
                 'Custom design consult for brides & guests',
                 'Party & Eid bookings welcome',
               ].map(item => (
-                <li key={item} className="flex items-start gap-2.5 text-sm" style={{ color: '#22332a' }}>
+                <li key={item} className="flex items-start gap-2.5 text-sm" style={{ color: '#e8f0e5' }}>
                   <span
                     className="mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
                     style={{ background: '#1f3a2b', boxShadow: 'inset 0 0 0 1px rgba(241,223,164,0.6)' }}
@@ -441,7 +441,7 @@ const Landing = () => {
                   size="lg"
                   variant="outline"
                   className="bg-transparent hover:bg-transparent"
-                  style={{ borderColor: '#c9a24a', color: '#1f3a2b' }}
+                  style={{ borderColor: '#c9a24a', color: '#f1dfa4' }}
                 >
                   Book a Session
                 </Button>
