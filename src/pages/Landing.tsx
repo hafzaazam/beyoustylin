@@ -195,41 +195,46 @@ const Landing = () => {
       </section>
 
       {/* Features */}
-      <section id="services" className="py-28 px-4 lg:px-8 border-t border-border/60">
-        <div className="max-w-6xl mx-auto">
-          <div className="max-w-2xl mb-20">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground mb-6">What We Offer</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-normal mb-6 tracking-tight leading-[1.1]">
-              Curated beauty, <span className="italic text-muted-foreground">every detail.</span>
+      <section id="services" className="py-24 px-4 lg:px-8">
+        <div className="max-w-6xl mx-auto border border-border/60">
+          <div className="p-10 md:p-16 border-b border-border/60">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-6 font-light">What We Offer</p>
+            <h2 className="font-heading text-4xl md:text-6xl font-normal tracking-tight leading-[1.05] max-w-2xl">
+              Curated beauty, <span className="italic font-normal text-primary/70">every detail.</span>
             </h2>
-            <p className="text-muted-foreground text-base leading-relaxed">
+            <p className="mt-6 text-muted-foreground text-base font-light leading-relaxed max-w-md">
               From your everyday glow-up to once-in-a-lifetime bridal moments — services designed to celebrate you.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/60">
-            {featureCards.map((f, i) => (
-              <div
-                key={f.title}
-                className="group relative p-8 border-r border-b border-border/60 hover:bg-muted/30 transition-colors duration-300"
-              >
-                <div className="flex items-start justify-between mb-10">
-                  <f.icon className="w-5 h-5 text-foreground" strokeWidth={1.5} />
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-3">
+            {featureCards.map((f, i) => {
+              const isLastRow = i >= featureCards.length - (featureCards.length % 3 || 3);
+              const isLastCol = (i + 1) % 3 === 0;
+              return (
+                <div
+                  key={f.title}
+                  className={`group p-10 transition-colors duration-700 hover:bg-muted/40 ${!isLastCol ? 'md:border-r border-border/60' : ''} ${!isLastRow ? 'border-b border-border/60' : 'border-b md:border-b-0 border-border/60'}`}
+                >
+                  <div className="flex justify-between items-start mb-12">
+                    <f.icon className="w-6 h-6 text-primary/80" strokeWidth={1} />
+                    <span className="text-[10px] text-muted-foreground/60 tabular-nums">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <h3 className="font-heading text-xl font-normal mb-4 tracking-tight">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground font-light leading-relaxed mb-8 min-h-[3rem]">{f.desc}</p>
+                  <div className="inline-flex items-center text-[10px] tracking-[0.2em] uppercase text-primary/80 group-hover:text-foreground transition-colors">
+                    Explore
+                    <ArrowRight className="ml-2 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" strokeWidth={1.25} />
+                  </div>
                 </div>
-                <h3 className="font-heading text-xl font-normal mb-3 tracking-tight">{f.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-8">{f.desc}</p>
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-foreground/70 group-hover:text-foreground transition-colors">
-                  <span>Explore</span>
-                  <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" strokeWidth={1.5} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
+
 
 
       {/* Popular services */}
