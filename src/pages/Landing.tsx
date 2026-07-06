@@ -140,7 +140,7 @@ const Landing = () => {
       <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <Logo className="h-10 w-auto" />
+            <Logo className="h-14 lg:h-16 w-auto" />
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
             <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
