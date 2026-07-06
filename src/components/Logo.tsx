@@ -14,7 +14,12 @@ const Logo = ({ className, alt = 'BeYou Stylin' }: LogoProps) => (
   <img
     src={brandLogo}
     alt={alt}
-    className={cn('object-contain', className)}
+    className={cn(
+      'object-contain',
+      // Ensure brand colors stay legible on dark backgrounds
+      'dark:bg-white/95 dark:rounded-xl dark:p-1 dark:ring-1 dark:ring-primary/20',
+      className,
+    )}
   />
 );
 
