@@ -151,9 +151,12 @@ const Landing = () => {
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
             <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
           </div>
-          <Link to="/admin">
-            <Button size="sm" variant="outline">Admin Panel</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/admin">
+              <Button size="sm" variant="outline">Admin Panel</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
