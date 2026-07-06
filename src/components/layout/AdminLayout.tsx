@@ -55,11 +55,11 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
         <div className="pointer-events-none absolute bottom-0 -left-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
 
         <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
-            <Logo className="w-10 h-10" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
+            <Logo className="w-14 h-14" />
           </div>
           <div>
-            <h1 className="font-heading text-lg font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
+            <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
             <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">Admin Suite</p>
           </div>
           <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)}>
