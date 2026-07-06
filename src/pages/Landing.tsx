@@ -10,6 +10,7 @@ import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
@@ -150,9 +151,12 @@ const Landing = () => {
             <a href="#about" className="hover:text-foreground transition-colors">About</a>
             <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
           </div>
-          <Link to="/admin">
-            <Button size="sm" variant="outline">Admin Panel</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/admin">
+              <Button size="sm" variant="outline">Admin Panel</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
