@@ -7,6 +7,7 @@ import {
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: Gem },
@@ -150,9 +151,12 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           </div>
 
           {/* Decorative right-side chip */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]" />
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Live</span>
+          <div className="relative flex items-center gap-2">
+            <ThemeToggle />
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]" />
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Live</span>
+            </div>
           </div>
         </header>
 

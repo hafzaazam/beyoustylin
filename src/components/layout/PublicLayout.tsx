@@ -5,6 +5,7 @@ import {
   ArrowRight, Heart, Crown, Flower2,
 } from 'lucide-react';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 import { ReactNode } from 'react';
 
 const navLinks = [
@@ -41,9 +42,12 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
               )
             )}
           </div>
-          <Link to="/admin">
-            <Button size="sm" variant="outline">Admin Panel</Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/admin">
+              <Button size="sm" variant="outline">Admin Panel</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
