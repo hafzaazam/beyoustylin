@@ -5,6 +5,7 @@ import {
   Menu, X, LogOut, Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { path: '/account', label: 'Overview', icon: Gem },
