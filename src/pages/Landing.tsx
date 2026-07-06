@@ -10,6 +10,7 @@ import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
+import SiteNav from '@/components/layout/SiteNav';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
