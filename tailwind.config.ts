@@ -18,6 +18,7 @@ export default {
         body: ['Inter', 'sans-serif'],
         cormorant: ['"Cormorant Garamond"', 'serif'],
         montserrat: ['Montserrat', 'sans-serif'],
+        display: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
