@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
 
 const navItems = [
   { path: '/account', label: 'Overview', icon: Gem },
@@ -50,14 +51,11 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
 
         <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
           <Link to="/" className="flex items-center gap-3 flex-1 min-w-0">
-            <div
-              className="w-11 h-11 rounded-2xl flex items-center justify-center ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)]"
-              style={{ background: 'var(--gradient-primary)' }}
-            >
-              <span className="font-heading text-lg font-bold text-sidebar-primary-foreground tracking-tight">BU</span>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden shrink-0">
+              <Logo className="w-14 h-14" />
             </div>
             <div className="min-w-0">
-              <h1 className="font-heading text-lg font-semibold tracking-tight text-sidebar-primary-foreground truncate">BeYou Stylin</h1>
+              <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-primary-foreground truncate">BeYou Stylin</h1>
               <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">My Account</p>
             </div>
           </Link>
