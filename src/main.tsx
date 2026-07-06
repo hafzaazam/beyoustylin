@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { ThemeProvider } from "next-themes";
 import App from "./App.tsx";
 import "./index.css";
 import "@fontsource/cormorant-garamond/300.css";
