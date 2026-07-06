@@ -10,6 +10,7 @@ import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
+import SiteNav from '@/components/layout/SiteNav';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
@@ -136,25 +137,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <Logo className="h-10 w-auto" />
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
-            <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
-            <Link to="/mehndi" className="hover:text-foreground transition-colors">Mehndi</Link>
+      <SiteNav />
 
-            <a href="#book" className="hover:text-foreground transition-colors">Book</a>
-            <a href="#about" className="hover:text-foreground transition-colors">About</a>
-            <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
-          </div>
-          <Link to="/admin">
-            <Button size="sm" variant="outline">Admin Panel</Button>
-          </Link>
-        </div>
-      </nav>
 
       {/* Hero — travellinks-inspired dark stage */}
       <section className="relative pt-16 min-h-[100vh] flex items-center overflow-hidden bg-[#0d0710] text-white">
