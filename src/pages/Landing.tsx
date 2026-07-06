@@ -10,7 +10,6 @@ import { useSalon } from '@/context/SalonContext';
 import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
-import SiteNav from '@/components/layout/SiteNav';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
@@ -137,97 +136,55 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Nav */}
-      <SiteNav />
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <Logo className="h-10 w-auto" />
+          </Link>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+            <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
+            <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
+            <Link to="/mehndi" className="hover:text-foreground transition-colors">Mehndi</Link>
 
-
-      {/* Hero — travellinks-inspired dark stage */}
-      <section className="relative pt-16 min-h-[100vh] flex items-center overflow-hidden bg-[#0d0710] text-white">
-        {/* backdrop image + gradients */}
-        <div className="absolute inset-0">
-          <img src={heroImage} alt="BeYou Stylin luxury salon" className="w-full h-full object-cover opacity-40" width={1600} height={1024} />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0d0710] via-[#0d0710]/85 to-[#0d0710]/30" />
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(900px 500px at 10% 40%, hsl(328 85% 55% / 0.35), transparent 60%), radial-gradient(700px 400px at 90% 90%, hsl(335 92% 68% / 0.28), transparent 60%)' }} />
+            <a href="#book" className="hover:text-foreground transition-colors">Book</a>
+            <a href="#about" className="hover:text-foreground transition-colors">About</a>
+            <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
+          </div>
+          <Link to="/admin">
+            <Button size="sm" variant="outline">Admin Panel</Button>
+          </Link>
         </div>
+      </nav>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-20 w-full grid lg:grid-cols-[1.15fr_0.85fr] gap-12 items-center">
-          {/* Left column */}
-          <div className="animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/40 bg-primary/10 text-primary text-[11px] uppercase tracking-[0.24em] font-semibold mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />
-              Lahore-Based · Bridal Studio Since 2014
+      {/* Hero */}
+      <section className="relative pt-16 min-h-[100vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0">
+          <img src={heroImage} alt="BeYou Stylin luxury salon" className="w-full h-full object-cover" width={1600} height={1024} />
+          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-20 w-full">
+          <div className="max-w-2xl animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6">
+              <Sparkles className="w-3.5 h-3.5" />
+              Premium Bridal & Beauty Studio
             </div>
-
-            <h1 className="font-display font-black leading-[0.95] tracking-tight text-[clamp(2.75rem,7vw,5.75rem)] mb-8">
-              Your Trusted Bridal
-              <br />
-              & Beauty Studio
-              <br />
-              <span className="italic font-black bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(90deg, hsl(335 92% 78%), hsl(328 85% 55%))' }}>
-                for Iconic Moments
-              </span>
+            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6">
+              Where Every Bride Becomes <span className="text-primary italic">Iconic</span>
             </h1>
-
-            <p className="text-base md:text-lg text-white/70 max-w-lg mb-10 leading-relaxed">
-              Helping brides, families and party guests glow with signature makeup, hair and mehndi — crafted by senior artists.
+            <p className="text-lg text-muted-foreground mb-8 max-w-xl">
+              Signature bridal makeup, hair styling, mehndi and skincare — thoughtfully crafted for your most beautiful moments.
             </p>
-
-            <div className="flex items-center gap-5 flex-wrap">
-              <a href="#book">
-                <Button
-                  size="lg"
-                  className="rounded-full px-7 h-14 text-base font-semibold shadow-[0_20px_40px_-15px_hsl(328_85%_55%/0.7)]"
-                  style={{ background: 'var(--gradient-primary)' }}
-                >
-                  Book Now <ArrowRight className="ml-1 w-4 h-4" />
-                </Button>
-              </a>
-              <a href="tel:+923001234567" className="group flex items-center gap-3 text-white">
-                <span className="w-12 h-12 rounded-full flex items-center justify-center border border-white/20 bg-white/5 backdrop-blur group-hover:border-primary/60 group-hover:bg-primary/10 transition-colors">
-                  <Phone className="w-4 h-4 text-primary" />
-                </span>
-                <span className="text-sm font-medium border-b border-white/30 group-hover:border-primary pb-0.5">Free Consultation</span>
-              </a>
+            <div className="flex flex-wrap gap-3">
+              <a href="#book"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></a>
+              <Link to="/packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></Link>
             </div>
-
-            <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {perks.map(p => (
-                <div key={p.label} className="flex items-center gap-2 text-xs text-white/70">
+                <div key={p.label} className="flex items-center gap-2 text-sm text-muted-foreground">
                   <p.icon className="w-4 h-4 text-primary shrink-0" />
                   <span>{p.label}</span>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Right column — floating featured card */}
-          <div className="relative hidden lg:block">
-            <div
-              className="relative mx-auto max-w-md rounded-[2rem] overflow-hidden border border-white/15 shadow-[0_40px_100px_-30px_hsl(328_85%_55%/0.55)] rotate-[-4deg] hover:rotate-0 transition-transform duration-700"
-              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))' }}
-            >
-              <img src={mehndiHero} alt="Featured bridal look" className="w-full aspect-[4/5] object-cover" loading="lazy" />
-              <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/50 backdrop-blur border border-white/20 text-[10px] uppercase tracking-widest text-white/90 font-semibold">
-                <Crown className="w-3 h-3 text-primary" /> Featured
-              </div>
-              <div className="absolute inset-x-4 bottom-4 flex items-center justify-between rounded-2xl bg-black/55 backdrop-blur px-4 py-3 border border-white/15">
-                <div>
-                  <p className="text-white font-heading text-lg font-semibold leading-tight">Signature Barat Look</p>
-                  <p className="text-white/60 text-xs">From Rs. 45,000</p>
-                </div>
-                <div className="flex items-center gap-1 text-primary text-sm font-semibold">
-                  <Star className="w-4 h-4 fill-primary" /> 4.9
-                </div>
-              </div>
-            </div>
-            {/* floating tag */}
-            <div className="absolute -bottom-6 -left-4 rounded-2xl bg-white/95 text-foreground px-4 py-3 shadow-xl flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Happy Brides</p>
-                <p className="font-heading text-lg font-bold leading-none">500+ Styled</p>
-              </div>
             </div>
           </div>
         </div>

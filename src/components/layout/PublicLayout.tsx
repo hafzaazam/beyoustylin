@@ -1,11 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Instagram, Facebook, Sparkles, MapPin, Phone, Mail, Clock,
   ArrowRight, Heart, Crown, Flower2,
 } from 'lucide-react';
 import Logo from '@/components/Logo';
-import SiteNav from '@/components/layout/SiteNav';
 import { ReactNode } from 'react';
 
 const navLinks = [
@@ -20,10 +19,35 @@ const navLinks = [
 const PublicLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <SiteNav />
+      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5">
+            <Logo className="h-10 w-auto" />
+          </Link>
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
+            {navLinks.map(l =>
+              l.to.startsWith('/#') ? (
+                <a key={l.to} href={l.to} className="hover:text-foreground transition-colors">{l.label}</a>
+              ) : (
+                <NavLink
+                  key={l.to}
+                  to={l.to}
+                  className={({ isActive }) =>
+                    `hover:text-foreground transition-colors ${isActive ? 'text-foreground' : ''}`
+                  }
+                >
+                  {l.label}
+                </NavLink>
+              )
+            )}
+          </div>
+          <Link to="/admin">
+            <Button size="sm" variant="outline">Admin Panel</Button>
+          </Link>
+        </div>
+      </nav>
 
-      <main className="flex-1 pt-20">{children}</main>
-
+      <main className="flex-1 pt-16">{children}</main>
 
       <footer className="relative mt-24 overflow-hidden border-t border-primary/15 bg-gradient-to-b from-background via-secondary/30 to-background">
         {/* ambient glow accents */}
