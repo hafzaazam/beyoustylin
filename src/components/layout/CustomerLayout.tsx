@@ -134,6 +134,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
               {title}
             </h2>
           </div>
+          <ThemeToggle />
           <Link
             to="/#book"
             className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.6)] hover:shadow-[0_12px_32px_-10px_hsl(328_85%_55%/0.75)] transition-shadow"
