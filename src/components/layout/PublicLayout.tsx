@@ -5,6 +5,7 @@ import {
   ArrowRight, Heart, Crown, Flower2,
 } from 'lucide-react';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 import { ReactNode } from 'react';
 
 const navLinks = [
