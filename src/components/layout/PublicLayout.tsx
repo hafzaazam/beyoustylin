@@ -1,11 +1,21 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Instagram, Facebook, Sparkles, MapPin, Phone, Mail, Clock,
   ArrowRight, Heart, Crown, Flower2,
 } from 'lucide-react';
 import Logo from '@/components/Logo';
+import SiteNav from '@/components/layout/SiteNav';
 import { ReactNode } from 'react';
+
+const navLinks = [
+  { to: '/services', label: 'Services' },
+  { to: '/packages', label: 'Packages' },
+  { to: '/mehndi', label: 'Mehndi' },
+  { to: '/services', label: 'Book' },
+  { to: '/#about', label: 'About' },
+  { to: '/#contact', label: 'Contact' },
+];
 
 const navLinks = [
   { to: '/services', label: 'Services' },
