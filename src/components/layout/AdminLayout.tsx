@@ -7,6 +7,7 @@ import {
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: Gem },
