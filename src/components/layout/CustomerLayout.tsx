@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Gem, CalendarHeart, MailOpen, ReceiptText, Flower2, UserRound,
-  Menu, X, LogOut, Sparkles
+  Menu, X, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -11,7 +11,7 @@ import Logo from '@/components/Logo';
 const navItems = [
   { path: '/account', label: 'Overview', icon: Gem },
   { path: '/account/appointments', label: 'Appointments', icon: CalendarHeart },
-  { path: '/account/requests', label: 'My Requests', icon: MailOpen },
+  { path: '/account/requests', label: 'Requests', icon: MailOpen },
   { path: '/account/invoices', label: 'Invoices', icon: ReceiptText },
   { path: '/account/favorites', label: 'Favorites', icon: Flower2 },
   { path: '/account/profile', label: 'Profile', icon: UserRound },
@@ -37,34 +37,28 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
   const initial = (user?.email?.[0] || 'U').toUpperCase();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-background">
       {open && (
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col overflow-hidden ${open ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ background: 'var(--gradient-sidebar)' }}
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-border/60 transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col ${open ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="pointer-events-none absolute -top-24 -right-16 h-56 w-56 rounded-full bg-sidebar-primary/25 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 -left-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
-
-        <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
+        <div className="flex items-center justify-between gap-3 px-6 py-6 border-b border-border/60">
           <Link to="/" className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden shrink-0">
-              <Logo className="w-14 h-14" />
-            </div>
+            <Logo className="h-10 w-auto" />
             <div className="min-w-0">
-              <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-primary-foreground truncate">BeYou Stylin</h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">My Account</p>
+              <h1 className="font-heading text-lg font-light tracking-tight text-foreground truncate">BeYou Stylin</h1>
+              <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">My Account</p>
             </div>
           </Link>
-          <button className="lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setOpen(false)}>
-            <X className="w-5 h-5" />
+          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
+            <X className="w-4 h-4" strokeWidth={1.25} />
           </button>
         </div>
 
-        <nav className="relative p-3 space-y-1 flex-1 overflow-y-auto">
+        <nav className="p-3 flex-1 overflow-y-auto">
           {navItems.map(item => {
             const active = location.pathname === item.path;
             return (
@@ -72,77 +66,67 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setOpen(false)}
-                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.2em] transition-colors ${
                   active
-                    ? 'text-sidebar-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.7)]'
-                    : 'text-sidebar-foreground/75 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
-                style={active ? { background: 'var(--gradient-primary)' } : undefined}
               >
                 {active && (
-                  <span className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full bg-sidebar-primary shadow-[0_0_12px_hsl(335_92%_62%/0.9)]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-primary" />
                 )}
-                <item.icon className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary group-hover:scale-110'}`} />
-                <span className="flex-1">{item.label}</span>
+                <item.icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-primary' : 'text-muted-foreground/60'}`} strokeWidth={1.25} />
+                <span>{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="relative mt-auto p-3 border-t border-sidebar-border/60">
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
-              style={{ background: 'var(--gradient-primary)' }}
-            >
+        <div className="p-4 border-t border-border/60 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-[11px] font-medium">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
-              <p className="text-[10px] text-sidebar-primary/80 uppercase tracking-wider font-semibold">Member</p>
+              <p className="text-xs text-foreground truncate font-light">{user?.email}</p>
+              <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">Member</p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-destructive-foreground transition-all"
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors border-t border-border/60 pt-3"
           >
-            <LogOut className="w-4 h-4" /> Sign Out
+            <LogOut className="w-3.5 h-3.5" strokeWidth={1.25} /> Sign Out
           </button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 relative overflow-hidden px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl">
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+        <header className="sticky top-0 z-30 px-4 lg:px-10 py-6 flex items-center gap-4 border-b border-border/60 bg-background/90 backdrop-blur">
           <button
-            className="relative lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+            className="lg:hidden inline-flex items-center justify-center w-9 h-9 border border-border/60 hover:border-primary/40 transition-colors"
             onClick={() => setOpen(true)}
           >
-            <Menu className="w-5 h-5 text-foreground" />
+            <Menu className="w-4 h-4 text-foreground" strokeWidth={1.25} />
           </button>
-          <div className="relative flex-1 min-w-0 pl-4">
-            <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1.5 rounded-full shadow-[0_0_12px_hsl(328_85%_55%/0.6)]"
-              style={{ background: 'var(--gradient-primary)' }}
-            />
-            <p className="text-[10px] uppercase tracking-[0.28em] font-bold bg-clip-text text-transparent leading-none mb-1.5" style={{ backgroundImage: 'var(--gradient-primary)' }}>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-medium mb-1.5">
               {subtitle || 'My Account'}
             </p>
-            <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">
+            <h2 className="font-heading text-2xl lg:text-3xl font-light text-foreground tracking-tight leading-none truncate">
               {title}
             </h2>
           </div>
           <ThemeToggle />
           <Link
             to="/#book"
-            className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.6)] hover:shadow-[0_12px_32px_-10px_hsl(328_85%_55%/0.75)] transition-shadow"
-            style={{ background: 'var(--gradient-primary)' }}
+            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-[10px] uppercase tracking-[0.2em] text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
           >
-            <Sparkles className="w-4 h-4" /> Book new
+            Book new
           </Link>
         </header>
 
-        <main className="flex-1 p-4 lg:p-8 animate-fade-in">{children}</main>
+        <main className="flex-1 p-4 lg:p-10 animate-fade-in">{children}</main>
       </div>
     </div>
   );
