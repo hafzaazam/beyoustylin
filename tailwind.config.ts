@@ -14,9 +14,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        heading: ['"Cormorant Garamond"', 'serif'],
+        body: ['Karla', 'sans-serif'],
         cormorant: ['"Cormorant Garamond"', 'serif'],
+        karla: ['Karla', 'sans-serif'],
         montserrat: ['Montserrat', 'sans-serif'],
       },
       colors: {
