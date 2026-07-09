@@ -107,11 +107,10 @@ const AccountProfile = () => {
             </div>
           </div>
 
-          <div className="rounded-3xl p-6 text-primary-foreground shadow-[0_20px_60px_-25px_hsl(328_85%_55%/0.5)] relative overflow-hidden" style={{ background: 'var(--gradient-primary)' }}>
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl" />
-            <p className="text-xs uppercase tracking-widest font-bold opacity-80">Glow Rewards</p>
-            <p className="font-heading text-5xl font-bold mt-2">{loyalty}<span className="text-base opacity-80"> pts</span></p>
-            <p className="text-sm opacity-90 mt-3">Earn 10 points per completed visit. Save more with every glow-up.</p>
+          <div className="border border-border/60 p-8 bg-muted/30">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-medium">Glow Rewards</p>
+            <p className="font-heading text-6xl font-light mt-4 tabular-nums">{loyalty}<span className="text-base opacity-60 ml-2">pts</span></p>
+            <p className="text-sm text-muted-foreground mt-4 font-light leading-relaxed">Earn 10 points per completed visit. Save more with every glow-up.</p>
           </div>
         </div>
       )}
