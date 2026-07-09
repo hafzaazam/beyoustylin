@@ -43,43 +43,41 @@ const ServicesPublic = () => {
   return (
     <PublicLayout>
       {/* Hero */}
-      <section className="relative py-20 px-4 lg:px-8 bg-gradient-to-b from-primary/10 via-background to-background">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-5">
-            <Sparkles className="w-3.5 h-3.5" />
-            Signature Beauty Menu
-          </div>
-          <h1 className="font-heading text-5xl md:text-6xl font-bold tracking-tight mb-5">
-            Our <span className="text-primary italic">Services</span>
+      <section className="relative py-24 px-4 lg:px-8 border-b border-border/60">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-6 font-medium">Signature Beauty Menu</p>
+          <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-6">
+            Our <span className="italic text-primary/80">services.</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Explore our complete menu of makeup, hair, skincare and mehndi services — thoughtfully priced and crafted to make you feel iconic.
+          <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
+            Explore our complete menu of makeup, hair, skincare and mehndi — thoughtfully priced and crafted.
           </p>
         </div>
       </section>
 
+
       {/* Filters */}
-      <section className="px-4 lg:px-8 -mt-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-card border border-border rounded-2xl p-4 md:p-5 shadow-sm flex flex-col md:flex-row gap-4 md:items-center">
+      <section className="px-4 lg:px-8 pt-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-4 md:items-center pb-6 border-b border-border/60">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" strokeWidth={1.25} />
               <Input
                 placeholder="Search services..."
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                className="pl-9"
+                className="pl-7 rounded-none border-0 border-b border-transparent focus-visible:ring-0 focus-visible:border-primary/60 bg-transparent"
               />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 md:pb-0">
+            <div className="flex gap-1 overflow-x-auto pb-1 md:pb-0">
               {categories.map(c => (
                 <button
                   key={c}
                   onClick={() => setActiveCat(c)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${
+                  className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] whitespace-nowrap border-b transition-colors ${
                     activeCat === c
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-background border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                      ? 'text-foreground border-primary'
+                      : 'text-muted-foreground border-transparent hover:text-foreground'
                   }`}
                 >
                   {c}
@@ -90,51 +88,48 @@ const ServicesPublic = () => {
         </div>
       </section>
 
+
       {/* Services grid */}
       <section className="py-16 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-14">
+        <div className="max-w-6xl mx-auto space-y-20">
           {grouped.length === 0 ? (
-            <div className="text-center py-24 text-muted-foreground">
+            <div className="text-center py-24 text-muted-foreground font-light">
               No services match your search.
             </div>
           ) : (
             grouped.map(([category, items]) => (
               <div key={category}>
-                <div className="flex items-end justify-between mb-6">
+                <div className="flex items-end justify-between mb-8 pb-6 border-b border-border/60">
                   <div>
-                    <p className="text-xs uppercase tracking-widest text-primary font-medium mb-1">Category</p>
-                    <h2 className="font-heading text-3xl font-bold">{category}</h2>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-2 font-medium">Category</p>
+                    <h2 className="font-heading text-3xl md:text-4xl font-light tracking-tight">{category}</h2>
                   </div>
-                  <span className="text-sm text-muted-foreground">{items.length} service{items.length !== 1 ? 's' : ''}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">
+                    {String(items.length).padStart(2, '0')} · service{items.length !== 1 ? 's' : ''}
+                  </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/60">
                   {items.map(s => (
-                    <div key={s.id} className="group bg-card p-6 rounded-2xl border border-border flex flex-col gap-3 hover:shadow-md hover:border-primary/40 transition-all">
+                    <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
                       <div className="flex items-start justify-between">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{s.category}</span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> {s.duration} min
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
+                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums flex items-center gap-1">
+                          <Clock className="w-3 h-3" strokeWidth={1.25} /> {s.duration}m
                         </span>
                       </div>
-                      <Link to={`/services/${s.id}`} className="font-heading text-lg font-semibold hover:text-primary transition-colors">
+                      <Link to={`/services/${s.id}`} className="font-heading text-2xl font-light tracking-tight hover:text-primary transition-colors">
                         {s.name}
                       </Link>
-                      <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
-                        <span className="text-primary font-bold text-lg">
+                      <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
+                        <span className="text-primary/90 font-medium text-sm tabular-nums">
                           {s.price > 0 ? `Rs. ${s.price.toLocaleString()}` : 'On Request'}
                         </span>
-                        <div className="flex items-center gap-3">
-                          <Link to={`/services/${s.id}`} className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors">
-                            Details
-                          </Link>
-                          <Link to={`/?service=${s.id}#book`} className="text-xs font-medium text-primary hover:underline flex items-center gap-1">
-                            Book <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        </div>
+                        <Link to={`/?service=${s.id}#book`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors inline-flex items-center gap-1.5">
+                          Book <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
+                        </Link>
                       </div>
                     </div>
                   ))}
-
                 </div>
               </div>
             ))
@@ -143,20 +138,18 @@ const ServicesPublic = () => {
       </section>
 
       {/* CTA */}
-      <section className="pb-24 px-4 lg:px-8">
-        <div className="max-w-5xl mx-auto rounded-3xl p-10 md:p-12 bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">Ready to book a session?</h2>
-          <p className="opacity-90 mb-6">Reserve your appointment or ask our team for a personalised quote.</p>
+      <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-24 mt-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Reserve</p>
+          <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Ready to book a session?</h2>
+          <p className="text-muted-foreground mb-8 font-light">Reserve your appointment or ask our team for a personalised quote.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/#book"><Button size="lg" variant="secondary" className="px-8">Book Appointment</Button></Link>
-            <Link to="/packages">
-              <Button size="lg" variant="outline" className="px-8 bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                View Packages
-              </Button>
-            </Link>
+            <Link to="/#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></Link>
+            <Link to="/packages"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">View Packages</Button></Link>
           </div>
         </div>
       </section>
+
     </PublicLayout>
   );
 };
