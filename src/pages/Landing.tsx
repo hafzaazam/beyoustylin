@@ -161,31 +161,30 @@ const Landing = () => {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-16 min-h-[100vh] flex items-center overflow-hidden">
+      <section className="relative pt-16 min-h-[92vh] flex items-center overflow-hidden border-b border-border/60">
         <div className="absolute inset-0">
           <img src={heroImage} alt="BeYou Stylin luxury salon" className="w-full h-full object-cover" width={1600} height={1024} />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/40" />
+          <div className="absolute inset-0 bg-background/85" />
         </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-20 w-full">
-          <div className="max-w-2xl animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-6">
-              <Sparkles className="w-3.5 h-3.5" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-24 w-full">
+          <div className="max-w-3xl">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-8 font-medium">
               Premium Bridal & Beauty Studio
-            </div>
-            <h1 className="font-heading text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.05] tracking-tight mb-6">
-              Where Every Bride Becomes <span className="text-primary italic">Iconic</span>
+            </p>
+            <h1 className="font-heading text-6xl md:text-7xl lg:text-8xl font-light leading-[1.02] tracking-tight mb-8">
+              Where every bride<br />becomes <span className="italic text-primary/80">iconic.</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-xl">
-              Signature bridal makeup, hair styling, mehndi and skincare — thoughtfully crafted for your most beautiful moments.
+            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl font-light leading-relaxed">
+              Signature bridal makeup, hair, mehndi and skincare — thoughtfully crafted for your most beautiful moments.
             </p>
             <div className="flex flex-wrap gap-3">
-              <a href="#book"><Button size="lg" className="text-base px-8">Book Appointment <ArrowRight className="ml-1" /></Button></a>
-              <Link to="/packages"><Button size="lg" variant="outline" className="text-base px-8">View Packages</Button></Link>
+              <a href="#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></a>
+              <Link to="/packages"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">View Packages</Button></Link>
             </div>
-            <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="mt-16 pt-10 border-t border-border/60 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {perks.map(p => (
-                <div key={p.label} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <p.icon className="w-4 h-4 text-primary shrink-0" />
+                <div key={p.label} className="flex items-center gap-2.5 text-xs uppercase tracking-widest text-muted-foreground">
+                  <p.icon className="w-4 h-4 text-primary/80 shrink-0" strokeWidth={1.25} />
                   <span>{p.label}</span>
                 </div>
               ))}
@@ -193,6 +192,7 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
 
       {/* Features */}
       <section id="services" className="py-24 px-4 lg:px-8">
@@ -238,29 +238,28 @@ const Landing = () => {
 
 
       {/* Popular services */}
-      <section className="py-24 px-4 lg:px-8 bg-muted/40">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-12">
+      <section className="py-24 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-14">
             <div>
-              <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Signature Menu</p>
-              <h2 className="font-heading text-4xl md:text-5xl font-bold">Most Loved Services</h2>
+              <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Signature Menu</p>
+              <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Most loved services.</h2>
             </div>
-            <Link to="/services" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
-              View all services <ArrowRight className="w-4 h-4" />
+            <Link to="/services" className="text-[10px] uppercase tracking-[0.2em] text-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
+              View all <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.25} />
             </Link>
-
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/60">
             {featuredServices.map(s => (
-              <div key={s.id} className="bg-card p-6 rounded-2xl border border-border flex flex-col gap-3 hover:shadow-md transition-all">
+              <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">{s.category}</span>
-                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">{s.duration}m</span>
                 </div>
-                <h3 className="font-heading text-lg font-semibold">{s.name}</h3>
-                <div className="flex items-center justify-between mt-auto pt-2 border-t border-border">
-                  <span className="text-primary font-bold text-lg">Rs. {s.price.toLocaleString()}</span>
-                  <span className="text-xs text-muted-foreground">{s.duration} min</span>
+                <h3 className="font-heading text-2xl font-light tracking-tight">{s.name}</h3>
+                <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
+                  <span className="text-primary/90 font-medium text-sm tabular-nums">Rs. {s.price.toLocaleString()}</span>
+                  <Link to={`/services/${s.id}`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors">Details →</Link>
                 </div>
               </div>
             ))}
@@ -269,42 +268,39 @@ const Landing = () => {
       </section>
 
       {/* Packages */}
-      <section id="packages" className="py-24 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Bridal Packages</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Complete Barat Packages</h2>
-            <p className="text-muted-foreground">All-inclusive bridal experiences — everything you need for your perfect day, in one seamless package.</p>
+      <section id="packages" className="py-24 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mb-14">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Bridal Packages</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Complete Barat packages.</h2>
+            <p className="text-muted-foreground font-light leading-relaxed">All-inclusive bridal experiences — everything you need for your perfect day, in one seamless package.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-l border-border/60">
             {featuredDeals.map((d, idx) => {
               const isPopular = idx === 0;
               return (
-                <div key={d.id} className={`relative p-8 rounded-3xl border-2 transition-all ${isPopular ? 'border-primary bg-primary/5 shadow-xl' : 'border-border bg-card hover:border-primary/40'}`}>
+                <div key={d.id} className={`relative p-10 border-r border-b border-border/60 ${isPopular ? 'bg-muted/30' : ''}`}>
                   {isPopular && (
-                    <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                      Most Popular
-                    </div>
+                    <span className="absolute top-6 right-6 text-[9px] uppercase tracking-[0.25em] text-primary/80">Most Popular</span>
                   )}
-                  <h3 className="font-heading text-2xl font-bold mb-2">{d.name}</h3>
-                  <div className="flex items-baseline gap-2 mb-6">
-                    <span className="text-4xl font-heading font-bold text-primary">Rs. {d.discountedPrice.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground">/ package</span>
+                  <h3 className="font-heading text-3xl font-light tracking-tight mb-6">{d.name}</h3>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="font-heading text-4xl text-foreground tabular-nums">Rs. {d.discountedPrice.toLocaleString()}</span>
                   </div>
-                  <div className="text-xs text-muted-foreground mb-4">≈ {Math.round(d.totalDuration / 60)} hours session</div>
-                  <ul className="space-y-2.5 mb-8">
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-8">≈ {Math.round(d.totalDuration / 60)} hour session</div>
+                  <ul className="space-y-3 mb-10 pt-6 border-t border-border/60">
                     {d.serviceIds.map(sid => {
                       const svc = services.find(x => x.id === sid);
                       return svc ? (
-                        <li key={sid} className="flex items-start gap-2.5 text-sm">
-                          <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <li key={sid} className="flex items-start gap-3 text-sm text-muted-foreground font-light">
+                          <Check className="w-3.5 h-3.5 text-primary/80 mt-1 shrink-0" strokeWidth={1.5} />
                           <span>{svc.name}</span>
                         </li>
                       ) : null;
                     })}
                   </ul>
                   <a href="#book" onClick={() => { setMode('booking'); setBookingForm(f => ({ ...f, selection: `deal:${d.id}` })); }} className="block">
-                    <Button className="w-full" variant={isPopular ? 'default' : 'outline'}>Book This Package</Button>
+                    <Button className="w-full rounded-none text-xs uppercase tracking-[0.2em]" variant={isPopular ? 'default' : 'outline'}>Book this package</Button>
                   </a>
                 </div>
               );
@@ -312,6 +308,7 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
 
       {/* Mehndi highlight — henna green + gold palette */}
       <section
@@ -445,55 +442,49 @@ const Landing = () => {
 
 
       {/* About */}
-      <section id="about" className="py-24 px-4 lg:px-8 bg-muted/40">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+      <section id="about" className="py-24 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Our Story</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-6">Beauty Meets Craftsmanship</h2>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Our Story</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-8">Beauty meets craftsmanship.</h2>
+            <p className="text-muted-foreground mb-4 leading-relaxed font-light">
               BeYou Stylin was born from a simple idea — that every woman deserves to feel iconic on her most important days. Our team of senior artists brings over a decade of experience in bridal makeup, hair styling, and skincare.
             </p>
-            <p className="text-muted-foreground mb-8 leading-relaxed">
-              Using only premium products and modern techniques, we tailor every look to your unique features, so you don't just look beautiful — you look like the best version of yourself.
+            <p className="text-muted-foreground mb-10 leading-relaxed font-light">
+              Using only premium products and modern techniques, we tailor every look to your unique features.
             </p>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="font-heading text-3xl font-bold text-primary">500+</div>
-                <div className="text-xs text-muted-foreground mt-1">Brides Styled</div>
-              </div>
-              <div>
-                <div className="font-heading text-3xl font-bold text-primary">50+</div>
-                <div className="text-xs text-muted-foreground mt-1">Signature Services</div>
-              </div>
-              <div>
-                <div className="font-heading text-3xl font-bold text-primary">10+</div>
-                <div className="text-xs text-muted-foreground mt-1">Years of Craft</div>
-              </div>
+            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border/60">
+              {[['500+', 'Brides Styled'], ['50+', 'Signature Services'], ['10+', 'Years of Craft']].map(([n, l]) => (
+                <div key={l}>
+                  <div className="font-heading text-4xl font-light text-foreground tabular-nums">{n}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">{l}</div>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl">
-            <img src={heroImage} alt="BeYou Stylin studio interior" className="w-full h-full object-cover" loading="lazy" />
+          <div className="relative aspect-[4/5] overflow-hidden">
+            <img src={heroImage} alt="BeYou Stylin studio interior" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" loading="lazy" />
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">Kind Words</p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold">Loved by Our Clients</h2>
+      <section className="py-24 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mb-14">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Kind Words</p>
+            <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Loved by our clients.</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 border-t border-l border-border/60">
             {testimonials.map(t => (
-              <div key={t.name} className="p-8 rounded-2xl border border-border bg-card">
-                <div className="flex gap-0.5 mb-4">
-                  {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-4 h-4 fill-primary text-primary" />)}
+              <div key={t.name} className="p-10 border-r border-b border-border/60">
+                <div className="flex gap-1 mb-6">
+                  {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-primary/80 text-primary/80" strokeWidth={1} />)}
                 </div>
-                <p className="text-foreground mb-6 leading-relaxed">"{t.text}"</p>
-                <div className="pt-4 border-t border-border">
-                  <div className="font-semibold">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                <p className="font-heading text-xl font-light italic leading-relaxed mb-8 text-foreground/90">"{t.text}"</p>
+                <div className="pt-6 border-t border-border/60">
+                  <div className="text-sm font-medium tracking-tight">{t.name}</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{t.role}</div>
                 </div>
               </div>
             ))}
@@ -501,9 +492,10 @@ const Landing = () => {
         </div>
       </section>
 
+
       {/* Booking Request Form */}
-      <section id="book" className="py-24 px-4 lg:px-8 bg-muted/40 scroll-mt-20">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-10 items-start">
+      <section id="book" className="py-24 px-4 lg:px-8 border-t border-border/60 scroll-mt-20">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-2">
             <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">
               {mode === 'booking' ? 'Book Appointment' : 'Request a Quote'}
@@ -712,46 +704,40 @@ const Landing = () => {
       </section>
 
       {/* CTA */}
-      <section id="contact" className="py-24 px-4 lg:px-8">
-        <div className="max-w-5xl mx-auto rounded-3xl p-10 md:p-16 bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground text-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-primary-foreground blur-3xl" />
-            <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-primary-foreground blur-3xl" />
+      <section id="contact" className="py-24 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-6 font-medium">Contact</p>
+          <h2 className="font-heading text-5xl md:text-6xl font-light tracking-tight mb-6">Ready to look <span className="italic text-primary/80">iconic?</span></h2>
+          <p className="text-muted-foreground mb-10 max-w-xl mx-auto font-light leading-relaxed">
+            Book your consultation today. Our artists are ready to design a look that is uniquely you.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 mb-14">
+            <a href="#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></a>
+            <a href="tel:+923001234567"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Call Us</Button></a>
           </div>
-          <div className="relative">
-            <Calendar className="w-12 h-12 mx-auto mb-6 opacity-90" />
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">Ready to Look Iconic?</h2>
-            <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">Book your consultation today. Our artists are ready to design a look that's uniquely you.</p>
-            <div className="flex flex-wrap justify-center gap-3 mb-10">
-              <a href="#book"><Button size="lg" variant="secondary" className="px-8">Book Appointment</Button></a>
-              <a href="tel:+923001234567"><Button size="lg" variant="outline" className="px-8 bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">Call Us</Button></a>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-6 text-sm opacity-90 pt-8 border-t border-primary-foreground/20">
-              <div className="flex items-center justify-center gap-2"><MapPin className="w-4 h-4" /> Karachi, Pakistan</div>
-              <div className="flex items-center justify-center gap-2"><Phone className="w-4 h-4" /> +92 300 1234567</div>
-              <div className="flex items-center justify-center gap-2"><Mail className="w-4 h-4" /> hello@beyoustylin.com</div>
-            </div>
+          <div className="grid sm:grid-cols-3 gap-6 text-xs uppercase tracking-widest text-muted-foreground pt-10 border-t border-border/60">
+            <div className="flex items-center justify-center gap-2"><MapPin className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> Karachi, Pakistan</div>
+            <div className="flex items-center justify-center gap-2"><Phone className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> +92 300 1234567</div>
+            <div className="flex items-center justify-center gap-2"><Mail className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> hello@beyoustylin.com</div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 lg:px-8 border-t border-border">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-white ring-1 ring-primary/20 flex items-center justify-center overflow-hidden">
-              <Logo className="w-8 h-8" />
-            </div>
-            <span className="font-heading font-semibold">BeYou Stylin</span>
-            <span className="text-xs text-muted-foreground ml-2">© {new Date().getFullYear()}</span>
+      <footer className="py-10 px-4 lg:px-8 border-t border-border/60">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Logo className="h-8 w-auto" />
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">© {new Date().getFullYear()} BeYou Stylin</span>
           </div>
-          <div className="flex items-center gap-4 text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" /></a>
-            <a href="#" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" /></a>
-            <Link to="/admin" className="text-sm hover:text-primary transition-colors ml-2">Admin</Link>
+          <div className="flex items-center gap-5 text-muted-foreground">
+            <a href="#" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
+            <a href="#" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
+            <Link to="/admin" className="text-[10px] uppercase tracking-widest hover:text-primary transition-colors">Admin</Link>
           </div>
         </div>
       </footer>
+
     </div>
   );
 };
