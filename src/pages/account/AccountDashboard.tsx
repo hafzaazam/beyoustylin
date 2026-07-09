@@ -75,91 +75,84 @@ const AccountDashboard = () => {
   }, [user]);
 
   const tiles = [
-    { label: 'Upcoming', value: stats.upcoming, icon: CalendarCheck, to: '/account/appointments', tone: 'from-primary/15 to-primary/5' },
-    { label: 'Past Visits', value: stats.pastVisits, icon: TrendingUp, to: '/account/appointments', tone: 'from-accent/40 to-accent/10' },
-    { label: 'Requests', value: stats.pendingRequests, icon: Inbox, to: '/account/requests', tone: 'from-warning/15 to-warning/5' },
-    { label: 'Favorites', value: stats.favorites, icon: Heart, to: '/account/favorites', tone: 'from-primary/15 to-accent/10' },
+    { label: 'Upcoming', value: stats.upcoming, icon: CalendarCheck, to: '/account/appointments' },
+    { label: 'Past Visits', value: stats.pastVisits, icon: TrendingUp, to: '/account/appointments' },
+    { label: 'Requests', value: stats.pendingRequests, icon: Inbox, to: '/account/requests' },
+    { label: 'Favorites', value: stats.favorites, icon: Heart, to: '/account/favorites' },
   ];
 
   return (
     <CustomerLayout title={`Welcome back, ${stats.fullName.split(' ')[0]}`} subtitle="Overview">
-      {/* Loyalty hero */}
-      <div
-        className="relative overflow-hidden rounded-3xl p-6 md:p-8 mb-8 text-primary-foreground shadow-[0_20px_60px_-25px_hsl(328_85%_55%/0.5)]"
-        style={{ background: 'var(--gradient-primary)' }}
-      >
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-20 -left-10 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="text-[11px] uppercase tracking-widest font-semibold">Glow Rewards</span>
-            </div>
-            <p className="font-heading text-4xl md:text-5xl font-bold leading-none">{stats.loyaltyPoints}<span className="text-lg font-medium opacity-80"> pts</span></p>
-            <p className="text-sm opacity-90 mt-2 max-w-md">Earn 10 points every completed visit. Redeem at the salon for exclusive perks.</p>
+      {/* Loyalty band */}
+      <div className="grid md:grid-cols-3 border-t border-l border-border/60 mb-10">
+        <div className="p-8 md:p-10 border-r border-b border-border/60 md:col-span-2">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
+            <Sparkles className="w-3 h-3" strokeWidth={1.25} /> Glow Rewards
           </div>
-          {stats.nextAppointment ? (
-            <div className="rounded-2xl bg-white/15 backdrop-blur-md p-5 min-w-[220px] ring-1 ring-white/20">
-              <p className="text-[11px] uppercase tracking-widest opacity-80 font-semibold mb-1">Next visit</p>
-              <p className="font-heading text-xl font-semibold">{stats.nextAppointment.date}</p>
-              <p className="text-sm opacity-90">{stats.nextAppointment.time} · {stats.nextAppointment.label}</p>
-              <Link to="/account/appointments" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold hover:underline">
-                View details <ArrowRight className="w-3 h-3" />
-              </Link>
-            </div>
-          ) : (
-            <Link
-              to="/#book"
-              className="rounded-2xl bg-white/15 backdrop-blur-md p-5 min-w-[220px] ring-1 ring-white/20 hover:bg-white/20 transition-colors"
-            >
-              <p className="text-[11px] uppercase tracking-widest opacity-80 font-semibold mb-1">No upcoming visit</p>
-              <p className="font-heading text-lg font-semibold">Book your next glow-up</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold">
-                Reserve now <ArrowRight className="w-3 h-3" />
-              </span>
-            </Link>
-          )}
+          <p className="font-heading text-6xl md:text-7xl font-light leading-none tabular-nums">
+            {stats.loyaltyPoints}<span className="text-lg opacity-60 ml-2">pts</span>
+          </p>
+          <p className="text-sm text-muted-foreground mt-4 max-w-md font-light leading-relaxed">
+            Earn 10 points every completed visit. Redeem at the salon for exclusive perks.
+          </p>
         </div>
+        {stats.nextAppointment ? (
+          <div className="p-8 border-r border-b border-border/60 bg-muted/30 flex flex-col">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 font-medium">Next visit</p>
+            <p className="font-heading text-2xl font-light tracking-tight mb-1">{stats.nextAppointment.date}</p>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-auto">
+              {stats.nextAppointment.time} · {stats.nextAppointment.label}
+            </p>
+            <Link to="/account/appointments" className="mt-6 text-[10px] uppercase tracking-[0.2em] text-primary/90 hover:text-primary inline-flex items-center gap-2">
+              View details <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
+            </Link>
+          </div>
+        ) : (
+          <Link to="/#book" className="p-8 border-r border-b border-border/60 hover:bg-muted/30 transition-colors flex flex-col">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 font-medium">No upcoming visit</p>
+            <p className="font-heading text-2xl font-light tracking-tight mb-auto">Book your next glow-up.</p>
+            <span className="mt-6 text-[10px] uppercase tracking-[0.2em] text-primary/90 inline-flex items-center gap-2">
+              Reserve now <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
+            </span>
+          </Link>
+        )}
       </div>
 
       {/* Stat tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-l border-border/60 mb-10">
         {tiles.map(t => (
           <Link
             key={t.label}
             to={t.to}
-            className={`group relative overflow-hidden rounded-2xl p-5 border border-border/60 bg-gradient-to-br ${t.tone} hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-16px_hsl(328_85%_55%/0.35)] transition-all`}
+            className="group relative p-6 border-r border-b border-border/60 hover:bg-muted/30 transition-colors"
           >
-            <t.icon className="w-5 h-5 text-primary mb-3" />
-            <p className="text-3xl font-heading font-bold text-foreground">{loading ? '—' : t.value}</p>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-1">{t.label}</p>
-            <ArrowRight className="w-4 h-4 text-primary absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <t.icon className="w-4 h-4 text-primary/80 mb-6" strokeWidth={1.25} />
+            <p className="font-heading text-4xl font-light tabular-nums text-foreground">{loading ? '—' : t.value}</p>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-2">{t.label}</p>
+            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.25} />
           </Link>
         ))}
       </div>
 
-      {/* Total spent */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <FileText className="w-4 h-4" />
-            <p className="text-xs uppercase tracking-wider font-semibold">Lifetime spend</p>
+      {/* Bottom row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-border/60">
+        <div className="p-8 border-r border-b border-border/60">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
+            <FileText className="w-3 h-3" strokeWidth={1.25} /> Lifetime spend
           </div>
-          <p className="font-heading text-3xl font-bold">Rs. {stats.totalSpent.toLocaleString()}</p>
-          <Link to="/account/invoices" className="text-xs text-primary font-semibold hover:underline mt-2 inline-flex items-center gap-1">
-            View invoices <ArrowRight className="w-3 h-3" />
+          <p className="font-heading text-4xl font-light tabular-nums">Rs. {stats.totalSpent.toLocaleString()}</p>
+          <Link to="/account/invoices" className="text-[10px] uppercase tracking-[0.2em] text-primary/90 mt-4 inline-flex items-center gap-2">
+            View invoices <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
           </Link>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-6">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <Sparkles className="w-4 h-4" />
-            <p className="text-xs uppercase tracking-wider font-semibold">Quick actions</p>
+        <div className="p-8 border-r border-b border-border/60">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
+            <Sparkles className="w-3 h-3" strokeWidth={1.25} /> Quick actions
           </div>
-          <div className="flex flex-wrap gap-2 mt-3">
-            <Link to="/services" className="text-sm font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors">Browse services</Link>
-            <Link to="/packages" className="text-sm font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition-colors">Bridal packages</Link>
-            <Link to="/account/profile" className="text-sm font-medium px-3 py-1.5 rounded-full bg-muted text-foreground hover:bg-muted/70 transition-colors">Update profile</Link>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/services" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Browse services</Link>
+            <Link to="/packages" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Bridal packages</Link>
+            <Link to="/account/profile" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Update profile</Link>
           </div>
         </div>
       </div>

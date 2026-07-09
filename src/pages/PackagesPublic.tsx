@@ -3,40 +3,36 @@ import { Link } from 'react-router-dom';
 import { useSalon } from '@/context/SalonContext';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
-import { Check, Clock, Crown, Sparkles } from 'lucide-react';
+import { Check, Clock } from 'lucide-react';
 
 const PackagesPublic = () => {
   const { deals, services } = useSalon();
-
   const activeDeals = useMemo(() => deals.filter(d => d.status === 'active'), [deals]);
 
   return (
     <PublicLayout>
       {/* Hero */}
-      <section className="relative py-20 px-4 lg:px-8 bg-gradient-to-b from-primary/10 via-background to-background">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium mb-5">
-            <Crown className="w-3.5 h-3.5" />
-            Bridal & Event Packages
-          </div>
-          <h1 className="font-heading text-5xl md:text-6xl font-bold tracking-tight mb-5">
-            Complete <span className="text-primary italic">Packages</span>
+      <section className="relative py-24 px-4 lg:px-8 border-b border-border/60">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-6 font-medium">Bridal & Event Packages</p>
+          <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-6">
+            Complete <span className="italic text-primary/80">packages.</span>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
             All-inclusive bridal and party bundles — every service you need for your special day, thoughtfully priced together.
           </p>
         </div>
       </section>
 
       {/* Packages grid */}
-      <section className="py-16 px-4 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 px-4 lg:px-8">
+        <div className="max-w-6xl mx-auto">
           {activeDeals.length === 0 ? (
-            <div className="text-center py-24 text-muted-foreground">
+            <div className="text-center py-24 text-muted-foreground font-light">
               No packages available right now.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-border/60">
               {activeDeals.map((d, idx) => {
                 const isPopular = idx === 0;
                 const items = d.serviceIds
@@ -48,45 +44,39 @@ const PackagesPublic = () => {
                 return (
                   <div
                     key={d.id}
-                    className={`relative p-8 rounded-3xl border-2 transition-all ${
-                      isPopular
-                        ? 'border-primary bg-primary/5 shadow-xl'
-                        : 'border-border bg-card hover:border-primary/40'
-                    }`}
+                    className={`relative p-10 border-r border-b border-border/60 ${isPopular ? 'bg-muted/30' : ''}`}
                   >
                     {isPopular && (
-                      <div className="absolute -top-3 left-8 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
+                      <span className="absolute top-6 right-6 text-[9px] uppercase tracking-[0.25em] text-primary/80">
                         Most Popular
-                      </div>
+                      </span>
                     )}
-                    <h3 className="font-heading text-2xl font-bold mb-4">{d.name}</h3>
+                    <h3 className="font-heading text-3xl md:text-4xl font-light tracking-tight mb-8">{d.name}</h3>
 
-
-                    <div className="flex items-baseline gap-2 mb-2">
-                      <span className="text-4xl font-heading font-bold text-primary">
+                    <div className="flex items-baseline gap-3 mb-2">
+                      <span className="font-heading text-4xl font-light text-foreground tabular-nums">
                         Rs. {d.discountedPrice.toLocaleString()}
                       </span>
-                      <span className="text-sm text-muted-foreground">/ package</span>
                     </div>
                     {savings > 0 && (
-                      <div className="flex items-center gap-2 mb-4 text-xs">
-                        <span className="line-through text-muted-foreground">Rs. {originalTotal.toLocaleString()}</span>
-                        <span className="text-primary font-semibold">Save Rs. {savings.toLocaleString()}</span>
+                      <div className="flex items-center gap-3 mb-4 text-[10px] uppercase tracking-widest">
+                        <span className="line-through text-muted-foreground tabular-nums">Rs. {originalTotal.toLocaleString()}</span>
+                        <span className="text-primary/90 tabular-nums">Save Rs. {savings.toLocaleString()}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-5">
-                      <Clock className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground mb-8">
+                      <Clock className="w-3 h-3" strokeWidth={1.25} />
                       ≈ {Math.round(d.totalDuration / 60)} hour session
                     </div>
 
-                    <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium mb-3">
+                    <div className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium pt-6 border-t border-border/60">
                       What's included
                     </div>
-                    <ul className="space-y-2.5 mb-8">
+                    <ul className="space-y-3 mb-10">
                       {items.map(svc =>
                         svc ? (
-                          <li key={svc.id} className="flex items-start gap-2.5 text-sm">
-                            <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <li key={svc.id} className="flex items-start gap-3 text-sm text-muted-foreground font-light">
+                            <Check className="w-3.5 h-3.5 text-primary/80 mt-1 shrink-0" strokeWidth={1.5} />
                             <span>{svc.name}</span>
                           </li>
                         ) : null
@@ -94,8 +84,8 @@ const PackagesPublic = () => {
                     </ul>
 
                     <Link to="/#book" className="block">
-                      <Button className="w-full" variant={isPopular ? 'default' : 'outline'}>
-                        Book This Package
+                      <Button className="w-full rounded-none text-xs uppercase tracking-[0.2em]" variant={isPopular ? 'default' : 'outline'}>
+                        Book this package
                       </Button>
                     </Link>
                   </div>
@@ -107,18 +97,14 @@ const PackagesPublic = () => {
       </section>
 
       {/* CTA */}
-      <section className="pb-24 px-4 lg:px-8">
-        <div className="max-w-5xl mx-auto rounded-3xl p-10 md:p-12 bg-gradient-to-br from-primary via-primary to-accent text-primary-foreground text-center">
-          <Sparkles className="w-10 h-10 mx-auto mb-4 opacity-90" />
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-3">Need a custom package?</h2>
-          <p className="opacity-90 mb-6">Tell us about your event and budget — we'll craft a bespoke quote just for you.</p>
+      <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Custom</p>
+          <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Need a custom package?</h2>
+          <p className="text-muted-foreground mb-8 font-light">Tell us about your event and budget — we'll craft a bespoke quote just for you.</p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Link to="/#book"><Button size="lg" variant="secondary" className="px-8">Request a Quote</Button></Link>
-            <Link to="/services">
-              <Button size="lg" variant="outline" className="px-8 bg-transparent border-primary-foreground/40 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
-                Browse Services
-              </Button>
-            </Link>
+            <Link to="/#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Request a quote</Button></Link>
+            <Link to="/services"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Browse services</Button></Link>
           </div>
         </div>
       </section>
