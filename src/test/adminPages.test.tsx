@@ -43,6 +43,8 @@ const ok = vi.fn(async () => true);
 vi.mock('@/context/SalonContext', () => ({
   useSalon: () => ({
     staff, customers, services, deals, chairs, bookings, invoices, appointmentRequests,
+    products: [], sales: [], giftVouchers: [], discountCodes: [],
+    getProductById: () => undefined, getGiftVoucherById: () => undefined,
     loading: false, privateLoaded: true, live: true, refresh: ok,
     addStaff: ok, updateStaff: ok, toggleStaffStatus: ok, deleteStaff: ok,
     addCustomer: vi.fn(async () => customers[0]), updateCustomer: ok, toggleCustomerStatus: ok, deleteCustomer: ok,

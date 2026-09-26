@@ -2,19 +2,20 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import {
-  CalendarCheck, Wallet, Users, Armchair, TrendingUp, Clock, Trophy, Download, MailOpen, ArrowRight, AlertCircle,
+  CalendarCheck, Wallet, Users, Armchair, TrendingUp, Clock, Trophy, Download, MailOpen, ArrowRight, AlertCircle, PackageX,
 } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useSalon } from '@/context/SalonContext';
-import { ACTIVE_BOOKING_STATUSES, Booking } from '@/types/salon';
-import { formatDuration, formatPKR, formatTime, toLocalDateKey } from '@/lib/format';
+import { ACTIVE_BOOKING_STATUSES, Booking, amountDue } from '@/types/salon';
+import { byDay, collectedLines, presetRange, summarize } from '@/lib/revenue';
+import { formatDateTime, formatDuration, formatPKR, formatTime, toLocalDateKey } from '@/lib/format';
 import { downloadCsv, toCsv } from '@/lib/csv';
 
 const DAY = 86_400_000;
 
 const Dashboard = () => {
-  const { bookings, staff, chairs, invoices, services, deals, appointmentRequests, getCustomerById, getStaffById, getChairById, getDealById, getServiceById } = useSalon();
+  const { bookings, staff, chairs, invoices, sales, products, services, deals, appointmentRequests, getCustomerById, getStaffById, getChairById, getDealById, getServiceById } = useSalon();
   const [perfRange, setPerfRange] = useState<'today' | 'month'>('today');
 
   const now = new Date();
@@ -26,13 +27,25 @@ const Dashboard = () => {
     b.dealId ? getDealById(b.dealId)?.name ?? 'Package'
       : b.serviceIds.map(id => getServiceById(id)?.name).filter(Boolean).join(', ');
 
-  // Revenue = money actually collected (paid invoices, dated by payment).
-  const paid = invoices.filter(i => i.status === 'paid');
-  const paidOn = (i: typeof paid[number]) => new Date(i.paidAt ?? i.createdAt);
-  const dailyRevenue = paid.filter(i => paidOn(i) >= startOfToday).reduce((s, i) => s + i.totalAmount, 0);
-  const monthlyRevenue = paid.filter(i => paidOn(i) >= startOfMonth).reduce((s, i) => s + i.totalAmount, 0);
+  // Revenue = money actually collected: paid invoices (minus gift-voucher cover),
+  // retail sales and gift vouchers sold — see src/lib/revenue.ts.
+  const todayKey = toLocalDateKey(now);
+  const { today, month } = useMemo(() => ({
+    today: summarize(collectedLines(invoices, sales, presetRange('today'))),
+    month: summarize(collectedLines(invoices, sales, presetRange('thisMonth'))),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [invoices, sales, todayKey]);
   const unpaid = invoices.filter(i => i.status === 'unpaid');
-  const outstanding = unpaid.reduce((s, i) => s + i.totalAmount, 0);
+  const outstanding = unpaid.reduce((s, i) => s + amountDue(i), 0);
+  const lowStock = products.filter(p => p.status === 'active' && p.stock <= p.lowStockAt);
+  const collectedSub = (s: typeof today) => {
+    const parts = [
+      s.services > 0 && `services ${formatPKR(s.services)}`,
+      s.products > 0 && `products ${formatPKR(s.products)}`,
+      s.vouchersSold > 0 && `vouchers ${formatPKR(s.vouchersSold)}`,
+    ].filter(Boolean);
+    return parts.length ? parts.join(' · ') : 'services, products & vouchers';
+  };
 
   const todayBookings = bookings
     .filter(b => new Date(b.startTime) >= startOfToday && new Date(b.startTime).getTime() < startOfToday.getTime() + DAY && b.status !== 'canceled')
@@ -55,26 +68,18 @@ const Dashboard = () => {
   const stats = [
     { label: "Today's bookings", value: todayBookings.length, sub: `${upcomingToday.length} still to come`, icon: CalendarCheck, to: '/admin/schedule' },
     { label: 'In progress', value: inProgress.length, sub: 'customers in the chair now', icon: Clock, to: '/admin/bookings' },
-    { label: "Today's revenue", value: formatPKR(dailyRevenue), sub: 'collected (paid invoices)', icon: Wallet, to: '/admin/invoices' },
-    { label: 'Monthly revenue', value: formatPKR(monthlyRevenue), sub: now.toLocaleString('en-US', { month: 'long', year: 'numeric' }), icon: TrendingUp, to: '/admin/invoices' },
+    { label: 'Collected today', value: formatPKR(today.collected), sub: collectedSub(today), icon: Wallet, to: '/admin/reports' },
+    { label: 'Collected this month', value: formatPKR(month.collected), sub: now.toLocaleString('en-US', { month: 'long', year: 'numeric' }), icon: TrendingUp, to: '/admin/reports' },
     { label: 'Outstanding', value: formatPKR(outstanding), sub: `${unpaid.length} unpaid invoice${unpaid.length === 1 ? '' : 's'}`, icon: AlertCircle, to: '/admin/invoices' },
     { label: 'Chairs free now', value: `${activeChairs.length - chairsInUse}/${activeChairs.length}`, sub: `${chairsInUse} in use · ${staff.filter(s => s.status === 'active').length} active staff`, icon: Armchair, to: '/admin/chairs' },
   ];
 
-  // Last 14 days of collected revenue.
+  // Last 14 days of collected money (all sources, single series).
   const revenueSeries = useMemo(() => {
-    const days = Array.from({ length: 14 }, (_, i) => {
-      const d = new Date(startOfToday.getTime() - (13 - i) * DAY);
-      return { key: toLocalDateKey(d), label: d.toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }), revenue: 0 };
-    });
-    const byKey = new Map(days.map(d => [d.key, d]));
-    paid.forEach(i => {
-      const slot = byKey.get(toLocalDateKey(paidOn(i)));
-      if (slot) slot.revenue += i.totalAmount;
-    });
-    return days;
+    const range = { from: new Date(startOfToday.getTime() - 13 * DAY), to: new Date(startOfToday.getTime() + DAY) };
+    return byDay(collectedLines(invoices, sales, range), range).map(r => ({ key: r.key, label: r.label, revenue: r.total }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoices, startOfToday.getTime()]);
+  }, [invoices, sales, startOfToday.getTime()]);
   const hasRevenue = revenueSeries.some(d => d.revenue > 0);
 
   // Staff performance
@@ -125,6 +130,23 @@ const Dashboard = () => {
         </Link>
       )}
 
+      {lowStock.length > 0 && (
+        <Link
+          to="/admin/products"
+          className="mb-6 flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm hover:bg-warning/15 transition-colors"
+        >
+          <PackageX className="w-4 h-4 text-warning shrink-0" />
+          <span className="flex-1 min-w-0 truncate">
+            <strong>Low stock:</strong>{' '}
+            <span>
+              {lowStock.slice(0, 3).map(p => `${p.name} (${p.stock} left)`).join(', ')}
+              {lowStock.length > 3 && ` and ${lowStock.length - 3} more`}
+            </span>
+          </span>
+          <ArrowRight className="w-4 h-4 text-warning shrink-0" />
+        </Link>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
         {stats.map(stat => (
           <Link key={stat.label} to={stat.to} className="stat-card flex items-center gap-4">
@@ -170,7 +192,7 @@ const Dashboard = () => {
         {/* Revenue trend */}
         <div className="bg-card rounded-xl border p-6">
           <div className="flex items-baseline justify-between mb-4">
-            <h3 className="font-heading text-lg font-semibold">Collected revenue · last 14 days</h3>
+            <h3 className="font-heading text-lg font-semibold">Money collected · last 14 days</h3>
           </div>
           {hasRevenue ? (
             <div className="h-64" role="img" aria-label="Bar chart of collected revenue per day for the last 14 days">
@@ -193,7 +215,7 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-muted-foreground text-sm">No payments recorded in the last 14 days. Mark invoices as paid to track revenue.</p>
+            <p className="text-muted-foreground text-sm">No payments or sales recorded in the last 14 days. Mark invoices as paid or record a sale to track revenue.</p>
           )}
         </div>
       </div>
@@ -213,7 +235,7 @@ const Dashboard = () => {
                 <div key={b.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{getCustomerById(b.customerId)?.name ?? 'Customer'}</p>
-                    <p className="text-xs text-muted-foreground">{new Date(b.startTime).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                    <p className="text-xs text-muted-foreground">{formatDateTime(b.startTime)}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold tabular-nums">{formatPKR(b.totalPrice)}</p>
