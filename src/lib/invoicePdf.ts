@@ -1,106 +1,160 @@
 import { jsPDF } from 'jspdf';
-import { Booking, Customer, Invoice, Staff } from '@/types/salon';
+import { Invoice } from '@/types/salon';
+import { SITE } from '@/config/site';
 
-interface BuildArgs {
+export interface InvoicePdfData {
   invoice: Invoice;
-  booking?: Booking;
-  customer?: Customer;
-  staff?: Staff;
+  customerName?: string;
+  customerPhone?: string;
+  staffName?: string;
+  /** ISO start time of the appointment. */
+  appointmentTime?: string;
 }
 
-export function buildInvoicePdf({ invoice, booking, customer, staff }: BuildArgs): string {
+const PLUM: [number, number, number] = [110, 24, 92];
+const PINK: [number, number, number] = [214, 51, 132];
+const INK: [number, number, number] = [40, 40, 40];
+const MUTED: [number, number, number] = [130, 130, 130];
+
+const money = (n: number) => `Rs. ${Math.round(n).toLocaleString('en-PK')}`;
+const when = (iso: string) =>
+  new Date(iso).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' });
+
+// PDFs are generated on demand instead of being stored as base64 in the
+// database: they are small, always reflect the current invoice status,
+// and keep the invoices table lean.
+export function buildInvoicePdf(data: InvoicePdfData): jsPDF {
+  const { invoice } = data;
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageW = doc.internal.pageSize.getWidth();
-  const marginX = 40;
-  let y = 60;
+  const pageH = doc.internal.pageSize.getHeight();
+  const marginX = 48;
+  const right = pageW - marginX;
+  let y = 64;
 
-  // Header
+  // Header band
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(193, 86, 107);
-  doc.setFontSize(24);
-  doc.text('BeYou Stylin', pageW / 2, y, { align: 'center' });
-  y += 20;
+  doc.setFontSize(22);
+  doc.setTextColor(...PLUM);
+  doc.text(SITE.name, marginX, y);
   doc.setFont('helvetica', 'normal');
-  doc.setTextColor(120, 120, 120);
-  doc.setFontSize(10);
-  doc.text('Premium Salon & Bridal Studio', pageW / 2, y, { align: 'center' });
-  y += 25;
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(SITE.tagline, marginX, y + 16);
+  doc.text([SITE.city, SITE.phoneDisplay, SITE.email], right, y - 10, { align: 'right' });
+  y += 40;
 
-  doc.setDrawColor(229, 161, 170);
-  doc.setLineWidth(1);
-  doc.line(marginX, y, pageW - marginX, y);
-  y += 25;
+  doc.setDrawColor(...PINK);
+  doc.setLineWidth(1.2);
+  doc.line(marginX, y, right, y);
+  y += 32;
 
-  // Invoice meta
-  doc.setTextColor(40, 40, 40);
+  // Title + number
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
+  doc.setFontSize(16);
+  doc.setTextColor(...INK);
   doc.text('INVOICE', marginX, y);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`# ${invoice.invoiceNumber}`, pageW - marginX, y, { align: 'right' });
-  y += 20;
+  doc.setFontSize(11);
+  doc.text(invoice.invoiceNumber, right, y, { align: 'right' });
+  y += 26;
+
+  const statusLabel =
+    invoice.status === 'paid'
+      ? `PAID${invoice.paidAt ? ` · ${when(invoice.paidAt)}` : ''}${invoice.paymentMethod ? ` · ${invoice.paymentMethod}` : ''}`
+      : invoice.status === 'void' ? 'VOID' : 'UNPAID';
 
   const meta: Array<[string, string]> = [
-    ['Customer', customer?.name || 'Walk-in'],
-    ['Phone', customer?.phone || '-'],
-    ['Staff', staff?.name || '-'],
-    ['Date', new Date(invoice.createdAt).toLocaleString()],
-    ['Booking', booking ? `#${booking.id.slice(0, 8)}` : '-'],
-    ['Status', invoice.status.toUpperCase()],
+    ['Billed to', data.customerName || 'Walk-in customer'],
+    ['Issued', when(invoice.createdAt)],
+    ['Phone', data.customerPhone || '—'],
+    ['Appointment', data.appointmentTime ? when(data.appointmentTime) : '—'],
+    ['Stylist', data.staffName || '—'],
+    ['Status', statusLabel],
   ];
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
+  const colW = (right - marginX) / 2;
   meta.forEach(([k, v], i) => {
-    const col = i % 2;
-    const row = Math.floor(i / 2);
-    const x = marginX + col * ((pageW - marginX * 2) / 2);
-    doc.setTextColor(140, 140, 140);
-    doc.text(`${k}:`, x, y + row * 16);
-    doc.setTextColor(40, 40, 40);
-    doc.text(v, x + 60, y + row * 16);
+    const x = marginX + (i % 2) * colW;
+    const rowY = y + Math.floor(i / 2) * 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...MUTED);
+    doc.text(k, x, rowY);
+    doc.setTextColor(...INK);
+    doc.setFont('helvetica', 'bold');
+    doc.text(doc.splitTextToSize(v, colW - 80)[0] ?? '', x + 72, rowY);
   });
-  y += Math.ceil(meta.length / 2) * 16 + 15;
+  y += Math.ceil(meta.length / 2) * 18 + 18;
 
   // Items table
-  doc.setFillColor(250, 245, 245);
-  doc.rect(marginX, y, pageW - marginX * 2, 22, 'F');
+  doc.setFillColor(250, 244, 248);
+  doc.rect(marginX, y, right - marginX, 24, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(60, 60, 60);
-  doc.setFontSize(10);
-  doc.text('Item', marginX + 10, y + 15);
-  doc.text('Type', marginX + 300, y + 15);
-  doc.text('Price (Rs.)', pageW - marginX - 10, y + 15, { align: 'right' });
-  y += 30;
+  doc.setFontSize(9.5);
+  doc.setTextColor(...INK);
+  doc.text('Item', marginX + 10, y + 16);
+  doc.text('Type', marginX + 320, y + 16);
+  doc.text('Amount', right - 10, y + 16, { align: 'right' });
+  y += 40;
 
   doc.setFont('helvetica', 'normal');
-  invoice.items.forEach(item => {
-    doc.setTextColor(40, 40, 40);
-    doc.text(item.name, marginX + 10, y);
-    doc.setTextColor(120, 120, 120);
-    doc.text(item.type, marginX + 300, y);
-    doc.setTextColor(40, 40, 40);
-    doc.text(item.price.toLocaleString(), pageW - marginX - 10, y, { align: 'right' });
-    y += 16;
-    doc.setDrawColor(240, 240, 240);
-    doc.line(marginX, y - 6, pageW - marginX, y - 6);
-  });
+  for (const item of invoice.items) {
+    const lines: string[] = doc.splitTextToSize(item.name, 290);
+    if (y + lines.length * 13 > pageH - 140) {
+      doc.addPage();
+      y = 64;
+    }
+    doc.setTextColor(...INK);
+    doc.text(lines, marginX + 10, y);
+    doc.setTextColor(...MUTED);
+    doc.text(item.type === 'adjustment' ? 'adjustment' : item.type, marginX + 320, y);
+    doc.setTextColor(...INK);
+    doc.text(money(item.price), right - 10, y, { align: 'right' });
+    y += lines.length * 13 + 8;
+    doc.setDrawColor(236, 236, 236);
+    doc.setLineWidth(0.6);
+    doc.line(marginX, y - 12, right, y - 12);
+  }
 
-  y += 15;
-  doc.setDrawColor(193, 86, 107);
+  // Total
+  y += 10;
+  doc.setDrawColor(...PINK);
   doc.setLineWidth(1);
-  doc.line(pageW - marginX - 200, y, pageW - marginX, y);
-  y += 20;
+  doc.line(right - 220, y, right, y);
+  y += 22;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
-  doc.setTextColor(193, 86, 107);
-  doc.text('Total', pageW - marginX - 200, y);
-  doc.text(`Rs. ${invoice.totalAmount.toLocaleString()}`, pageW - marginX, y, { align: 'right' });
+  doc.setTextColor(...PLUM);
+  doc.text('Total', right - 220, y);
+  doc.text(money(invoice.totalAmount), right, y, { align: 'right' });
+
+  if (invoice.status === 'void') {
+    doc.setFontSize(96);
+    doc.setTextColor(230, 200, 210);
+    doc.text('VOID', pageW / 2, pageH / 2, { align: 'center', angle: 30 });
+  }
 
   // Footer
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(9);
-  doc.setTextColor(140, 140, 140);
-  doc.text('Thank you for choosing BeYou Stylin — where you shine your way.', pageW / 2, doc.internal.pageSize.getHeight() - 40, { align: 'center' });
+  doc.setTextColor(...MUTED);
+  doc.text(`Thank you for choosing ${SITE.name} — where you shine your way.`, pageW / 2, pageH - 40, { align: 'center' });
 
-  return doc.output('datauristring');
+  return doc;
 }
+
+const fileName = (invoice: Invoice) => `${invoice.invoiceNumber}.pdf`;
+
+export const downloadInvoicePdf = (data: InvoicePdfData) => buildInvoicePdf(data).save(fileName(data.invoice));
+
+/** Blob URL for previewing in an <iframe>. Revoke it when the preview closes. */
+export const invoicePdfUrl = (data: InvoicePdfData) =>
+  URL.createObjectURL(buildInvoicePdf(data).output('blob'));
+
+/** Opens the PDF in a new tab with the print dialog. */
+export const printInvoicePdf = (data: InvoicePdfData) => {
+  const doc = buildInvoicePdf(data);
+  doc.autoPrint();
+  const url = URL.createObjectURL(doc.output('blob'));
+  window.open(url, '_blank', 'noopener');
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+};
