@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Gem, CalendarHeart, Scissors, Crown, Sparkles, HeartHandshake,
-  ReceiptText, Menu, X, ChevronRight, MailOpen, LogOut
+  ReceiptText, Menu, X, ChevronRight, MailOpen, LogOut, CalendarClock, Armchair, ShieldCheck, ExternalLink,
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,27 +12,33 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 const navItems = [
   { path: '/admin', label: 'Dashboard', icon: Gem },
+  { path: '/admin/schedule', label: 'Schedule', icon: CalendarClock },
   { path: '/admin/requests', label: 'Requests', icon: MailOpen },
   { path: '/admin/bookings', label: 'Bookings', icon: CalendarHeart },
+  { path: '/admin/invoices', label: 'Invoices', icon: ReceiptText },
+  { path: '/admin/customers', label: 'Customers', icon: HeartHandshake },
   { path: '/admin/services', label: 'Services', icon: Scissors },
   { path: '/admin/deals', label: 'Deals', icon: Crown },
   { path: '/admin/staff', label: 'Staff', icon: Sparkles },
-  { path: '/admin/customers', label: 'Customers', icon: HeartHandshake },
-  { path: '/admin/invoices', label: 'Invoices', icon: ReceiptText },
+  { path: '/admin/chairs', label: 'Chairs', icon: Armchair },
+  { path: '/admin/team', label: 'Team & Access', icon: ShieldCheck, managersOnly: true },
 ];
 
 interface AdminLayoutProps {
   children: React.ReactNode;
   title: string;
+  /** Buttons shown on the right of the page header. */
+  actions?: React.ReactNode;
 }
 
-const AdminLayout = ({ children, title }: AdminLayoutProps) => {
+const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { appointmentRequests } = useSalon();
-  const { user, roles, signOut } = useAuth();
+  const { appointmentRequests, live, privateLoaded } = useSalon();
+  const { user, roles, signOut, canManage } = useAuth();
   const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
+  usePageTitle(title);
 
   const handleSignOut = async () => {
     await signOut();
@@ -62,13 +69,13 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
             <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">Admin Suite</p>
           </div>
-          <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)}>
+          <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <nav className="relative p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.map(item => {
+          {navItems.filter(item => !item.managersOnly || canManage).map(item => {
             const active = location.pathname === item.path;
             return (
               <Link
@@ -99,6 +106,12 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
         </nav>
 
         <div className="relative mt-auto p-3 border-t border-sidebar-border/60">
+          <Link
+            to="/"
+            className="flex items-center gap-3 px-4 py-2 mb-1 rounded-xl text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> View public site
+          </Link>
           <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10 backdrop-blur-sm">
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
@@ -131,6 +144,7 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
           <button
             className="relative lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
           >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
@@ -150,19 +164,31 @@ const AdminLayout = ({ children, title }: AdminLayoutProps) => {
             </h2>
           </div>
 
-          {/* Decorative right-side chip */}
           <div className="relative flex items-center gap-2">
+            {actions && <div className="hidden sm:flex items-center gap-2">{actions}</div>}
             <ThemeToggle />
-            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]" />
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Live</span>
+            <div
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm"
+              title={live ? 'Changes from other devices appear automatically' : 'Live updates unavailable — refresh to see changes from other devices'}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${live ? 'bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]' : 'bg-muted-foreground/50'}`} />
+              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{live ? 'Live' : 'Offline'}</span>
             </div>
           </div>
         </header>
 
 
         <main className="flex-1 p-4 lg:p-8 animate-fade-in">
-          {children}
+          {actions && <div className="flex sm:hidden flex-wrap gap-2 mb-4">{actions}</div>}
+          {privateLoaded ? children : (
+            <div className="space-y-4" aria-busy="true" aria-label="Loading">
+              <div className="h-10 w-64 rounded-lg bg-muted animate-pulse" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[0, 1, 2].map(i => <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />)}
+              </div>
+              <div className="h-72 rounded-2xl bg-muted animate-pulse" />
+            </div>
+          )}
         </main>
       </div>
     </div>

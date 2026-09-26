@@ -145,6 +145,9 @@
   .status-canceled {
     @apply bg-destructive/10 text-destructive ring-destructive/20;
   }
+  .status-muted {
+    @apply bg-muted text-muted-foreground ring-border;
+  }
 }
 
 @layer base {

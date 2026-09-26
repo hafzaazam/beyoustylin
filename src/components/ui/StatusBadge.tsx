@@ -1,21 +1,29 @@
-import { BookingStatus, EntityStatus } from '@/types/salon';
+import { AppointmentRequestStatus, BookingStatus, EntityStatus, InvoiceStatus } from '@/types/salon';
 
-export const StatusBadge = ({ status }: { status: BookingStatus | EntityStatus | 'paid' | 'unpaid' }) => {
-  const classMap: Record<string, string> = {
-    pending: 'status-badge status-pending',
-    confirmed: 'status-badge status-confirmed',
-    started: 'status-badge status-started',
-    completed: 'status-badge status-completed',
-    canceled: 'status-badge status-canceled',
-    active: 'status-badge status-completed',
-    disabled: 'status-badge status-canceled',
-    paid: 'status-badge status-completed',
-    unpaid: 'status-badge status-pending',
-  };
+type AnyStatus = BookingStatus | EntityStatus | InvoiceStatus | AppointmentRequestStatus;
 
-  return (
-    <span className={classMap[status] || 'status-badge'}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
+const classMap: Record<AnyStatus, string> = {
+  pending: 'status-pending',
+  confirmed: 'status-confirmed',
+  started: 'status-started',
+  completed: 'status-completed',
+  canceled: 'status-canceled',
+  active: 'status-completed',
+  disabled: 'status-canceled',
+  paid: 'status-completed',
+  unpaid: 'status-pending',
+  void: 'status-muted',
+  approved: 'status-completed',
+  dismissed: 'status-muted',
+  withdrawn: 'status-muted',
 };
+
+const labelMap: Partial<Record<AnyStatus, string>> = {
+  started: 'In progress',
+};
+
+export const StatusBadge = ({ status }: { status: AnyStatus }) => (
+  <span className={`status-badge ${classMap[status] ?? ''}`}>
+    {labelMap[status] ?? status.charAt(0).toUpperCase() + status.slice(1)}
+  </span>
+);
