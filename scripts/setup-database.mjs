@@ -132,9 +132,9 @@ if (project.status === 403 || project.status === 404) {
       '  This usually means the database is managed by Lovable (Lovable Cloud).',
       '  In that case, open the project in Lovable and send this message in the chat:',
       '',
-      c.bold('    Please run the SQL files supabase/migrations/20260926090000_enum_additions.sql'),
-      c.bold('    and supabase/migrations/20260926090100_integrity_and_features.sql as database'),
-      c.bold('    migrations, in that order.'),
+      c.bold('    Please run these SQL files from supabase/migrations as database migrations, in order:'),
+      ...readdirSync(MIGRATIONS_DIR).filter(f => /^\d+_.*\.sql$/.test(f) && f.split('_')[0] > BASELINE_VERSION).sort()
+        .map(f => c.bold(`      ${f}`)),
       '',
       '  Otherwise, ask the owner of the Supabase project to invite your account.',
     ].join('\n'),
@@ -199,7 +199,9 @@ const checks = await runSql(`
     to_regprocedure('public.bookings_prevent_overlap()') IS NOT NULL AS overlap_rule,
     to_regprocedure('public.ensure_customer_record()') IS NOT NULL AS customer_portal,
     to_regprocedure('public.set_member_role(text, public.app_role)') IS NOT NULL AS team_roles,
-    EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_bookings_sync_invoice') AS auto_invoices`)
+    EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trg_bookings_sync_invoice') AS auto_invoices,
+    to_regprocedure('public.create_sale(jsonb, uuid, text, uuid, text, text, text, text)') IS NOT NULL AS point_of_sale,
+    to_regprocedure('public.apply_invoice_discount(uuid, text)') IS NOT NULL AS vouchers_and_codes`)
   .then(rows => rows?.[0] ?? {})
   .catch(e => fail(`Could not verify: ${e.message}`));
 const labels = {
@@ -207,6 +209,8 @@ const labels = {
   customer_portal: 'Customer portal functions',
   team_roles: 'Team & access functions',
   auto_invoices: 'Automatic invoices',
+  point_of_sale: 'Point of sale & products',
+  vouchers_and_codes: 'Gift vouchers & discount codes',
 };
 let allGood = true;
 for (const [key, label] of Object.entries(labels)) {
