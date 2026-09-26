@@ -18,6 +18,7 @@ import { formatDuration, formatPKR, toLocalDateKey } from '@/lib/format';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
+import Reveal from '@/components/Reveal';
 import {
   Sparkles, Flower2, Crown,
   Star, MapPin, Phone, Mail,
@@ -323,7 +324,7 @@ const Landing = () => {
 
 
       {/* What we do: three real pillars instead of a grid of same-size feature cards */}
-      <section id="services" className="py-20 md:py-28 px-4 lg:px-8">
+      <Reveal as="section" id="services" className="py-20 md:py-28 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-12 md:mb-16">
             <h2 className="font-heading text-4xl md:text-6xl font-normal tracking-tight leading-[1.05]">
@@ -361,13 +362,13 @@ const Landing = () => {
             ))}
           </div>
         </div>
-      </section>
+      </Reveal>
 
 
 
       {/* Popular services */}
       {featuredServices.length > 0 && (
-      <section className="py-24 px-4 lg:px-8 border-t border-border/60">
+      <Reveal as="section" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-14">
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Most loved services.</h2>
@@ -393,12 +394,12 @@ const Landing = () => {
             ))}
           </div>
         </div>
-      </section>
+      </Reveal>
       )}
 
       {/* Packages */}
       {featuredDeals.length > 0 && (
-      <section id="packages" className="py-24 px-4 lg:px-8 border-t border-border/60">
+      <Reveal as="section" id="packages" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-14">
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Complete Barat packages.</h2>
@@ -436,12 +437,12 @@ const Landing = () => {
             })}
           </div>
         </div>
-      </section>
+      </Reveal>
       )}
 
 
       {/* Mehndi highlight — henna green + gold palette */}
-      <section
+      <Reveal as="section"
         id="mehndi"
         className="relative py-24 px-4 lg:px-8 overflow-hidden"
         style={{
@@ -554,11 +555,11 @@ const Landing = () => {
             </div>
           </div>
         </div>
-      </section>
+      </Reveal>
 
 
       {/* About */}
-      <section id="about" className="py-24 px-4 lg:px-8 border-t border-border/60">
+      <Reveal as="section" id="about" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-8">Beauty meets craftsmanship.</h2>
@@ -578,10 +579,10 @@ const Landing = () => {
             <img src={SITE.heroImage} alt={SITE.heroImageAlt} className="w-full h-full object-cover" style={{ objectPosition: SITE.heroImagePosition }} loading="lazy" />
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* Testimonials */}
-      <section className="py-24 px-4 lg:px-8 border-t border-border/60">
+      <Reveal as="section" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-14">
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Loved by our clients.</h2>
@@ -601,11 +602,11 @@ const Landing = () => {
             ))}
           </div>
         </div>
-      </section>
+      </Reveal>
 
 
       {/* Booking Request Form */}
-      <section id="book" className="py-24 px-4 lg:px-8 border-t border-border/60 scroll-mt-20">
+      <Reveal as="section" id="book" className="py-24 px-4 lg:px-8 border-t border-border/60 scroll-mt-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-2">
             <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
@@ -809,10 +810,10 @@ const Landing = () => {
             )}
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* CTA */}
-      <section id="contact" className="py-24 px-4 lg:px-8 border-t border-border/60">
+      <Reveal as="section" id="contact" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="font-heading text-5xl md:text-6xl font-light tracking-tight mb-6">Ready to look <span className="italic text-primary">iconic?</span></h2>
           <p className="text-muted-foreground mb-10 max-w-xl mx-auto font-light leading-relaxed">
@@ -828,7 +829,7 @@ const Landing = () => {
             <a href={`mailto:${SITE.email}`} className="flex items-center justify-center gap-2 hover:text-foreground"><Mail className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} aria-hidden /> {SITE.email}</a>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* Footer */}
       <footer className="py-10 px-4 lg:px-8 border-t border-border/60">

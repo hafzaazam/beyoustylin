@@ -8,6 +8,7 @@ import { Clock, Search, ArrowRight } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { formatDuration, formatPKR } from '@/lib/format';
 import { Service } from '@/types/salon';
+import Reveal from '@/components/Reveal';
 
 const ServicesPublic = () => {
   const { services, loading } = useSalon();
@@ -97,7 +98,7 @@ const ServicesPublic = () => {
 
 
       {/* Services grid */}
-      <section className="py-16 px-4 lg:px-8">
+      <Reveal as="section" className="py-16 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-20">
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px" aria-busy="true" aria-label="Loading services">
@@ -156,10 +157,10 @@ const ServicesPublic = () => {
             ))
           )}
         </div>
-      </section>
+      </Reveal>
 
       {/* CTA */}
-      <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-24 mt-8">
+      <Reveal as="section" className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-24 mt-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Ready to book a session?</h2>
           <p className="text-muted-foreground mb-8 font-light">Reserve your appointment or ask our team for a personalised quote.</p>
@@ -168,7 +169,7 @@ const ServicesPublic = () => {
             <Link to="/packages"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">View Packages</Button></Link>
           </div>
         </div>
-      </section>
+      </Reveal>
 
     </PublicLayout>
   );

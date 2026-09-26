@@ -11,6 +11,7 @@ import style1 from '@/assets/mehndi-style-1.jpg';
 import style2 from '@/assets/mehndi-style-2.jpg';
 import style3 from '@/assets/mehndi-style-3.jpg';
 import style4 from '@/assets/mehndi-style-4.jpg';
+import Reveal from '@/components/Reveal';
 
 /* ─────────────── Royal palette (locked) ─────────────── */
 const C = {
@@ -112,7 +113,7 @@ const MehndiPublic = () => {
         </section>
 
         {/* ─── 2. STYLES MENU ─── */}
-        <section id="styles" className="py-28 md:py-32 px-6" style={{ background: C.green }}>
+        <Reveal as="section" id="styles" className="py-28 md:py-32 px-6" style={{ background: C.green }}>
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 md:mb-20 gap-8">
               <div className="space-y-4">
@@ -174,10 +175,10 @@ const MehndiPublic = () => {
               ))}
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── 3. THE CATALOGUE (from DB) ─── */}
-        <section id="mehndi-products" className="py-32 md:py-40 px-6" style={{ background: C.ink }}>
+        <Reveal as="section" id="mehndi-products" className="py-32 md:py-40 px-6" style={{ background: C.ink }}>
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-20 md:mb-24">
               <h2
@@ -270,10 +271,10 @@ const MehndiPublic = () => {
               </div>
             )}
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── 4. RITUAL TIMELINE (parchment) ─── */}
-        <section
+        <Reveal as="section"
           className="py-28 md:py-32 px-6"
           style={{ background: C.parchment, color: C.ink }}
         >
@@ -323,10 +324,10 @@ const MehndiPublic = () => {
               ))}
             </div>
           </div>
-        </section>
+        </Reveal>
 
         {/* ─── 5. RESERVE CTA ─── */}
-        <section className="py-32 md:py-40 px-6" style={{ background: C.ink }}>
+        <Reveal as="section" className="py-32 md:py-40 px-6" style={{ background: C.ink }}>
           <div className="max-w-4xl mx-auto p-10 md:p-24 text-center relative overflow-hidden">
             {/* subtle pinstripe texture via CSS gradient */}
             <div
@@ -373,7 +374,7 @@ const MehndiPublic = () => {
               </Link>
             </div>
           </div>
-        </section>
+        </Reveal>
       </div>
     </PublicLayout>
   );

@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
 import { SITE } from '@/config/site';
 import { LEGAL_LINKS } from '@/config/legal';
+import PromoPopup from '@/components/PromoPopup';
 
 const navLinks = [
   { to: '/services', label: 'Services' },
@@ -147,6 +148,7 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
       </nav>
 
       <main className="flex-1 pt-16">{children}</main>
+      <PromoPopup />
 
       <footer className="border-t border-border/60 mt-16">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-12">

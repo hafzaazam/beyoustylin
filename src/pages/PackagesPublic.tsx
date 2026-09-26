@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Check, Clock } from 'lucide-react';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { formatDuration, formatPKR } from '@/lib/format';
+import Reveal from '@/components/Reveal';
 
 const PackagesPublic = () => {
   const { deals, services, loading } = useSalon();
@@ -27,7 +28,7 @@ const PackagesPublic = () => {
       </section>
 
       {/* Packages grid */}
-      <section className="py-20 px-4 lg:px-8">
+      <Reveal as="section" className="py-20 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-px" aria-busy="true" aria-label="Loading packages">
@@ -103,10 +104,10 @@ const PackagesPublic = () => {
             </div>
           )}
         </div>
-      </section>
+      </Reveal>
 
       {/* CTA */}
-      <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-20">
+      <Reveal as="section" className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Need a custom package?</h2>
           <p className="text-muted-foreground mb-8 font-light">Tell us about your event and budget and we'll craft a bespoke quote just for you.</p>
@@ -115,7 +116,7 @@ const PackagesPublic = () => {
             <Link to="/services"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Browse services</Button></Link>
           </div>
         </div>
-      </section>
+      </Reveal>
     </PublicLayout>
   );
 };
