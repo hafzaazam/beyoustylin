@@ -4,6 +4,7 @@ import { CalendarCheck, Inbox, FileText, Heart, Sparkles, ArrowRight, TrendingUp
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { formatPKR } from '@/lib/format';
 
 interface Stats {
   upcoming: number;
@@ -42,19 +43,20 @@ const AccountDashboard = () => {
           supabase.from('bookings').select('id, start_time, status, service_ids, deal_id')
             .eq('customer_id', customerRes.data.id)
             .order('start_time', { ascending: true }),
-          supabase.from('invoices').select('total_amount').eq('customer_id', customerRes.data.id),
+          // Only money actually paid counts as spend (not unpaid or void invoices).
+          supabase.from('invoices').select('total_amount').eq('customer_id', customerRes.data.id).eq('status', 'paid'),
         ]);
         const now = new Date();
         const bookings = bookingsRes.data || [];
         upcoming = bookings.filter(b => new Date(b.start_time) >= now && b.status !== 'canceled' && b.status !== 'completed').length;
         pastVisits = bookings.filter(b => b.status === 'completed').length;
-        totalSpent = (invoicesRes.data || []).reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
-        const next = bookings.find(b => new Date(b.start_time) >= now && b.status !== 'canceled');
+        totalSpent = (invoicesRes.data || []).reduce((s, i) => s + Number(i.total_amount || 0), 0);
+        const next = bookings.find(b => new Date(b.start_time) >= now && b.status !== 'canceled' && b.status !== 'completed');
         if (next) {
           const d = new Date(next.start_time);
           nextAppointment = {
-            date: d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-            time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+            date: d.toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' }),
+            time: d.toLocaleTimeString('en-PK', { hour: 'numeric', minute: '2-digit' }),
             label: next.deal_id ? 'Package booking' : 'Service booking',
           };
         }
@@ -82,7 +84,7 @@ const AccountDashboard = () => {
   ];
 
   return (
-    <CustomerLayout title={`Welcome back, ${stats.fullName.split(' ')[0]}`} subtitle="Overview">
+    <CustomerLayout title={loading ? 'Welcome back' : `Welcome back, ${stats.fullName.split(' ')[0]}`} subtitle="Overview">
       {/* Loyalty band */}
       <div className="grid md:grid-cols-3 border-t border-l border-border/60 mb-10">
         <div className="p-8 md:p-10 border-r border-b border-border/60 md:col-span-2">
@@ -90,7 +92,7 @@ const AccountDashboard = () => {
             <Sparkles className="w-3 h-3" strokeWidth={1.25} /> Glow Rewards
           </div>
           <p className="font-heading text-6xl md:text-7xl font-light leading-none tabular-nums">
-            {stats.loyaltyPoints}<span className="text-lg opacity-60 ml-2">pts</span>
+            {loading ? '—' : stats.loyaltyPoints}<span className="text-lg opacity-60 ml-2">pts</span>
           </p>
           <p className="text-sm text-muted-foreground mt-4 max-w-md font-light leading-relaxed">
             Earn 10 points every completed visit. Redeem at the salon for exclusive perks.
@@ -140,7 +142,7 @@ const AccountDashboard = () => {
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
             <FileText className="w-3 h-3" strokeWidth={1.25} /> Lifetime spend
           </div>
-          <p className="font-heading text-4xl font-light tabular-nums">Rs. {stats.totalSpent.toLocaleString()}</p>
+          <p className="font-heading text-4xl font-light tabular-nums">{loading ? '—' : formatPKR(stats.totalSpent)}</p>
           <Link to="/account/invoices" className="text-[10px] uppercase tracking-[0.2em] text-primary/90 mt-4 inline-flex items-center gap-2">
             View invoices <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
           </Link>

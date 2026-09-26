@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useSalon } from '@/context/SalonContext';
+import { useAuth } from '@/hooks/useAuth';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { supabase } from '@/integrations/supabase/client';
+import { AccountButton } from '@/components/layout/PublicLayout';
+import { SITE } from '@/config/site';
+import { bookingRequestSchema, firstError, quoteRequestSchema } from '@/lib/validation';
+import { formatDuration, formatPKR, toLocalDateKey } from '@/lib/format';
 import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
@@ -14,16 +22,16 @@ import ThemeToggle from '@/components/ThemeToggle';
 import {
   Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
   Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
-  Instagram, Facebook, ArrowRight, Check, Send, CheckCircle2
+  Instagram, Facebook, ArrowRight, Check, Send, CheckCircle2, Loader2, Menu,
 } from 'lucide-react';
 
 const featureCards = [
-  { icon: Crown, title: 'Bridal Specialists', desc: 'Signature Barat, Walima, Nikah & Engagement makeup crafted by senior artists.' },
-  { icon: Sparkles, title: 'Hydra & 3D Facials', desc: 'Advanced skincare treatments for radiant, camera-ready glow.' },
-  { icon: Scissors, title: 'Precision Hair Cutting', desc: 'Signature cuts, layers, feathers & kids styling by expert stylists.' },
-  { icon: Palette, title: 'Hair Colour & Keratin', desc: 'Fashion colours, rebonding, extenso & keratin smoothing treatments.' },
-  { icon: Flower2, title: 'Bridal Mehndi', desc: 'Delicate Sodani & classic mehndi artistry for your big day.' },
-  { icon: HeartHandshake, title: 'Party Packages', desc: 'Full glam party looks, hairstyles & lashes for every occasion.' },
+  { icon: Crown, title: 'Bridal Specialists', desc: 'Signature Barat, Walima, Nikah & Engagement makeup crafted by senior artists.', to: '/packages' },
+  { icon: Sparkles, title: 'Hydra & 3D Facials', desc: 'Advanced skincare treatments for radiant, camera-ready glow.', to: '/services' },
+  { icon: Scissors, title: 'Precision Hair Cutting', desc: 'Signature cuts, layers, feathers & kids styling by expert stylists.', to: '/services' },
+  { icon: Palette, title: 'Hair Colour & Keratin', desc: 'Fashion colours, rebonding, extenso & keratin smoothing treatments.', to: '/services' },
+  { icon: Flower2, title: 'Bridal Mehndi', desc: 'Delicate Sodani & classic mehndi artistry for your big day.', to: '/mehndi' },
+  { icon: HeartHandshake, title: 'Party Packages', desc: 'Full glam party looks, hairstyles & lashes for every occasion.', to: '/packages' },
 ];
 
 const perks = [
@@ -39,9 +47,15 @@ const testimonials = [
   { name: 'Hira R.', role: 'Regular Client', text: 'Their Hydra Facial is life-changing. My skin has never looked better. The ambience is so calming too.', rating: 5 },
 ];
 
+const selectClass =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
 const Landing = () => {
+  usePageTitle();
   const { deals, services, addAppointmentRequest } = useSalon();
-  const { toast } = useToast();
+  const { user, isCustomer } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const featuredDeals = deals.filter(d => d.status === 'active').slice(0, 4);
   const featuredServices = services.filter(s => s.status === 'active' && s.price > 0).slice(0, 6);
 
@@ -63,17 +77,44 @@ const Landing = () => {
     const deal = params.get('deal');
     if (svc) {
       setMode('booking');
+      setSubmitted(null);
       setBookingForm(f => ({ ...f, selection: `service:${svc}` }));
     } else if (deal) {
       setMode('booking');
+      setSubmitted(null);
       setBookingForm(f => ({ ...f, selection: `deal:${deal}` }));
+    } else if (params.get('mode') === 'quote') {
+      setMode('quote');
+      setSubmitted(null);
     }
-    if ((svc || deal) || location.hash === '#book') {
-      setTimeout(() => {
-        document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll to any section in the hash (links from other pages use "/#about", "/#book", …).
+    const target = svc || deal ? 'book' : location.hash.slice(1);
+    if (target) {
+      const t = setTimeout(() => {
+        document.getElementById(target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+      return () => clearTimeout(t);
     }
   }, [location.search, location.hash]);
+
+  // Signed-in customers don't have to retype their details.
+  useEffect(() => {
+    if (!user || !isCustomer) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from('profiles').select('full_name, phone, email').eq('id', user.id).maybeSingle();
+      if (cancelled || !data) return;
+      const fill = <T extends { name: string; phone: string; email: string }>(f: T): T => ({
+        ...f,
+        name: f.name || data.full_name || '',
+        phone: f.phone || data.phone || '',
+        email: f.email || data.email || user.email || '',
+      });
+      setBookingForm(fill);
+      setQuoteForm(fill);
+    })();
+    return () => { cancelled = true; };
+  }, [user, isCustomer]);
 
 
   const parseSelection = (sel: string): { serviceId?: string; dealId?: string } => {
@@ -82,57 +123,75 @@ const Landing = () => {
     return {};
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  // Local date (not UTC) so late-night visitors in Pakistan can still pick today.
+  const todayStr = toLocalDateKey(new Date());
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bookingForm.name.trim() || !bookingForm.phone.trim() || !bookingForm.date || !bookingForm.time) {
-      toast({ title: 'Please fill in your name, phone, date and time', variant: 'destructive' });
+    const parsed = bookingRequestSchema.safeParse(bookingForm);
+    const problem = firstError(parsed);
+    if (problem || !parsed.success) { toast.error(problem); return; }
+    const when = new Date(`${parsed.data.date}T${parsed.data.time}`);
+    if (Number.isNaN(when.getTime()) || when.getTime() < Date.now()) {
+      toast.error('Please choose a date and time in the future.');
       return;
     }
-    if (!bookingForm.selection) {
-      toast({ title: 'Please select a package or service', description: 'For custom inquiries, switch to "Request a Quote".', variant: 'destructive' });
-      return;
-    }
-    const { serviceId, dealId } = parseSelection(bookingForm.selection);
-    addAppointmentRequest({
+    const { serviceId, dealId } = parseSelection(parsed.data.selection);
+    setSubmitting(true);
+    const { error } = await addAppointmentRequest({
       type: 'booking',
-      name: bookingForm.name.trim(),
-      phone: bookingForm.phone.trim(),
-      email: bookingForm.email.trim() || undefined,
+      name: parsed.data.name,
+      phone: parsed.data.phone,
+      email: parsed.data.email,
       serviceId,
       dealId,
-      preferredDate: bookingForm.date,
-      preferredTime: bookingForm.time,
-      notes: bookingForm.notes.trim() || undefined,
+      preferredDate: parsed.data.date,
+      preferredTime: parsed.data.time,
+      notes: parsed.data.notes || undefined,
     });
+    setSubmitting(false);
+    if (error) {
+      toast.error(`We couldn't send your request: ${error}`, { description: `Please try again or call us on ${SITE.phoneDisplay}.` });
+      return;
+    }
     setSubmitted('booking');
     setBookingForm(initialBooking);
-    toast({ title: 'Booking request submitted', description: 'Our team will contact you shortly to confirm.' });
   };
 
-  const handleQuoteSubmit = (e: React.FormEvent) => {
+  const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quoteForm.name.trim() || !quoteForm.phone.trim() || !quoteForm.notes.trim()) {
-      toast({ title: 'Please fill in your name, phone and describe what you need', variant: 'destructive' });
-      return;
-    }
-    const { serviceId, dealId } = parseSelection(quoteForm.selection);
-    addAppointmentRequest({
+    const parsed = quoteRequestSchema.safeParse(quoteForm);
+    const problem = firstError(parsed);
+    if (problem || !parsed.success) { toast.error(problem); return; }
+    const { serviceId, dealId } = parseSelection(parsed.data.selection ?? '');
+    setSubmitting(true);
+    const { error } = await addAppointmentRequest({
       type: 'quote',
-      name: quoteForm.name.trim(),
-      phone: quoteForm.phone.trim(),
-      email: quoteForm.email.trim() || undefined,
+      name: parsed.data.name,
+      phone: parsed.data.phone,
+      email: parsed.data.email,
       serviceId,
       dealId,
-      eventDate: quoteForm.eventDate || undefined,
-      budget: quoteForm.budget.trim() || undefined,
-      notes: quoteForm.notes.trim(),
+      eventDate: parsed.data.eventDate || undefined,
+      budget: parsed.data.budget || undefined,
+      notes: parsed.data.notes,
     });
+    setSubmitting(false);
+    if (error) {
+      toast.error(`We couldn't send your request: ${error}`, { description: `Please try again or call us on ${SITE.phoneDisplay}.` });
+      return;
+    }
     setSubmitted('quote');
     setQuoteForm(initialQuote);
-    toast({ title: 'Quote request submitted', description: "We'll get back to you with a personalised quote soon." });
   };
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  // Cheapest published mehndi service, for the "From Rs. …" badge.
+  const mehndiFrom = useMemo(() => {
+    const prices = activeServices
+      .filter(s => /mehndi|henna/i.test(`${s.category} ${s.name}`) && s.price > 0)
+      .map(s => s.price);
+    return prices.length ? Math.min(...prices) : null;
+  }, [activeServices]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -153,9 +212,28 @@ const Landing = () => {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link to="/admin">
-              <Button size="sm" variant="outline">Admin Panel</Button>
-            </Link>
+            <AccountButton className="hidden sm:block" />
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden inline-flex items-center justify-center w-9 h-9 border border-border/60" aria-label="Open menu">
+                  <Menu className="w-4 h-4" strokeWidth={1.25} />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="font-heading font-light text-2xl text-left">{SITE.name}</SheetTitle>
+                </SheetHeader>
+                <div className="mt-8 flex flex-col" onClick={() => setMenuOpen(false)}>
+                  {[['/services', 'Services'], ['/packages', 'Packages'], ['/mehndi', 'Mehndi']].map(([to, label]) => (
+                    <Link key={to} to={to} className="py-3 border-b border-border/60 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">{label}</Link>
+                  ))}
+                  {[['#book', 'Book'], ['#about', 'About'], ['#contact', 'Contact']].map(([href, label]) => (
+                    <a key={href} href={href} className="py-3 border-b border-border/60 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">{label}</a>
+                  ))}
+                  <div className="mt-6"><AccountButton /></div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </nav>
@@ -212,9 +290,10 @@ const Landing = () => {
               const isLastRow = i >= featureCards.length - (featureCards.length % 3 || 3);
               const isLastCol = (i + 1) % 3 === 0;
               return (
-                <div
+                <Link
                   key={f.title}
-                  className={`group p-10 transition-colors duration-700 hover:bg-muted/40 ${!isLastCol ? 'md:border-r border-border/60' : ''} ${!isLastRow ? 'border-b border-border/60' : 'border-b md:border-b-0 border-border/60'}`}
+                  to={f.to}
+                  className={`group block p-10 transition-colors duration-700 hover:bg-muted/40 ${!isLastCol ? 'md:border-r border-border/60' : ''} ${!isLastRow ? 'border-b border-border/60' : 'border-b md:border-b-0 border-border/60'}`}
                 >
                   <div className="flex justify-between items-start mb-12">
                     <f.icon className="w-6 h-6 text-primary/80" strokeWidth={1} />
@@ -228,7 +307,7 @@ const Landing = () => {
                     Explore
                     <ArrowRight className="ml-2 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" strokeWidth={1.25} />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -238,6 +317,7 @@ const Landing = () => {
 
 
       {/* Popular services */}
+      {featuredServices.length > 0 && (
       <section className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-14">
@@ -254,11 +334,11 @@ const Landing = () => {
               <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between">
                   <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">{s.duration}m</span>
+                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">{formatDuration(s.duration)}</span>
                 </div>
                 <h3 className="font-heading text-2xl font-light tracking-tight">{s.name}</h3>
                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
-                  <span className="text-primary/90 font-medium text-sm tabular-nums">Rs. {s.price.toLocaleString()}</span>
+                  <span className="text-primary/90 font-medium text-sm tabular-nums">{formatPKR(s.price)}</span>
                   <Link to={`/services/${s.id}`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors">Details →</Link>
                 </div>
               </div>
@@ -266,8 +346,10 @@ const Landing = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* Packages */}
+      {featuredDeals.length > 0 && (
       <section id="packages" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-14">
@@ -285,9 +367,9 @@ const Landing = () => {
                   )}
                   <h3 className="font-heading text-3xl font-light tracking-tight mb-6">{d.name}</h3>
                   <div className="flex items-baseline gap-2 mb-2">
-                    <span className="font-heading text-4xl text-foreground tabular-nums">Rs. {d.discountedPrice.toLocaleString()}</span>
+                    <span className="font-heading text-4xl text-foreground tabular-nums">{formatPKR(d.discountedPrice)}</span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-8">≈ {Math.round(d.totalDuration / 60)} hour session</div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-8">{formatDuration(d.totalDuration)} session</div>
                   <ul className="space-y-3 mb-10 pt-6 border-t border-border/60">
                     {d.serviceIds.map(sid => {
                       const svc = services.find(x => x.id === sid);
@@ -299,7 +381,7 @@ const Landing = () => {
                       ) : null;
                     })}
                   </ul>
-                  <a href="#book" onClick={() => { setMode('booking'); setBookingForm(f => ({ ...f, selection: `deal:${d.id}` })); }} className="block">
+                  <a href="#book" onClick={() => { setMode('booking'); setSubmitted(null); setBookingForm(f => ({ ...f, selection: `deal:${d.id}` })); }} className="block">
                     <Button className="w-full rounded-none text-xs uppercase tracking-[0.2em]" variant={isPopular ? 'default' : 'outline'}>Book this package</Button>
                   </a>
                 </div>
@@ -308,6 +390,7 @@ const Landing = () => {
           </div>
         </div>
       </section>
+      )}
 
 
       {/* Mehndi highlight — henna green + gold palette */}
@@ -363,8 +446,10 @@ const Landing = () => {
                 <Flower2 className="w-5 h-5" style={{ color: '#f1dfa4' }} />
               </div>
               <div>
-                <p className="text-xs" style={{ color: '#7a6a3a' }}>Bridal Sodani</p>
-                <p className="font-heading font-semibold" style={{ color: '#12241a' }}>From Rs. 25,000</p>
+                <p className="text-xs" style={{ color: '#7a6a3a' }}>Mehndi artistry</p>
+                <p className="font-heading font-semibold" style={{ color: '#12241a' }}>
+                  {mehndiFrom !== null ? `From ${formatPKR(mehndiFrom)}` : 'Custom quotes'}
+                </p>
               </div>
             </div>
           </div>
@@ -425,7 +510,7 @@ const Landing = () => {
                   Explore Mehndi <ArrowRight className="ml-1 w-4 h-4" />
                 </Button>
               </Link>
-              <Link to="/services?category=Mehndi">
+              <Link to="/?mode=quote#book" onClick={() => { setMode('quote'); setSubmitted(null); }}>
                 <Button
                   size="lg"
                   variant="outline"
@@ -525,7 +610,7 @@ const Landing = () => {
             </ul>
             <div className="mt-8 p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-2 text-sm font-medium mb-1"><Phone className="w-4 h-4 text-primary" /> Prefer to call?</div>
-              <p className="text-sm text-muted-foreground">Reach us at <a href="tel:+923001234567" className="text-primary font-medium">+92 300 1234567</a> — Mon–Sat, 10am–8pm.</p>
+              <p className="text-sm text-muted-foreground">Reach us at <a href={SITE.phoneHref} className="text-primary font-medium">{SITE.phoneDisplay}</a> — {SITE.hours}.</p>
             </div>
           </div>
 
@@ -586,20 +671,20 @@ const Landing = () => {
                     value={bookingForm.selection}
                     onChange={e => setBookingForm({ ...bookingForm, selection: e.target.value })}
                     required
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClass}
                   >
                     <option value="">— Choose one —</option>
                     {activeDeals.length > 0 && (
                       <optgroup label="Bridal Packages">
                         {activeDeals.map(d => (
-                          <option key={d.id} value={`deal:${d.id}`}>{d.name} — Rs. {d.discountedPrice.toLocaleString()}</option>
+                          <option key={d.id} value={`deal:${d.id}`}>{d.name} — {formatPKR(d.discountedPrice)}</option>
                         ))}
                       </optgroup>
                     )}
                     <optgroup label="Services">
                       {activeServices.map(s => (
                         <option key={s.id} value={`service:${s.id}`}>
-                          {s.name}{s.price > 0 ? ` — Rs. ${s.price.toLocaleString()}` : ' — Custom price'}
+                          {s.name}{s.price > 0 ? ` — ${formatPKR(s.price)}` : ' — Custom price'}
                         </option>
                       ))}
                     </optgroup>
@@ -617,7 +702,7 @@ const Landing = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="bk-time">Preferred time *</Label>
-                    <Input id="bk-time" type="time" value={bookingForm.time} onChange={e => setBookingForm({ ...bookingForm, time: e.target.value })} required />
+                    <Input id="bk-time" type="time" min={bookingForm.date === todayStr ? new Date().toTimeString().slice(0, 5) : undefined} value={bookingForm.time} onChange={e => setBookingForm({ ...bookingForm, time: e.target.value })} required />
                   </div>
                 </div>
 
@@ -626,8 +711,8 @@ const Landing = () => {
                   <Textarea id="bk-notes" value={bookingForm.notes} onChange={e => setBookingForm({ ...bookingForm, notes: e.target.value })} maxLength={500} rows={3} placeholder="Any special requests, occasion details, etc." />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full">
-                  <Send className="w-4 h-4" /> Submit Booking Request
+                <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Submit Booking Request
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
                   Bookings are subject to availability. Our team confirms every appointment manually.
@@ -657,7 +742,7 @@ const Landing = () => {
                     id="qt-service"
                     value={quoteForm.selection}
                     onChange={e => setQuoteForm({ ...quoteForm, selection: e.target.value })}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className={selectClass}
                   >
                     <option value="">Not sure — need guidance</option>
                     {activeDeals.length > 0 && (
@@ -682,17 +767,17 @@ const Landing = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="qt-budget">Budget range (optional)</Label>
-                    <Input id="qt-budget" value={quoteForm.budget} onChange={e => setQuoteForm({ ...quoteForm, budget: e.target.value })} maxLength={50} placeholder="e.g. Rs. 50,000 – 80,000" />
+                    <Input id="qt-budget" value={quoteForm.budget} onChange={e => setQuoteForm({ ...quoteForm, budget: e.target.value })} maxLength={100} placeholder="e.g. Rs. 50,000 – 80,000" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="qt-notes">Tell us what you need *</Label>
-                  <Textarea id="qt-notes" value={quoteForm.notes} onChange={e => setQuoteForm({ ...quoteForm, notes: e.target.value })} maxLength={1000} rows={4} placeholder="Describe your event, group size, services you're considering, timing preferences, etc." required />
+                  <Textarea id="qt-notes" value={quoteForm.notes} onChange={e => setQuoteForm({ ...quoteForm, notes: e.target.value })} maxLength={2000} rows={4} placeholder="Describe your event, group size, services you're considering, timing preferences, etc." required />
                 </div>
 
-                <Button type="submit" size="lg" className="w-full">
-                  <Send className="w-4 h-4" /> Request Quote
+                <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Request Quote
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
                   We'll respond within 24 hours with a personalised quote — no obligation.
@@ -713,12 +798,12 @@ const Landing = () => {
           </p>
           <div className="flex flex-wrap justify-center gap-3 mb-14">
             <a href="#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></a>
-            <a href="tel:+923001234567"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Call Us</Button></a>
+            <a href={SITE.phoneHref}><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Call Us</Button></a>
           </div>
           <div className="grid sm:grid-cols-3 gap-6 text-xs uppercase tracking-widest text-muted-foreground pt-10 border-t border-border/60">
-            <div className="flex items-center justify-center gap-2"><MapPin className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> Karachi, Pakistan</div>
-            <div className="flex items-center justify-center gap-2"><Phone className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> +92 300 1234567</div>
-            <div className="flex items-center justify-center gap-2"><Mail className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> hello@beyoustylin.com</div>
+            <div className="flex items-center justify-center gap-2"><MapPin className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.city}</div>
+            <a href={SITE.phoneHref} className="flex items-center justify-center gap-2 hover:text-foreground"><Phone className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.phoneDisplay}</a>
+            <a href={`mailto:${SITE.email}`} className="flex items-center justify-center gap-2 hover:text-foreground normal-case tracking-normal"><Mail className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.email}</a>
           </div>
         </div>
       </section>
@@ -728,12 +813,16 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo className="h-8 w-auto" />
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">© {new Date().getFullYear()} BeYou Stylin</span>
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">© {new Date().getFullYear()} {SITE.name}</span>
           </div>
           <div className="flex items-center gap-5 text-muted-foreground">
-            <a href="#" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
-            <a href="#" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
-            <Link to="/admin" className="text-[10px] uppercase tracking-widest hover:text-primary transition-colors">Admin</Link>
+            {SITE.instagramUrl && (
+              <a href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
+            )}
+            {SITE.facebookUrl && (
+              <a href={SITE.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
+            )}
+            <Link to="/auth" className="text-[10px] uppercase tracking-widest hover:text-primary transition-colors">Staff &amp; client sign in</Link>
           </div>
         </div>
       </footer>

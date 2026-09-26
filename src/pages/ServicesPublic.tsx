@@ -1,13 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSalon } from '@/context/SalonContext';
-import PublicLayout from '@/components/layout/PublicLayout';
+import PublicLayout, { FavoriteButton } from '@/components/layout/PublicLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Clock, Search, Sparkles, ArrowRight } from 'lucide-react';
+import { Clock, Search, ArrowRight } from 'lucide-react';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { formatDuration, formatPKR } from '@/lib/format';
+import { Service } from '@/types/salon';
 
 const ServicesPublic = () => {
-  const { services } = useSalon();
+  const { services, loading } = useSalon();
+  usePageTitle('Services');
   const [query, setQuery] = useState('');
   const [activeCat, setActiveCat] = useState<string>('All');
 
@@ -32,10 +36,11 @@ const ServicesPublic = () => {
   }, [activeServices, query, activeCat]);
 
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof filtered>();
+    const map = new Map<string, Service[]>();
     filtered.forEach(s => {
-      if (!map.has(s.category)) map.set(s.category, [] as any);
-      map.get(s.category)!.push(s);
+      const list = map.get(s.category) ?? [];
+      list.push(s);
+      map.set(s.category, list);
     });
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [filtered]);
@@ -50,7 +55,8 @@ const ServicesPublic = () => {
             Our <span className="italic text-primary/80">services.</span>
           </h1>
           <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
-            Explore our complete menu of makeup, hair, skincare and mehndi — thoughtfully priced and crafted.
+            Explore our complete menu of makeup, hair and skincare — thoughtfully priced and crafted.
+            Looking for mehndi? See our <Link to="/mehndi" className="text-primary/90 hover:underline">mehndi menu</Link>.
           </p>
         </div>
       </section>
@@ -64,6 +70,7 @@ const ServicesPublic = () => {
               <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" strokeWidth={1.25} />
               <Input
                 placeholder="Search services..."
+                aria-label="Search services"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 className="pl-7 rounded-none border-0 border-b border-transparent focus-visible:ring-0 focus-visible:border-primary/60 bg-transparent"
@@ -74,6 +81,7 @@ const ServicesPublic = () => {
                 <button
                   key={c}
                   onClick={() => setActiveCat(c)}
+                  aria-pressed={activeCat === c}
                   className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] whitespace-nowrap border-b transition-colors ${
                     activeCat === c
                       ? 'text-foreground border-primary'
@@ -92,9 +100,23 @@ const ServicesPublic = () => {
       {/* Services grid */}
       <section className="py-16 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-20">
-          {grouped.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px" aria-busy="true" aria-label="Loading services">
+              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-48 bg-muted animate-pulse" />)}
+            </div>
+          ) : grouped.length === 0 ? (
             <div className="text-center py-24 text-muted-foreground font-light">
-              No services match your search.
+              {activeServices.length === 0 ? 'Our service menu is being updated — please check back soon.' : 'No services match your search.'}
+              {(query || activeCat !== 'All') && activeServices.length > 0 && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => { setQuery(''); setActiveCat('All'); }}
+                    className="text-[10px] uppercase tracking-[0.2em] text-primary/90 hover:text-primary"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             grouped.map(([category, items]) => (
@@ -114,7 +136,8 @@ const ServicesPublic = () => {
                       <div className="flex items-start justify-between">
                         <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
                         <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums flex items-center gap-1">
-                          <Clock className="w-3 h-3" strokeWidth={1.25} /> {s.duration}m
+                          <Clock className="w-3 h-3" strokeWidth={1.25} /> {formatDuration(s.duration)}
+                          <FavoriteButton type="service" id={s.id} name={s.name} className="-my-1.5 -mr-1.5 ml-1" />
                         </span>
                       </div>
                       <Link to={`/services/${s.id}`} className="font-heading text-2xl font-light tracking-tight hover:text-primary transition-colors">
@@ -122,7 +145,7 @@ const ServicesPublic = () => {
                       </Link>
                       <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
                         <span className="text-primary/90 font-medium text-sm tabular-nums">
-                          {s.price > 0 ? `Rs. ${s.price.toLocaleString()}` : 'On Request'}
+                          {s.price > 0 ? formatPKR(s.price) : 'On Request'}
                         </span>
                         <Link to={`/?service=${s.id}#book`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors inline-flex items-center gap-1.5">
                           Book <ArrowRight className="w-3 h-3" strokeWidth={1.25} />

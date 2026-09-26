@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import CustomerLayout from '@/components/layout/CustomerLayout';
 import { useSalon } from '@/context/SalonContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { formatDuration, formatPKR } from '@/lib/format';
 
 const AccountFavorites = () => {
   const { services, deals } = useSalon();
@@ -15,7 +16,11 @@ const AccountFavorites = () => {
 
   return (
     <CustomerLayout title="Favorites" subtitle="Your saved menu">
-      {isEmpty ? (
+      {loading ? (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4" aria-busy="true" aria-label="Loading favorites">
+          {[0, 1, 2].map(i => <div key={i} className="h-32 rounded-2xl bg-muted animate-pulse" />)}
+        </div>
+      ) : isEmpty ? (
         <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
           <Heart className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No favorites yet</p>
@@ -38,12 +43,12 @@ const AccountFavorites = () => {
                         <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{s.category}</p>
                         <h3 className="font-heading text-lg font-semibold">{s.name}</h3>
                       </div>
-                      <button onClick={() => toggle('service', s.id)} className="text-primary hover:scale-110 transition-transform">
+                      <button onClick={() => toggle('service', s.id)} className="text-primary hover:scale-110 transition-transform" aria-label={`Remove ${s.name} from favorites`}>
                         <Heart className="w-5 h-5 fill-current" />
                       </button>
                     </div>
                     <div className="flex items-center justify-between mt-3">
-                      <span className="font-heading text-xl font-bold text-primary">{s.price ? `Rs. ${s.price.toLocaleString()}` : 'On request'}</span>
+                      <span className="font-heading text-xl font-bold text-primary">{s.price ? formatPKR(s.price) : 'On request'}</span>
                       <Link to={`/services/${s.id}`} className="text-xs font-semibold text-primary hover:underline">View →</Link>
                     </div>
                   </div>
@@ -64,13 +69,13 @@ const AccountFavorites = () => {
                         </div>
                         <h3 className="font-heading text-lg font-semibold">{d.name}</h3>
                       </div>
-                      <button onClick={() => toggle('deal', d.id)} className="text-primary hover:scale-110 transition-transform">
+                      <button onClick={() => toggle('deal', d.id)} className="text-primary hover:scale-110 transition-transform" aria-label={`Remove ${d.name} from favorites`}>
                         <Heart className="w-5 h-5 fill-current" />
                       </button>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-3">{d.serviceIds.length} services · {d.totalDuration} min</p>
+                    <p className="text-sm text-muted-foreground mb-3">{d.serviceIds.length} services · {formatDuration(d.totalDuration)}</p>
                     <div className="flex items-center justify-between">
-                      <span className="font-heading text-xl font-bold text-primary">Rs. {d.discountedPrice.toLocaleString()}</span>
+                      <span className="font-heading text-xl font-bold text-primary">{formatPKR(d.discountedPrice)}</span>
                       <Link to={`/?deal=${d.id}#book`} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:opacity-90">Book</Link>
                     </div>
                   </div>

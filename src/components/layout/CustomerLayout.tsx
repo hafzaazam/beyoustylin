@@ -5,6 +5,7 @@ import {
   Menu, X, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 
@@ -28,6 +29,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  usePageTitle(title);
 
   const handleSignOut = async () => {
     await signOut();
@@ -53,7 +55,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
               <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">My Account</p>
             </div>
           </Link>
-          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)}>
+          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)} aria-label="Close menu">
             <X className="w-4 h-4" strokeWidth={1.25} />
           </button>
         </div>
@@ -66,6 +68,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setOpen(false)}
+                aria-current={active ? 'page' : undefined}
                 className={`group relative flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.2em] transition-colors ${
                   active
                     ? 'text-foreground'
@@ -80,6 +83,13 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
               </Link>
             );
           })}
+          <Link
+            to="/#book"
+            onClick={() => setOpen(false)}
+            className="md:hidden mt-4 mx-4 flex items-center justify-center px-5 py-2.5 border border-primary/40 text-[10px] uppercase tracking-[0.2em] text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            Book new
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-border/60 space-y-3">
@@ -106,6 +116,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
           <button
             className="lg:hidden inline-flex items-center justify-center w-9 h-9 border border-border/60 hover:border-primary/40 transition-colors"
             onClick={() => setOpen(true)}
+            aria-label="Open menu"
           >
             <Menu className="w-4 h-4 text-foreground" strokeWidth={1.25} />
           </button>

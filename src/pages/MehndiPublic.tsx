@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
-import { supabase } from '@/integrations/supabase/client';
+import { useSalon } from '@/context/SalonContext';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { formatPKR } from '@/lib/format';
 import mehndi1 from '@/assets/mehndi-1.jpg';
 import mehndi2 from '@/assets/mehndi-2.jpg';
 import mehndi3 from '@/assets/mehndi-3.jpg';
@@ -36,29 +38,18 @@ const ritual = [
   { n: '04', title: 'The Curing', body: 'Sealing the design and providing heritage aftercare instructions to ensure longevity and vibrance.' },
 ];
 
-type MehndiService = {
-  id: string;
-  name: string;
-  category: string | null;
-  duration: number | null;
-  price: number | null;
-  description: string | null;
-};
+const isMehndi = (text: string) => /mehndi|henna/i.test(text);
 
 const MehndiPublic = () => {
-  const [mehndiServices, setMehndiServices] = useState<MehndiService[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase
-        .from('services')
-        .select('id,name,category,duration,price,description,status')
-        .eq('status', 'active')
-        .or('category.ilike.%mehndi%,category.ilike.%henna%,name.ilike.%mehndi%,name.ilike.%henna%')
-        .order('price', { ascending: true });
-      if (data) setMehndiServices(data as MehndiService[]);
-    })();
-  }, []);
+  usePageTitle('Mehndi');
+  // Reuse the menu already loaded by SalonContext instead of a second query.
+  const { services, loading } = useSalon();
+  const mehndiServices = useMemo(
+    () => services
+      .filter(s => s.status === 'active' && (isMehndi(s.category) || isMehndi(s.name)))
+      .sort((a, b) => a.price - b.price),
+    [services],
+  );
 
   return (
     <PublicLayout>
@@ -143,9 +134,9 @@ const MehndiPublic = () => {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {styles.map((s, i) => (
-                <Link
+                <a
                   key={s.code}
-                  to="/services?category=Mehndi"
+                  href="#mehndi-products"
                   className={`group relative aspect-[3/4] overflow-hidden border block ${
                     i % 2 === 1 ? 'md:translate-y-12' : ''
                   }`}
@@ -179,7 +170,7 @@ const MehndiPublic = () => {
                       {s.name}
                     </h3>
                   </div>
-                </Link>
+                </a>
               ))}
             </div>
           </div>
@@ -203,19 +194,25 @@ const MehndiPublic = () => {
               </p>
             </div>
 
-            {mehndiServices.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-busy="true" aria-label="Loading catalogue">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="aspect-[4/5] animate-pulse" style={{ background: C.greenSoft }} />
+                ))}
+              </div>
+            ) : mehndiServices.length === 0 ? (
               <p
                 className="text-center text-sm"
                 style={{ color: `${C.parchment}80` }}
               >
-                No mehndi services published yet.
+                Our mehndi menu is being updated. <Link to="/?mode=quote#book" className="underline" style={{ color: C.gold }}>Ask for a quote</Link>.
               </p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 md:gap-x-12 gap-y-16 md:gap-y-20">
                 {mehndiServices.map((svc, idx) => (
                   <Link
                     key={svc.id}
-                    to="/services?category=Mehndi"
+                    to={`/services/${svc.id}`}
                     className="group block space-y-5"
                   >
                     <div
@@ -257,7 +254,7 @@ const MehndiPublic = () => {
                         className="text-sm font-medium whitespace-nowrap"
                         style={{ color: C.gold }}
                       >
-                        Rs. {Number(svc.price ?? 0).toLocaleString('en-PK')}
+                        {svc.price > 0 ? formatPKR(svc.price) : 'On request'}
                       </span>
                     </div>
                     {svc.description && (
@@ -362,7 +359,7 @@ const MehndiPublic = () => {
                 Limited appointments available for the upcoming wedding season. Secure your
                 private session today.
               </p>
-              <Link to="/book" className="inline-block group">
+              <Link to="/?mode=quote#book" className="inline-block group">
                 <span
                   className="relative inline-block px-10 md:px-12 py-4 md:py-5 uppercase tracking-[0.2em] text-[11px] md:text-xs font-bold transition-all"
                   style={{ background: C.gold, color: C.ink }}

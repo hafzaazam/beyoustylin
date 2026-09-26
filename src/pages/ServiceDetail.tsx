@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useSalon } from '@/context/SalonContext';
-import PublicLayout from '@/components/layout/PublicLayout';
+import { usePageTitle } from '@/hooks/usePageTitle';
+import { formatDuration, formatPKR } from '@/lib/format';
+import PublicLayout, { FavoriteButton } from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft, ArrowRight, Calendar, Check, Clock, Crown,
@@ -10,9 +12,14 @@ import {
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { services, deals } = useSalon();
+  const { services, deals, loading } = useSalon();
 
-  const service = useMemo(() => services.find(s => s.id === id), [services, id]);
+  // Disabled services stay visible to staff in the admin panel, not on the public site.
+  const service = useMemo(() => services.find(s => s.id === id && s.status === 'active'), [services, id]);
+  usePageTitle(service?.name ?? (loading ? undefined : 'Service not found'));
+
+  // Navigating between related services keeps the same component mounted.
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [id]);
 
   const relatedInDeals = useMemo(
     () => deals.filter(d => d.status === 'active' && d.serviceIds.includes(id || '')),
@@ -25,6 +32,20 @@ const ServiceDetail = () => {
       : [],
     [services, service]
   );
+
+  if (!service && loading) {
+    return (
+      <PublicLayout>
+        <section className="py-20 md:py-24 px-4 lg:px-8" aria-busy="true" aria-label="Loading service">
+          <div className="max-w-5xl mx-auto space-y-6">
+            <div className="h-3 w-24 bg-muted animate-pulse" />
+            <div className="h-14 w-3/4 bg-muted animate-pulse" />
+            <div className="h-10 w-40 bg-muted animate-pulse" />
+          </div>
+        </section>
+      </PublicLayout>
+    );
+  }
 
   if (!service) {
     return (
@@ -60,15 +81,18 @@ const ServiceDetail = () => {
           <div className="flex items-center gap-4 mb-6 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             <span>{service.category}</span>
             <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" strokeWidth={1.25} /> {service.duration} min</span>
+            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" strokeWidth={1.25} /> {formatDuration(service.duration)}</span>
           </div>
-          <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-8 leading-[1.02]">
-            {service.name}
-          </h1>
+          <div className="flex items-start gap-3 mb-8">
+            <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight leading-[1.02]">
+              {service.name}
+            </h1>
+            <FavoriteButton type="service" id={service.id} name={service.name} className="mt-3" />
+          </div>
           <div className="flex flex-wrap items-baseline gap-3 mb-10 pb-10 border-b border-border/60">
             {service.price > 0 ? (
               <>
-                <span className="font-heading text-4xl md:text-5xl font-light text-foreground tabular-nums">Rs. {service.price.toLocaleString()}</span>
+                <span className="font-heading text-4xl md:text-5xl font-light text-foreground tabular-nums">{formatPKR(service.price)}</span>
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground">/ session</span>
               </>
             ) : (
@@ -96,11 +120,15 @@ const ServiceDetail = () => {
             <div>
               <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">About</p>
               <h2 className="font-heading text-3xl font-light tracking-tight mb-6">About this service.</h2>
+              {service.description ? (
+                <p className="text-muted-foreground leading-relaxed font-light whitespace-pre-line">{service.description}</p>
+              ) : (
               <p className="text-muted-foreground leading-relaxed font-light">
                 Enjoy our signature <span className="text-foreground italic">{service.name.toLowerCase()}</span> —
                 a {service.category.toLowerCase()} experience crafted by our expert team. Every session is personalised
                 to your features, skin tone and preferences, using premium products for a flawless, long-lasting finish.
               </p>
+              )}
             </div>
 
             <div>
@@ -132,7 +160,7 @@ const ServiceDetail = () => {
                         <div>
                           <div className="font-heading text-lg font-light">{d.name}</div>
                           <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
-                            ≈ {Math.round(d.totalDuration / 60)} hrs · Rs. {d.discountedPrice.toLocaleString()}
+                            {formatDuration(d.totalDuration)} · {formatPKR(d.discountedPrice)}
                           </div>
                         </div>
                       </div>
@@ -154,12 +182,12 @@ const ServiceDetail = () => {
               <div className="flex justify-between items-center py-3 border-t border-border/60 text-sm">
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</span>
                 <span className="font-medium text-primary/90 tabular-nums">
-                  {service.price > 0 ? `Rs. ${service.price.toLocaleString()}` : 'On Request'}
+                  {service.price > 0 ? formatPKR(service.price) : 'On Request'}
                 </span>
               </div>
               <div className="flex justify-between items-center py-3 border-t border-border/60 text-sm">
                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Duration</span>
-                <span className="font-medium tabular-nums">{service.duration} min</span>
+                <span className="font-medium tabular-nums">{formatDuration(service.duration)}</span>
               </div>
 
               <Link to={bookHref}>
@@ -192,9 +220,9 @@ const ServiceDetail = () => {
                   <h3 className="font-heading text-2xl font-light tracking-tight group-hover:text-primary transition-colors">{s.name}</h3>
                   <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
                     <span className="text-primary/90 font-medium text-sm tabular-nums">
-                      {s.price > 0 ? `Rs. ${s.price.toLocaleString()}` : 'On Request'}
+                      {s.price > 0 ? formatPKR(s.price) : 'On Request'}
                     </span>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{s.duration} min</span>
+                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDuration(s.duration)}</span>
                   </div>
                 </Link>
               ))}
