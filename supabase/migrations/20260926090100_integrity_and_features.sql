@@ -13,6 +13,28 @@ CREATE POLICY "Profiles readable by self or staff" ON public.profiles
   FOR SELECT TO authenticated
   USING (auth.uid() = id OR public.is_staff(auth.uid()));
 
+-- 1a-bis. PUBLIC MENU WAS BROKEN FOR SIGNED-OUT VISITORS.
+--     Migration 20260702134216 revoked EXECUTE on is_staff() from anon, but the
+--     services/deals read policies still call is_staff() for everyone, so every
+--     anonymous SELECT failed with "permission denied for function is_staff"
+--     and the landing, services and packages pages showed nothing.
+--     Split each policy so anonymous reads never evaluate is_staff().
+DROP POLICY IF EXISTS "Services public read active" ON public.services;
+DROP POLICY IF EXISTS "Services read active" ON public.services;
+DROP POLICY IF EXISTS "Services staff read all" ON public.services;
+CREATE POLICY "Services read active" ON public.services
+  FOR SELECT TO anon, authenticated USING (status = 'active');
+CREATE POLICY "Services staff read all" ON public.services
+  FOR SELECT TO authenticated USING (public.is_staff(auth.uid()));
+
+DROP POLICY IF EXISTS "Deals public read active" ON public.deals;
+DROP POLICY IF EXISTS "Deals read active" ON public.deals;
+DROP POLICY IF EXISTS "Deals staff read all" ON public.deals;
+CREATE POLICY "Deals read active" ON public.deals
+  FOR SELECT TO anon, authenticated USING (status = 'active');
+CREATE POLICY "Deals staff read all" ON public.deals
+  FOR SELECT TO authenticated USING (public.is_staff(auth.uid()));
+
 -- 1b. Users could raise their own loyalty_points through the update policy.
 --     Only personal fields stay writable; points are changed by triggers only.
 REVOKE INSERT, UPDATE ON public.profiles FROM authenticated;
