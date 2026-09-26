@@ -29,10 +29,20 @@ The anon key is public by design; access is controlled by RLS policies.
 
 Migrations live in `supabase/migrations/` and must be applied in filename order.
 **The app on this branch requires the two `20260926…` migrations** (new columns, RPC functions and triggers).
-Apply them with one of:
 
-- Supabase dashboard → SQL editor → run each file in order, or
-- `supabase link --project-ref tcdoebddgkwxgcexuhrx && supabase db push`
+Easiest way — one command, run by the owner of the Supabase project:
+
+```sh
+npm install
+npm run db:setup
+```
+
+It opens the Supabase token page; click **Generate new token**, copy it and paste it into the terminal.
+The script then applies only the migrations that are missing, records them in the migration history,
+and checks that everything works (it's safe to run again). The token is not saved anywhere; delete it afterwards.
+
+Alternatives: Supabase dashboard → SQL editor → run each new file in order, or
+`supabase link --project-ref tcdoebddgkwxgcexuhrx && supabase db push`.
 
 ## Roles
 
