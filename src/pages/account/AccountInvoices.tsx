@@ -61,6 +61,7 @@ const AccountInvoices = () => {
   };
 
   const paidTotal = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0);
+  const dueTotal = invoices.filter(i => i.status === 'unpaid').reduce((s, i) => s + amountDue(i), 0);
 
   return (
     <CustomerLayout title="Invoices & Receipts" subtitle="Billing history">
@@ -78,6 +79,7 @@ const AccountInvoices = () => {
         <>
           <p className="text-sm text-muted-foreground mb-4">
             Total paid: <span className="font-semibold text-foreground">{formatPKR(paidTotal)}</span>
+            {dueTotal > 0 && <> · Still to pay: <span className="font-semibold text-foreground">{formatPKR(dueTotal)}</span></>}
           </p>
           <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm">
             <table className="w-full text-sm min-w-[560px]">
@@ -96,8 +98,21 @@ const AccountInvoices = () => {
                     <td className="px-4 py-3 font-mono text-xs">{inv.invoiceNumber}</td>
                     <td className="px-4 py-3">{formatDate(inv.createdAt)}</td>
                     <td className="px-4 py-3"><StatusBadge status={inv.status} /></td>
-                    <td className={`px-4 py-3 text-right font-heading font-bold tabular-nums ${inv.status === 'void' ? 'text-muted-foreground line-through' : 'text-primary'}`}>
-                      {formatPKR(inv.totalAmount)}
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      <span className={`font-heading font-bold ${inv.status === 'void' ? 'text-muted-foreground line-through' : 'text-primary'}`}>
+                        {formatPKR(inv.totalAmount)}
+                      </span>
+                      {inv.status !== 'void' && inv.discountAmount > 0 && (
+                        <span className="block text-[11px] text-success">
+                          Saved {formatPKR(inv.discountAmount)}{inv.discountCode && ` with ${inv.discountCode}`}
+                        </span>
+                      )}
+                      {inv.status !== 'void' && inv.voucherAmount > 0 && (
+                        <span className="block text-[11px] text-muted-foreground">Gift voucher {formatPKR(inv.voucherAmount)}</span>
+                      )}
+                      {inv.status === 'unpaid' && inv.voucherAmount > 0 && (
+                        <span className="block text-[11px] font-semibold text-foreground">Due {formatPKR(amountDue(inv))}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="inline-flex gap-2">

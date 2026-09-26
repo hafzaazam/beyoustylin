@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Banknote, Download, Eye, FileSpreadsheet, Printer, ReceiptText, Search, Undo2 } from 'lucide-react';
+import { Banknote, Download, Eye, FileSpreadsheet, Printer, ReceiptText, Search, TicketPercent, Undo2 } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useConfirm } from '@/components/ConfirmDialog';
 import EmptyState from '@/components/EmptyState';
@@ -13,7 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSalon } from '@/context/SalonContext';
-import { Invoice, InvoiceStatus, PAYMENT_METHODS } from '@/types/salon';
+import { Invoice, InvoiceStatus, PAYMENT_METHODS, amountDue } from '@/types/salon';
+import InvoiceCreditsDialog from '@/components/vouchers/InvoiceCreditsDialog';
 import { InvoicePdfData, downloadInvoicePdf, invoicePdfUrl, printInvoicePdf } from '@/lib/invoicePdf';
 import { formatDate, formatPKR, toLocalDateKey } from '@/lib/format';
 import { downloadCsv, toCsv } from '@/lib/csv';
@@ -30,6 +31,7 @@ const InvoicesPage = () => {
   const [paying, setPaying] = useState<Invoice | null>(null);
   const [method, setMethod] = useState<string>(PAYMENT_METHODS[0]);
   const [busy, setBusy] = useState(false);
+  const [creditsFor, setCreditsFor] = useState<string | null>(null);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url); }, [preview]);
 
@@ -61,12 +63,19 @@ const InvoicesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salon.invoices, salon.customers, search, status, from, to]);
 
-  const summary = useMemo(() => ({
-    collected: filtered.filter(i => i.status === 'paid').reduce((s, i) => s + i.totalAmount, 0),
-    outstanding: filtered.filter(i => i.status === 'unpaid').reduce((s, i) => s + i.totalAmount, 0),
-    unpaidCount: filtered.filter(i => i.status === 'unpaid').length,
-    voided: filtered.filter(i => i.status === 'void').length,
-  }), [filtered]);
+  // Cash actually collected excludes the part paid with a gift voucher: that money
+  // was already counted when the voucher was sold.
+  const summary = useMemo(() => {
+    const paid = filtered.filter(i => i.status === 'paid');
+    const unpaid = filtered.filter(i => i.status === 'unpaid');
+    return {
+      collected: paid.reduce((s, i) => s + amountDue(i), 0),
+      byVoucher: paid.reduce((s, i) => s + i.voucherAmount, 0),
+      outstanding: unpaid.reduce((s, i) => s + amountDue(i), 0),
+      unpaidCount: unpaid.length,
+      voided: filtered.filter(i => i.status === 'void').length,
+    };
+  }, [filtered]);
 
   const paged = usePaged(filtered, 25, `${search}|${status}|${from}|${to}`);
 
@@ -101,11 +110,13 @@ const InvoicesPage = () => {
       return [
         inv.invoiceNumber, formatDate(inv.createdAt), customer?.name ?? '', customer?.phone ?? '',
         salon.getStaffById(inv.staffId)?.name ?? '', inv.items.map(i => i.name).join('; '),
-        inv.totalAmount, inv.status, inv.paidAt ? formatDate(inv.paidAt) : '', inv.paymentMethod ?? '',
+        inv.subtotal, inv.discountCode ?? '', inv.discountAmount, inv.totalAmount, inv.voucherAmount, amountDue(inv),
+        inv.status, inv.paidAt ? formatDate(inv.paidAt) : '', inv.paymentMethod ?? '',
       ];
     });
     const csv = toCsv(
-      ['Invoice', 'Date', 'Customer', 'Phone', 'Staff', 'Items', 'Total (PKR)', 'Status', 'Paid on', 'Payment method'],
+      ['Invoice', 'Date', 'Customer', 'Phone', 'Staff', 'Items', 'Subtotal (PKR)', 'Discount code', 'Discount (PKR)',
+        'Total (PKR)', 'Gift voucher (PKR)', 'Amount due/paid (PKR)', 'Status', 'Paid on', 'Payment method'],
       rows,
     );
     downloadCsv(`invoices-${from || 'all'}-${to || toLocalDateKey(new Date())}.csv`, csv);
@@ -120,7 +131,9 @@ const InvoicesPage = () => {
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Collected</p>
           <p className="text-2xl font-heading font-bold text-success tabular-nums">{formatPKR(summary.collected)}</p>
-          <p className="text-xs text-muted-foreground">Paid invoices in view</p>
+          <p className="text-xs text-muted-foreground">
+            Paid invoices in view{summary.byVoucher > 0 && ` · plus ${formatPKR(summary.byVoucher)} paid by gift voucher`}
+          </p>
         </div>
         <div className="stat-card">
           <p className="text-sm text-muted-foreground">Outstanding</p>
@@ -201,7 +214,18 @@ const InvoicesPage = () => {
                       <td className="px-4 py-3 max-w-[18rem]">
                         <div className="truncate" title={inv.items.map(i => i.name).join(', ')}>{inv.items.map(i => i.name).join(', ')}</div>
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">{formatPKR(inv.totalAmount)}</td>
+                      <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
+                        <div className="font-semibold">{formatPKR(inv.totalAmount)}</div>
+                        {inv.discountAmount > 0 && (
+                          <div className="text-[11px] text-success">−{formatPKR(inv.discountAmount)} {inv.discountCode}</div>
+                        )}
+                        {inv.voucherAmount > 0 && (
+                          <div className="text-[11px] text-muted-foreground">Voucher {formatPKR(inv.voucherAmount)}</div>
+                        )}
+                        {inv.status === 'unpaid' && inv.voucherAmount > 0 && (
+                          <div className="text-[11px] font-semibold text-warning">Due {formatPKR(amountDue(inv))}</div>
+                        )}
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <StatusBadge status={inv.status} />
                         {inv.status === 'paid' && (
@@ -210,6 +234,11 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
+                          {(inv.status === 'unpaid' || (inv.status === 'paid' && inv.paymentMethod === 'Gift voucher')) && (
+                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setCreditsFor(inv.id)} aria-label="Discount code or gift voucher" title="Discount code / gift voucher">
+                              <TicketPercent className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           {inv.status === 'unpaid' && (
                             <Button size="sm" variant="outline" className="h-8" onClick={() => { setMethod(PAYMENT_METHODS[0]); setPaying(inv); }}>
                               <Banknote className="w-3.5 h-3.5 mr-1.5" />Mark paid
@@ -246,8 +275,21 @@ const InvoicesPage = () => {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-heading">Record payment</DialogTitle>
-            <DialogDescription>{paying?.invoiceNumber} · {paying && formatPKR(paying.totalAmount)}</DialogDescription>
+            <DialogDescription>{paying?.invoiceNumber}</DialogDescription>
           </DialogHeader>
+          {paying && (
+            <div className="rounded-xl bg-muted/50 p-3 text-sm">
+              {paying.voucherAmount > 0 && (
+                <p className="text-muted-foreground">
+                  Total {formatPKR(paying.totalAmount)} · gift voucher covers {formatPKR(paying.voucherAmount)}
+                </p>
+              )}
+              <p className="flex items-baseline justify-between">
+                <span className="font-medium">Collect now</span>
+                <span className="font-heading text-2xl font-semibold tabular-nums">{formatPKR(amountDue(paying))}</span>
+              </p>
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label>Payment method</Label>
             <Select value={method} onValueChange={setMethod}>
@@ -281,6 +323,7 @@ const InvoicesPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <InvoiceCreditsDialog invoiceId={creditsFor} onClose={() => setCreditsFor(null)} />
       {confirmDialog}
     </AdminLayout>
   );

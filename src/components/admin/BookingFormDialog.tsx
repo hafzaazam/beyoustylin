@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { AlertTriangle, Check, ChevronsUpDown, Loader2, UserPlus, Users } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -59,6 +60,9 @@ interface FormState {
   status: BookingStatus;
   markPaid: boolean;
   paymentMethod: string;
+  /** Walk-ins only: applied to the new invoice before taking payment. */
+  discountCode: string;
+  voucherCode: string;
 }
 
 const emptyState = (mode: BookingFormMode): FormState => ({
@@ -66,7 +70,7 @@ const emptyState = (mode: BookingFormMode): FormState => ({
   staffId: '', chairId: '', startLocal: mode === 'walkin' ? toLocalInputValue(new Date()) : '',
   useDeal: false, dealId: '', serviceIds: [], customTotal: '', notes: '',
   status: mode === 'walkin' ? 'completed' : 'pending',
-  markPaid: true, paymentMethod: PAYMENT_METHODS[0],
+  markPaid: true, paymentMethod: PAYMENT_METHODS[0], discountCode: '', voucherCode: '',
 });
 
 const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, description, onSaved }: BookingFormDialogProps) => {
@@ -196,10 +200,11 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
         : await salon.addBooking(input);
       if (typeof result === 'string') return setError(result);
 
-      if (mode === 'walkin' && form.markPaid) await salon.payBooking(result.id, form.paymentMethod);
+      let paidNote = '';
+      if (mode === 'walkin' && form.markPaid) paidNote = await settleWalkIn(result.id);
       toast.success(
         mode === 'edit' ? 'Booking updated'
-          : mode === 'walkin' ? `Walk-in saved${form.markPaid ? ' and paid' : ''} — invoice created`
+          : mode === 'walkin' ? `Walk-in saved${paidNote} — invoice created`
             : 'Booking created — invoice generated',
       );
       onSaved?.(result);
@@ -207,6 +212,45 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
     } finally {
       setSaving(false);
     }
+  };
+
+  /**
+   * Applies the walk-in's discount code / gift voucher to the new invoice, then
+   * records payment for whatever is still due. The booking is already saved, so a
+   * rejected code never loses it: the invoice just stays unpaid for staff to fix.
+   * Returns a suffix for the success toast.
+   */
+  const settleWalkIn = async (bookingId: string): Promise<string> => {
+    const discount = form.discountCode.trim();
+    const voucherCode = form.voucherCode.trim();
+    const findInvoice = () => supabase.from('invoices')
+      .select('id, status, total_amount, voucher_amount').eq('booking_id', bookingId).maybeSingle();
+
+    if (discount || voucherCode) {
+      const { data: inv } = await findInvoice();
+      if (!inv) {
+        toast.warning('Walk-in saved, but its invoice was not found. Apply the code on the Invoices page.');
+        return '';
+      }
+      if (discount) {
+        const err = await salon.applyInvoiceDiscount(inv.id, discount);
+        if (err) {
+          toast.warning(`Discount code not applied: ${err} The invoice is still unpaid — fix it on the Invoices page.`, { duration: 10_000 });
+          return '';
+        }
+      }
+      if (voucherCode) {
+        const err = await salon.applyInvoiceGiftVoucher(inv.id, voucherCode);
+        if (err) {
+          toast.warning(`Gift voucher not applied: ${err} The invoice is still unpaid — fix it on the Invoices page.`, { duration: 10_000 });
+          return '';
+        }
+      }
+      const { data: after } = await findInvoice();
+      // A voucher that covers everything marks the invoice paid by itself.
+      if (after?.status === 'paid') return ' and paid with the gift voucher';
+    }
+    return (await salon.payBooking(bookingId, form.paymentMethod)) ? ' and paid' : '';
   };
 
   const heading = title ?? (mode === 'edit' ? 'Edit booking' : mode === 'walkin' ? 'Walk-in order' : 'New booking');
@@ -402,6 +446,27 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
                   <SelectTrigger className="w-44 h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
                 </Select>
+              )}
+              {form.markPaid && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                  <div className="space-y-1">
+                    <Label htmlFor="wi-discount" className="text-xs text-muted-foreground">Discount code (optional)</Label>
+                    <Input
+                      id="wi-discount" className="h-9 font-mono uppercase" placeholder="EID20" maxLength={30}
+                      value={form.discountCode} onChange={e => set('discountCode', e.target.value.toUpperCase())}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="wi-voucher" className="text-xs text-muted-foreground">Gift voucher (optional)</Label>
+                    <Input
+                      id="wi-voucher" className="h-9 font-mono uppercase" placeholder="GV-XXXXX-XXXXX" maxLength={20}
+                      value={form.voucherCode} onChange={e => set('voucherCode', e.target.value.toUpperCase())}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                    Codes are checked when you save. The payment method is used for anything the voucher doesn't cover.
+                  </p>
+                </div>
               )}
             </section>
           )}

@@ -115,17 +115,50 @@ export function buildInvoicePdf(data: InvoicePdfData): jsPDF {
     doc.line(marginX, y - 12, right, y - 12);
   }
 
-  // Total
+  // Totals: subtotal → discount → total → gift voucher → amount due / paid
+  const discount = invoice.discountAmount ?? 0;
+  const voucher = invoice.voucherAmount ?? 0;
+  const labelX = right - 220;
+  const summaryLine = (label: string, value: string, color: [number, number, number] = INK) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...MUTED);
+    doc.text(label, labelX, y);
+    doc.setTextColor(...color);
+    doc.text(value, right, y, { align: 'right' });
+    y += 16;
+  };
+
   y += 10;
+  if (discount > 0) {
+    summaryLine('Subtotal', money(invoice.subtotal ?? invoice.totalAmount + discount));
+    summaryLine(`Discount${invoice.discountCode ? ` (${invoice.discountCode})` : ''}`, `- ${money(discount)}`, [34, 120, 80]);
+  }
   doc.setDrawColor(...PINK);
   doc.setLineWidth(1);
-  doc.line(right - 220, y, right, y);
-  y += 22;
+  doc.line(labelX, y - 4, right, y - 4);
+  y += 16;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(...PLUM);
-  doc.text('Total', right - 220, y);
+  doc.text('Total', labelX, y);
   doc.text(money(invoice.totalAmount), right, y, { align: 'right' });
+  y += 20;
+
+  if (voucher > 0) {
+    summaryLine('Paid with gift voucher', `- ${money(voucher)}`);
+  }
+  if (voucher > 0 || invoice.status === 'paid') {
+    const rest = Math.max(0, invoice.totalAmount - voucher);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...INK);
+    const label = invoice.status === 'paid'
+      ? `Paid${invoice.paymentMethod && invoice.paymentMethod !== 'Gift voucher' ? ` (${invoice.paymentMethod})` : ''}`
+      : 'Amount due';
+    doc.text(label, labelX, y);
+    doc.text(money(rest), right, y, { align: 'right' });
+  }
 
   if (invoice.status === 'void') {
     doc.setFontSize(96);
