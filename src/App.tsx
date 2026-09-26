@@ -30,6 +30,11 @@ const CustomersPage = lazy(() => import('./pages/CustomersPage'));
 const InvoicesPage = lazy(() => import('./pages/InvoicesPage'));
 const RequestsPage = lazy(() => import('./pages/RequestsPage'));
 const TeamPage = lazy(() => import('./pages/TeamPage'));
+const PosPage = lazy(() => import('./pages/PosPage'));
+const SalesPage = lazy(() => import('./pages/SalesPage'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const VouchersPage = lazy(() => import('./pages/VouchersPage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
 
 const AccountDashboard = lazy(() => import('./pages/account/AccountDashboard'));
 const AccountAppointments = lazy(() => import('./pages/account/AccountAppointments'));
@@ -81,6 +86,11 @@ const App = () => (
                 <Route path="/admin/invoices" element={<Protected><InvoicesPage /></Protected>} />
                 <Route path="/admin/requests" element={<Protected><RequestsPage /></Protected>} />
                 <Route path="/admin/team" element={<ManagerRoute><TeamPage /></ManagerRoute>} />
+                <Route path="/admin/pos" element={<Protected><PosPage /></Protected>} />
+                <Route path="/admin/sales" element={<Protected><SalesPage /></Protected>} />
+                <Route path="/admin/products" element={<Protected><ProductsPage /></Protected>} />
+                <Route path="/admin/vouchers" element={<Protected><VouchersPage /></Protected>} />
+                <Route path="/admin/reports" element={<Protected><ReportsPage /></Protected>} />
 
                 <Route path="/account" element={<CustomerRoute><AccountDashboard /></CustomerRoute>} />
                 <Route path="/account/appointments" element={<CustomerRoute><AccountAppointments /></CustomerRoute>} />

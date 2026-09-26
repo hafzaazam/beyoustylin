@@ -3,12 +3,14 @@ import { toast } from 'sonner';
 import {
   Staff, Customer, Service, Deal, Chair, Booking, Invoice, BookingInput,
   BookingStatus, EntityStatus, AppointmentRequest, AppointmentRequestStatus,
+  DiscountCode, GiftVoucher, Product, Sale, SaleInput,
 } from '@/types/salon';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 import { useAuth } from '@/hooks/useAuth';
 import { friendlyError } from '@/lib/errors';
 import { Conflict, findConflict, normalizePhone } from '@/lib/booking';
+import { mapInvoice } from '@/lib/mappers';
 
 // ------ Row mappers (snake_case DB ↔ camelCase app) ------
 const mapStaff = (r: Tables<'staff'>): Staff => ({ id: r.id, name: r.name, role: r.role, phone: r.phone ?? '', status: r.status, createdAt: r.created_at });
@@ -31,13 +33,35 @@ const mapBooking = (r: Tables<'bookings'>): Booking => ({
   notes: r.notes ?? undefined,
   status: r.status, createdAt: r.created_at,
 });
-const mapInvoice = (r: Tables<'invoices'>): Invoice => ({
-  id: r.id, invoiceNumber: r.invoice_number, bookingId: r.booking_id,
-  customerId: r.customer_id, staffId: r.staff_id,
-  items: (Array.isArray(r.items) ? r.items : []) as unknown as Invoice['items'],
-  totalAmount: Number(r.total_amount),
-  createdAt: r.created_at, status: r.status,
-  paidAt: r.paid_at ?? undefined, paymentMethod: r.payment_method ?? undefined,
+const mapDiscountCode = (r: Tables<'discount_codes'>): DiscountCode => ({
+  id: r.id, code: r.code, description: r.description ?? undefined, kind: r.kind, value: Number(r.value),
+  appliesTo: r.applies_to as DiscountCode['appliesTo'], minSpend: Number(r.min_spend),
+  startsOn: r.starts_on ?? undefined, endsOn: r.ends_on ?? undefined,
+  maxUses: r.max_uses ?? undefined, uses: r.uses, status: r.status, createdAt: r.created_at,
+});
+const mapGiftVoucher = (r: Tables<'gift_vouchers'>): GiftVoucher => ({
+  id: r.id, code: r.code, initialValue: Number(r.initial_value), balance: Number(r.balance),
+  recipientName: r.recipient_name ?? undefined, recipientPhone: r.recipient_phone ?? undefined,
+  purchaserCustomerId: r.purchaser_customer_id ?? undefined, saleId: r.sale_id ?? undefined,
+  expiresOn: r.expires_on ?? undefined, status: r.status, notes: r.notes ?? undefined, createdAt: r.created_at,
+});
+const mapProduct = (r: Tables<'products'>): Product => ({
+  id: r.id, name: r.name, brand: r.brand ?? undefined, category: r.category, sku: r.sku ?? undefined,
+  description: r.description ?? undefined, price: Number(r.price), cost: r.cost === null ? undefined : Number(r.cost),
+  stock: r.stock, lowStockAt: r.low_stock_at, status: r.status,
+});
+const mapSale = (r: Tables<'sales'> & { sale_items?: Tables<'sale_items'>[] }): Sale => ({
+  id: r.id, saleNumber: r.sale_number, customerId: r.customer_id ?? undefined, customerName: r.customer_name ?? undefined,
+  staffId: r.staff_id ?? undefined, subtotal: Number(r.subtotal), discountCode: r.discount_code ?? undefined,
+  discountAmount: Number(r.discount_amount), total: Number(r.total), giftVoucherId: r.gift_voucher_id ?? undefined,
+  voucherAmount: Number(r.voucher_amount), paymentMethod: r.payment_method ?? undefined,
+  status: r.status === 'void' ? 'void' : 'paid', notes: r.notes ?? undefined, createdAt: r.created_at,
+  voidedAt: r.voided_at ?? undefined, voidReason: r.void_reason ?? undefined,
+  items: (r.sale_items ?? []).map(i => ({
+    id: i.id, kind: i.kind as 'product' | 'voucher', productId: i.product_id ?? undefined,
+    giftVoucherId: i.gift_voucher_id ?? undefined, name: i.name, quantity: i.quantity,
+    unitPrice: Number(i.unit_price), lineTotal: Number(i.line_total),
+  })),
 });
 const mapRequest = (r: Tables<'appointment_requests'>): AppointmentRequest => ({
   id: r.id, type: r.type, name: r.name, phone: r.phone, email: r.email ?? undefined,
@@ -63,11 +87,12 @@ const bookingRow = (b: BookingInput) => ({
   end_time: b.startTime,
 });
 
-type LiveTable = 'bookings' | 'invoices' | 'appointment_requests';
+type LiveTable = 'bookings' | 'invoices' | 'appointment_requests' | 'sales' | 'products' | 'gift_vouchers' | 'discount_codes';
 
 interface SalonContextType {
   staff: Staff[]; customers: Customer[]; services: Service[]; deals: Deal[];
   chairs: Chair[]; bookings: Booking[]; invoices: Invoice[]; appointmentRequests: AppointmentRequest[];
+  products: Product[]; sales: Sale[]; giftVouchers: GiftVoucher[]; discountCodes: DiscountCode[];
   /** Public data (services, deals) loaded. */
   loading: boolean;
   /** Staff-only data loaded (false for customers and signed-out visitors). */
@@ -120,6 +145,31 @@ interface SalonContextType {
   markRequestConverted: (id: string, bookingId: string) => Promise<boolean>;
   deleteAppointmentRequest: (id: string) => Promise<boolean>;
 
+  addProduct: (p: Omit<Product, 'id'>) => Promise<boolean>;
+  updateProduct: (id: string, p: Partial<Product>) => Promise<boolean>;
+  toggleProductStatus: (id: string) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
+  /** Adds (or with a negative number removes) stock, e.g. after a delivery. */
+  adjustStock: (id: string, delta: number) => Promise<boolean>;
+
+  addDiscountCode: (d: Omit<DiscountCode, 'id' | 'uses' | 'createdAt'>) => Promise<boolean>;
+  updateDiscountCode: (id: string, d: Partial<DiscountCode>) => Promise<boolean>;
+  toggleDiscountCodeStatus: (id: string) => Promise<boolean>;
+  deleteDiscountCode: (id: string) => Promise<boolean>;
+  updateGiftVoucher: (id: string, v: Partial<Pick<GiftVoucher, 'recipientName' | 'recipientPhone' | 'expiresOn' | 'status' | 'notes'>>) => Promise<boolean>;
+
+  /** Records a point-of-sale sale. Returns the saved sale, or an error message for the form. */
+  createSale: (input: SaleInput) => Promise<Sale | string>;
+  voidSale: (id: string, reason?: string) => Promise<boolean>;
+
+  /** Invoice codes: return null on success or an error message to show inline. */
+  applyInvoiceDiscount: (invoiceId: string, code: string) => Promise<string | null>;
+  removeInvoiceDiscount: (invoiceId: string) => Promise<boolean>;
+  applyInvoiceGiftVoucher: (invoiceId: string, code: string) => Promise<string | null>;
+  removeInvoiceGiftVoucher: (invoiceId: string) => Promise<boolean>;
+
+  getProductById: (id: string) => Product | undefined;
+  getGiftVoucherById: (id: string) => GiftVoucher | undefined;
   getStaffById: (id: string) => Staff | undefined;
   getCustomerById: (id: string) => Customer | undefined;
   getServiceById: (id: string) => Service | undefined;
@@ -153,6 +203,10 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [giftVouchers, setGiftVouchers] = useState<GiftVoucher[]>([]);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [privateLoaded, setPrivateLoaded] = useState(false);
   const [live, setLive] = useState(false);
@@ -175,9 +229,21 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     } else if (table === 'invoices') {
       const { data, error } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
       if (!error) setInvoices((data || []).map(mapInvoice));
-    } else {
+    } else if (table === 'appointment_requests') {
       const { data, error } = await supabase.from('appointment_requests').select('*').order('created_at', { ascending: false });
       if (!error) setAppointmentRequests((data || []).map(mapRequest));
+    } else if (table === 'sales') {
+      const { data, error } = await supabase.from('sales').select('*, sale_items(*)').order('created_at', { ascending: false });
+      if (!error) setSales((data || []).map(mapSale));
+    } else if (table === 'products') {
+      const { data, error } = await supabase.from('products').select('*').order('name');
+      if (!error) setProducts((data || []).map(mapProduct));
+    } else if (table === 'gift_vouchers') {
+      const { data, error } = await supabase.from('gift_vouchers').select('*').order('created_at', { ascending: false });
+      if (!error) setGiftVouchers((data || []).map(mapGiftVoucher));
+    } else {
+      const { data, error } = await supabase.from('discount_codes').select('*').order('created_at', { ascending: false });
+      if (!error) setDiscountCodes((data || []).map(mapDiscountCode));
     }
   }, []);
 
@@ -190,6 +256,10 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
       loadTable('bookings'),
       loadTable('invoices'),
       loadTable('appointment_requests'),
+      loadTable('sales'),
+      loadTable('products'),
+      loadTable('gift_vouchers'),
+      loadTable('discount_codes'),
     ]);
     const err = st.error ?? cu.error ?? ch.error;
     if (err) toast.error(`Could not load salon data: ${friendlyError(err)}`);
@@ -202,6 +272,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const clearPrivate = useCallback(() => {
     setStaff([]); setCustomers([]); setChairs([]); setBookings([]);
     setInvoices([]); setAppointmentRequests([]); setPrivateLoaded(false);
+    setProducts([]); setSales([]); setGiftVouchers([]); setDiscountCodes([]);
   }, []);
 
   useEffect(() => {
@@ -231,6 +302,9 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => schedule('bookings'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, () => schedule('invoices'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointment_requests' }, () => schedule('appointment_requests'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, () => schedule('sales'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => schedule('products'))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gift_vouchers' }, () => schedule('gift_vouchers'))
       .subscribe(status => setLive(status === 'SUBSCRIBED'));
     const timers = pending.current;
     return () => {
@@ -252,6 +326,8 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const getDealById = useCallback((id: string) => deals.find(d => d.id === id), [deals]);
   const getChairById = useCallback((id: string) => chairs.find(c => c.id === id), [chairs]);
   const getBookingById = useCallback((id: string) => bookings.find(b => b.id === id), [bookings]);
+  const getProductById = useCallback((id: string) => products.find(p => p.id === id), [products]);
+  const getGiftVoucherById = useCallback((id: string) => giftVouchers.find(v => v.id === id), [giftVouchers]);
   const getInvoiceByBookingId = useCallback((bid: string) => invoices.find(i => i.bookingId === bid), [invoices]);
   const findCustomerByPhone = useCallback((phone: string) => {
     const key = normalizePhone(phone);
@@ -261,7 +337,7 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
   const toggle = (status: EntityStatus): EntityStatus => status === 'active' ? 'disabled' : 'active';
 
   /** Deletes a row and confirms it was actually removed (RLS silently deletes nothing). */
-  const deleteRow = async (table: 'staff' | 'customers' | 'services' | 'deals' | 'chairs' | 'bookings' | 'appointment_requests', id: string) => {
+  const deleteRow = async (table: 'staff' | 'customers' | 'services' | 'deals' | 'chairs' | 'bookings' | 'appointment_requests' | 'products' | 'discount_codes', id: string) => {
     const { data, error } = await supabase.from(table).delete().eq('id', id).select('id');
     if (error) return fail(error);
     if (!data || data.length === 0) return fail("You don't have permission to delete this. Ask an owner or manager.");
@@ -515,9 +591,162 @@ export const SalonProvider = ({ children }: { children: ReactNode }) => {
     return true;
   };
 
+  // -------- Products --------
+  const productRow = (p: Partial<Product>) => ({
+    name: p.name, brand: p.brand === undefined ? undefined : p.brand || null, category: p.category,
+    sku: p.sku === undefined ? undefined : p.sku || null,
+    description: p.description === undefined ? undefined : p.description || null,
+    price: p.price, cost: p.cost === undefined ? undefined : p.cost ?? null,
+    stock: p.stock, low_stock_at: p.lowStockAt, status: p.status,
+  });
+  const addProduct = async (p: Omit<Product, 'id'>) => {
+    const { data, error } = await supabase.from('products').insert({ ...productRow(p), name: p.name }).select().single();
+    if (error) return fail(error);
+    setProducts(prev => [...prev, mapProduct(data)].sort((a, b) => a.name.localeCompare(b.name)));
+    return true;
+  };
+  const updateProduct = async (id: string, p: Partial<Product>) => {
+    const { data, error } = await supabase.from('products').update(productRow(p)).eq('id', id).select().single();
+    if (error) return fail(error);
+    setProducts(prev => prev.map(x => x.id === id ? mapProduct(data) : x));
+    return true;
+  };
+  const toggleProductStatus = async (id: string) => {
+    const cur = products.find(x => x.id === id); if (!cur) return false;
+    return updateProduct(id, { status: toggle(cur.status) });
+  };
+  const deleteProduct = async (id: string) => {
+    if (!(await deleteRow('products', id))) return false;
+    setProducts(prev => prev.filter(x => x.id !== id));
+    return true;
+  };
+  const adjustStock = async (id: string, delta: number) => {
+    // Re-read the current stock so a sale made on another device isn't overwritten.
+    const { data: cur, error: readError } = await supabase.from('products').select('stock').eq('id', id).single();
+    if (readError) return fail(readError);
+    const next = cur.stock + delta;
+    if (next < 0) return fail(`Only ${cur.stock} in stock — you can't remove ${-delta}.`);
+    return updateProduct(id, { stock: next });
+  };
+
+  // -------- Discount codes & gift vouchers --------
+  const discountRow = (d: Partial<DiscountCode>) => ({
+    code: d.code?.trim().toUpperCase(), kind: d.kind, value: d.value, applies_to: d.appliesTo,
+    description: d.description === undefined ? undefined : d.description || null,
+    min_spend: d.minSpend,
+    starts_on: d.startsOn === undefined ? undefined : d.startsOn || null,
+    ends_on: d.endsOn === undefined ? undefined : d.endsOn || null,
+    max_uses: d.maxUses === undefined ? undefined : d.maxUses || null,
+    status: d.status,
+  });
+  const addDiscountCode = async (d: Omit<DiscountCode, 'id' | 'uses' | 'createdAt'>) => {
+    const { data, error } = await supabase.from('discount_codes')
+      .insert({ ...discountRow(d), code: d.code.trim().toUpperCase(), kind: d.kind, value: d.value })
+      .select().single();
+    if (error) return fail(error.code === '23505' ? `Code ${d.code.toUpperCase()} already exists.` : error);
+    setDiscountCodes(prev => [mapDiscountCode(data), ...prev]);
+    return true;
+  };
+  const updateDiscountCode = async (id: string, d: Partial<DiscountCode>) => {
+    const { data, error } = await supabase.from('discount_codes').update(discountRow(d)).eq('id', id).select().single();
+    if (error) return fail(error.code === '23505' ? 'Another discount code already uses that code.' : error);
+    setDiscountCodes(prev => prev.map(x => x.id === id ? mapDiscountCode(data) : x));
+    return true;
+  };
+  const toggleDiscountCodeStatus = async (id: string) => {
+    const cur = discountCodes.find(x => x.id === id); if (!cur) return false;
+    return updateDiscountCode(id, { status: toggle(cur.status) });
+  };
+  const deleteDiscountCode = async (id: string) => {
+    if (!(await deleteRow('discount_codes', id))) return false;
+    setDiscountCodes(prev => prev.filter(x => x.id !== id));
+    return true;
+  };
+  const updateGiftVoucher = async (id: string, v: Partial<Pick<GiftVoucher, 'recipientName' | 'recipientPhone' | 'expiresOn' | 'status' | 'notes'>>) => {
+    const { data, error } = await supabase.from('gift_vouchers').update({
+      recipient_name: v.recipientName === undefined ? undefined : v.recipientName || null,
+      recipient_phone: v.recipientPhone === undefined ? undefined : v.recipientPhone || null,
+      expires_on: v.expiresOn === undefined ? undefined : v.expiresOn || null,
+      notes: v.notes === undefined ? undefined : v.notes || null,
+      status: v.status,
+    }).eq('id', id).select().single();
+    if (error) return fail(error);
+    setGiftVouchers(prev => prev.map(x => x.id === id ? mapGiftVoucher(data) : x));
+    return true;
+  };
+
+  // -------- Point of sale (stock, vouchers and totals are handled by create_sale) --------
+  const createSale = async (input: SaleInput): Promise<Sale | string> => {
+    const { data: saleId, error } = await supabase.rpc('create_sale', {
+      _items: input.items.map(l => l.kind === 'product'
+        ? { kind: 'product', product_id: l.productId, quantity: l.quantity }
+        : { kind: 'voucher', value: l.value, recipient_name: l.recipientName ?? null, recipient_phone: l.recipientPhone ?? null, expires_on: l.expiresOn || null }),
+      _customer_id: input.customerId ?? null,
+      _customer_name: input.customerName?.trim() || null,
+      _staff_id: input.staffId ?? null,
+      _discount_code: input.discountCode?.trim() || null,
+      _gift_voucher_code: input.giftVoucherCode?.trim() || null,
+      _payment_method: input.paymentMethod ?? null,
+      _notes: input.notes?.trim() || null,
+    });
+    if (error) return friendlyError(error);
+    const { data, error: readError } = await supabase.from('sales').select('*, sale_items(*)').eq('id', saleId).single();
+    await Promise.all([loadTable('products'), loadTable('gift_vouchers'), loadTable('discount_codes')]);
+    if (readError || !data) { await loadTable('sales'); return 'Sale saved, but it could not be reloaded. Refresh the page.'; }
+    const sale = mapSale(data);
+    setSales(prev => [sale, ...prev.filter(s => s.id !== sale.id)]);
+    return sale;
+  };
+  const voidSale = async (id: string, reason?: string) => {
+    const { error } = await supabase.rpc('void_sale', { _sale_id: id, _reason: reason?.trim() || null });
+    if (error) return fail(error);
+    await Promise.all([loadTable('sales'), loadTable('products'), loadTable('gift_vouchers'), loadTable('discount_codes')]);
+    return true;
+  };
+
+  // -------- Discount codes / gift vouchers on booking invoices --------
+  const afterInvoiceCredit = (invoiceId: string) => {
+    const bookingId = invoices.find(i => i.id === invoiceId)?.bookingId;
+    return Promise.all([
+      bookingId ? refreshInvoiceFor(bookingId) : loadTable('invoices'),
+      loadTable('gift_vouchers'),
+      loadTable('discount_codes'),
+    ]);
+  };
+  const applyInvoiceDiscount = async (invoiceId: string, code: string) => {
+    const { error } = await supabase.rpc('apply_invoice_discount', { _invoice_id: invoiceId, _code: code.trim() });
+    if (error) return friendlyError(error);
+    await afterInvoiceCredit(invoiceId);
+    return null;
+  };
+  const removeInvoiceDiscount = async (invoiceId: string) => {
+    const { error } = await supabase.rpc('remove_invoice_discount', { _invoice_id: invoiceId });
+    if (error) return fail(error);
+    await afterInvoiceCredit(invoiceId);
+    return true;
+  };
+  const applyInvoiceGiftVoucher = async (invoiceId: string, code: string) => {
+    const { error } = await supabase.rpc('apply_invoice_gift_voucher', { _invoice_id: invoiceId, _code: code.trim() });
+    if (error) return friendlyError(error);
+    await afterInvoiceCredit(invoiceId);
+    return null;
+  };
+  const removeInvoiceGiftVoucher = async (invoiceId: string) => {
+    const { error } = await supabase.rpc('remove_invoice_gift_voucher', { _invoice_id: invoiceId });
+    if (error) return fail(error);
+    await afterInvoiceCredit(invoiceId);
+    return true;
+  };
+
   return (
     <SalonContext.Provider value={{
       staff, customers, services, deals, chairs, bookings, invoices, appointmentRequests,
+      products, sales, giftVouchers, discountCodes,
+      addProduct, updateProduct, toggleProductStatus, deleteProduct, adjustStock,
+      addDiscountCode, updateDiscountCode, toggleDiscountCodeStatus, deleteDiscountCode, updateGiftVoucher,
+      createSale, voidSale,
+      applyInvoiceDiscount, removeInvoiceDiscount, applyInvoiceGiftVoucher, removeInvoiceGiftVoucher,
+      getProductById, getGiftVoucherById,
       loading, privateLoaded, live, refresh,
       addStaff, updateStaff, toggleStaffStatus, deleteStaff,
       addCustomer, updateCustomer, toggleCustomerStatus, deleteCustomer, linkCustomerAccount, findCustomerByPhone,

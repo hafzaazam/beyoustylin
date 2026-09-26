@@ -29,8 +29,8 @@ const bookings: Booking[] = [
   { id: 'b3', customerId: 'c1', staffId: 'st2', chairId: 'ch1', serviceIds: ['s2'], startTime: at(7), endTime: at(8), totalPrice: 6000, totalDuration: 60, status: 'completed', createdAt: at(6) },
 ];
 const invoices: Invoice[] = [
-  { id: 'i1', invoiceNumber: 'BYS-2026-00001', bookingId: 'b1', customerId: 'c1', staffId: 'st1', items: [{ name: 'Haircut', price: 1500, type: 'service' }], totalAmount: 1500, createdAt: at(8), status: 'unpaid' },
-  { id: 'i3', invoiceNumber: 'BYS-2026-00003', bookingId: 'b3', customerId: 'c1', staffId: 'st2', items: [{ name: 'Hydra Facial', price: 6000, type: 'service' }], totalAmount: 6000, createdAt: at(6), status: 'paid', paidAt: at(8), paymentMethod: 'Cash' },
+  { id: 'i1', invoiceNumber: 'BYS-2026-00001', bookingId: 'b1', customerId: 'c1', staffId: 'st1', items: [{ name: 'Haircut', price: 1500, type: 'service' }], totalAmount: 1500, createdAt: at(8), status: 'unpaid', subtotal: 1500, discountAmount: 0, voucherAmount: 0 },
+  { id: 'i3', invoiceNumber: 'BYS-2026-00003', bookingId: 'b3', customerId: 'c1', staffId: 'st2', items: [{ name: 'Hydra Facial', price: 6000, type: 'service' }], totalAmount: 6000, createdAt: at(6), status: 'paid', paidAt: at(8), paymentMethod: 'Cash', subtotal: 6000, discountAmount: 0, voucherAmount: 0 },
 ];
 const appointmentRequests: AppointmentRequest[] = [
   { id: 'r1', type: 'booking', name: 'Sana', phone: '03005555555', serviceId: 's1', preferredDate: '2026-10-01', preferredTime: '11:00', status: 'pending', createdAt: at(8) },

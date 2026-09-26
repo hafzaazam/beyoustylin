@@ -309,6 +309,12 @@ export type Database = {
           booking_id: string
           created_at: string
           customer_id: string
+          discount_amount: number
+          discount_code: string | null
+          discount_code_id: string | null
+          gift_voucher_id: string | null
+          subtotal: number
+          voucher_amount: number
           id: string
           invoice_number: string
           items: Json
@@ -325,6 +331,12 @@ export type Database = {
           booking_id: string
           created_at?: string
           customer_id: string
+          discount_amount?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          gift_voucher_id?: string | null
+          subtotal?: number
+          voucher_amount?: number
           id?: string
           invoice_number?: string
           items?: Json
@@ -341,6 +353,12 @@ export type Database = {
           booking_id?: string
           created_at?: string
           customer_id?: string
+          discount_amount?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          gift_voucher_id?: string | null
+          subtotal?: number
+          voucher_amount?: number
           id?: string
           invoice_number?: string
           items?: Json
@@ -376,6 +394,266 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      discount_codes: {
+        Row: {
+          applies_to: string
+          code: string
+          created_at: string
+          description: string | null
+          ends_on: string | null
+          id: string
+          kind: Database["public"]["Enums"]["discount_kind"]
+          max_uses: number | null
+          min_spend: number
+          starts_on: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+          uses: number
+          value: number
+        }
+        Insert: {
+          applies_to?: string
+          code: string
+          created_at?: string
+          description?: string | null
+          ends_on?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["discount_kind"]
+          max_uses?: number | null
+          min_spend?: number
+          starts_on?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          uses?: number
+          value: number
+        }
+        Update: {
+          applies_to?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          ends_on?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["discount_kind"]
+          max_uses?: number | null
+          min_spend?: number
+          starts_on?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+          uses?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      gift_vouchers: {
+        Row: {
+          balance: number
+          code: string
+          created_at: string
+          expires_on: string | null
+          id: string
+          initial_value: number
+          notes: string | null
+          purchaser_customer_id: string | null
+          recipient_name: string | null
+          recipient_phone: string | null
+          sale_id: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          updated_at: string
+        }
+        Insert: {
+          balance: number
+          code?: string
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          initial_value: number
+          notes?: string | null
+          purchaser_customer_id?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          sale_id?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          code?: string
+          created_at?: string
+          expires_on?: string | null
+          id?: string
+          initial_value?: number
+          notes?: string | null
+          purchaser_customer_id?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
+          sale_id?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          brand: string | null
+          category: string
+          cost: number | null
+          created_at: string
+          description: string | null
+          id: string
+          low_stock_at: number
+          name: string
+          price: number
+          sku: string | null
+          status: Database["public"]["Enums"]["entity_status"]
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category?: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          low_stock_at?: number
+          name: string
+          price?: number
+          sku?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          low_stock_at?: number
+          name?: string
+          price?: number
+          sku?: string | null
+          status?: Database["public"]["Enums"]["entity_status"]
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sale_items: {
+        Row: {
+          gift_voucher_id: string | null
+          id: string
+          kind: string
+          line_total: number
+          name: string
+          product_id: string | null
+          quantity: number
+          sale_id: string
+          unit_price: number
+        }
+        Insert: {
+          gift_voucher_id?: string | null
+          id?: string
+          kind: string
+          line_total: number
+          name: string
+          product_id?: string | null
+          quantity?: number
+          sale_id: string
+          unit_price: number
+        }
+        Update: {
+          gift_voucher_id?: string | null
+          id?: string
+          kind?: string
+          line_total?: number
+          name?: string
+          product_id?: string | null
+          quantity?: number
+          sale_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          customer_name: string | null
+          discount_amount: number
+          discount_code: string | null
+          discount_code_id: string | null
+          gift_voucher_id: string | null
+          id: string
+          notes: string | null
+          payment_method: string | null
+          sale_number: string
+          staff_id: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          total: number
+          void_reason: string | null
+          voided_at: string | null
+          voucher_amount: number
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          discount_amount?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          gift_voucher_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          sale_number?: string
+          staff_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          total?: number
+          void_reason?: string | null
+          voided_at?: string | null
+          voucher_amount?: number
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          customer_name?: string | null
+          discount_amount?: number
+          discount_code?: string | null
+          discount_code_id?: string | null
+          gift_voucher_id?: string | null
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          sale_number?: string
+          staff_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          total?: number
+          void_reason?: string | null
+          voided_at?: string | null
+          voucher_amount?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -508,6 +786,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_invoice_discount: { Args: { _code: string; _invoice_id: string }; Returns: number }
+      apply_invoice_gift_voucher: { Args: { _code: string; _invoice_id: string }; Returns: number }
+      create_sale: {
+        Args: {
+          _customer_id?: string | null
+          _customer_name?: string | null
+          _discount_code?: string | null
+          _gift_voucher_code?: string | null
+          _items: Json
+          _notes?: string | null
+          _payment_method?: string | null
+          _staff_id?: string | null
+        }
+        Returns: string
+      }
+      remove_invoice_discount: { Args: { _invoice_id: string }; Returns: undefined }
+      remove_invoice_gift_voucher: { Args: { _invoice_id: string }; Returns: undefined }
+      void_sale: { Args: { _reason?: string | null; _sale_id: string }; Returns: undefined }
       cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
       ensure_customer_record: { Args: never; Returns: string }
       has_role: {
@@ -569,6 +865,7 @@ export type Database = {
         | "started"
         | "completed"
         | "canceled"
+      discount_kind: "percent" | "fixed"
       entity_status: "active" | "disabled"
       invoice_status: "paid" | "unpaid" | "void"
       request_status: "pending" | "approved" | "dismissed" | "withdrawn"
@@ -708,6 +1005,7 @@ export const Constants = {
         "completed",
         "canceled",
       ],
+      discount_kind: ["percent", "fixed"],
       entity_status: ["active", "disabled"],
       invoice_status: ["paid", "unpaid", "void"],
       request_status: ["pending", "approved", "dismissed", "withdrawn"],

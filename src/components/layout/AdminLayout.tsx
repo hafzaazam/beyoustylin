@@ -4,24 +4,52 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Gem, CalendarHeart, Scissors, Crown, Sparkles, HeartHandshake,
   ReceiptText, Menu, X, ChevronRight, MailOpen, LogOut, CalendarClock, Armchair, ShieldCheck, ExternalLink,
+  ShoppingBag, Package, Ticket, BarChart3, History,
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
 
-const navItems = [
-  { path: '/admin', label: 'Dashboard', icon: Gem },
-  { path: '/admin/schedule', label: 'Schedule', icon: CalendarClock },
-  { path: '/admin/requests', label: 'Requests', icon: MailOpen },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarHeart },
-  { path: '/admin/invoices', label: 'Invoices', icon: ReceiptText },
-  { path: '/admin/customers', label: 'Customers', icon: HeartHandshake },
-  { path: '/admin/services', label: 'Services', icon: Scissors },
-  { path: '/admin/deals', label: 'Deals', icon: Crown },
-  { path: '/admin/staff', label: 'Staff', icon: Sparkles },
-  { path: '/admin/chairs', label: 'Chairs', icon: Armchair },
-  { path: '/admin/team', label: 'Team & Access', icon: ShieldCheck, managersOnly: true },
+interface NavItem { path: string; label: string; icon: typeof Gem; managersOnly?: boolean }
+
+// Grouped so the sidebar reads as front desk → money → catalogue → setup.
+const navGroups: { label?: string; items: NavItem[] }[] = [
+  {
+    items: [
+      { path: '/admin', label: 'Dashboard', icon: Gem },
+      { path: '/admin/schedule', label: 'Schedule', icon: CalendarClock },
+      { path: '/admin/requests', label: 'Requests', icon: MailOpen },
+      { path: '/admin/bookings', label: 'Bookings', icon: CalendarHeart },
+      { path: '/admin/pos', label: 'Point of sale', icon: ShoppingBag },
+    ],
+  },
+  {
+    label: 'Money',
+    items: [
+      { path: '/admin/invoices', label: 'Invoices', icon: ReceiptText },
+      { path: '/admin/sales', label: 'Sales history', icon: History },
+      { path: '/admin/vouchers', label: 'Vouchers & codes', icon: Ticket },
+      { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'Catalogue',
+    items: [
+      { path: '/admin/customers', label: 'Customers', icon: HeartHandshake },
+      { path: '/admin/services', label: 'Services', icon: Scissors },
+      { path: '/admin/deals', label: 'Deals', icon: Crown },
+      { path: '/admin/products', label: 'Products', icon: Package },
+    ],
+  },
+  {
+    label: 'Setup',
+    items: [
+      { path: '/admin/staff', label: 'Staff', icon: Sparkles },
+      { path: '/admin/chairs', label: 'Chairs', icon: Armchair },
+      { path: '/admin/team', label: 'Team & Access', icon: ShieldCheck, managersOnly: true },
+    ],
+  },
 ];
 
 interface AdminLayoutProps {
@@ -74,15 +102,21 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
           </button>
         </div>
 
-        <nav className="relative p-3 space-y-1 flex-1 overflow-y-auto">
-          {navItems.filter(item => !item.managersOnly || canManage).map(item => {
+        <nav className="relative p-3 flex-1 overflow-y-auto" aria-label="Admin">
+          {navGroups.map((group, gi) => (
+            <div key={group.label ?? gi} className={gi > 0 ? 'pt-3' : undefined}>
+              {group.label && (
+                <p className="px-4 pb-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold text-sidebar-foreground/45">{group.label}</p>
+              )}
+              <div className="space-y-1">
+          {group.items.filter(item => !item.managersOnly || canManage).map(item => {
             const active = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`group relative flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
                     ? 'text-sidebar-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.7)]'
                     : 'text-sidebar-foreground/75 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
@@ -103,6 +137,9 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
               </Link>
             );
           })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         <div className="relative mt-auto p-3 border-t border-sidebar-border/60">

@@ -96,7 +96,18 @@ export interface Invoice {
   status: InvoiceStatus;
   paidAt?: string;
   paymentMethod?: string;
+  /** Booking price before any discount code. */
+  subtotal: number;
+  discountCode?: string;
+  discountAmount: number;
+  giftVoucherId?: string;
+  /** Part of totalAmount covered by a gift voucher. */
+  voucherAmount: number;
 }
+
+/** What the customer still has to pay (total minus gift voucher cover). */
+export const amountDue = (x: { totalAmount?: number; total?: number; voucherAmount: number }) =>
+  Math.max(0, (x.totalAmount ?? x.total ?? 0) - x.voucherAmount);
 
 export interface InvoiceItem {
   name: string;
@@ -136,3 +147,102 @@ export const SERVICE_CATEGORIES = [
 export const STAFF_ROLES = [
   'Hairdresser', 'Makeup Artist', 'Nail Technician', 'Esthetician', 'Spa Therapist', 'Other'
 ];
+
+// ---------------- Vouchers, products & point of sale ----------------
+
+export type DiscountKind = 'percent' | 'fixed';
+export type DiscountAppliesTo = 'all' | 'services' | 'products';
+
+export interface DiscountCode {
+  id: string;
+  code: string;
+  description?: string;
+  kind: DiscountKind;
+  value: number;
+  appliesTo: DiscountAppliesTo;
+  minSpend: number;
+  startsOn?: string; // YYYY-MM-DD
+  endsOn?: string;   // YYYY-MM-DD
+  maxUses?: number;
+  uses: number;
+  status: EntityStatus;
+  createdAt: string;
+}
+
+export interface GiftVoucher {
+  id: string;
+  code: string;
+  initialValue: number;
+  balance: number;
+  recipientName?: string;
+  recipientPhone?: string;
+  purchaserCustomerId?: string;
+  saleId?: string;
+  expiresOn?: string; // YYYY-MM-DD
+  status: EntityStatus;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  brand?: string;
+  category: string;
+  sku?: string;
+  description?: string;
+  price: number;
+  cost?: number;
+  stock: number;
+  lowStockAt: number;
+  status: EntityStatus;
+}
+
+export interface SaleItem {
+  id: string;
+  kind: 'product' | 'voucher';
+  productId?: string;
+  giftVoucherId?: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  lineTotal: number;
+}
+
+export interface Sale {
+  id: string;
+  saleNumber: string;
+  customerId?: string;
+  customerName?: string;
+  staffId?: string;
+  subtotal: number;
+  discountCode?: string;
+  discountAmount: number;
+  total: number;
+  giftVoucherId?: string;
+  voucherAmount: number;
+  paymentMethod?: string;
+  status: 'paid' | 'void';
+  notes?: string;
+  createdAt: string;
+  voidedAt?: string;
+  voidReason?: string;
+  items: SaleItem[];
+}
+
+export type CartLine =
+  | { kind: 'product'; productId: string; quantity: number }
+  | { kind: 'voucher'; value: number; recipientName?: string; recipientPhone?: string; expiresOn?: string };
+
+export interface SaleInput {
+  items: CartLine[];
+  customerId?: string;
+  customerName?: string;
+  staffId?: string;
+  discountCode?: string;
+  giftVoucherCode?: string;
+  paymentMethod?: string;
+  notes?: string;
+}
+
+export const PRODUCT_CATEGORIES = ['Hair care', 'Skin care', 'Makeup', 'Nails', 'Tools', 'Gift sets', 'Other'];

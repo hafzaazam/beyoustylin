@@ -11,17 +11,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { friendlyError } from '@/lib/errors';
 import { formatDate, formatPKR } from '@/lib/format';
 import { downloadInvoicePdf, InvoicePdfData, invoicePdfUrl } from '@/lib/invoicePdf';
-import { Invoice } from '@/types/salon';
+import { Invoice, amountDue } from '@/types/salon';
+import { mapInvoice } from '@/lib/mappers';
 
 type BookingRow = Database['public']['Functions']['my_bookings']['Returns'][number];
 
-const mapInvoice = (r: Tables<'invoices'>): Invoice => ({
-  id: r.id, invoiceNumber: r.invoice_number, bookingId: r.booking_id,
-  customerId: r.customer_id, staffId: r.staff_id,
-  items: (Array.isArray(r.items) ? r.items : []) as unknown as Invoice['items'],
-  totalAmount: Number(r.total_amount), createdAt: r.created_at, status: r.status,
-  paidAt: r.paid_at ?? undefined, paymentMethod: r.payment_method ?? undefined,
-});
 
 const AccountInvoices = () => {
   const { user } = useAuth();
