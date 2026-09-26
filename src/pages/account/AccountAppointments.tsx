@@ -37,7 +37,7 @@ interface CardProps {
 const AppointmentCard = ({ b, label, onCancel, cancelBlockedReason }: CardProps) => {
   const start = new Date(b.start_time);
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 hover:shadow-[0_12px_30px_-16px_hsl(328_85%_55%/0.3)] transition-all flex flex-col">
+    <div className="rounded-2xl border border-border/60 bg-card p-5 hover:shadow-[var(--shadow-soft)] transition-all flex flex-col">
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0">
           <h3 className="font-heading text-lg font-semibold">{label}</h3>
@@ -133,7 +133,7 @@ const AccountAppointments = () => {
           <CardSkeleton /><CardSkeleton />
         </div>
       ) : bookings.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
+        <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-card/60">
           <CalendarCheck className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No appointments yet</p>
           <p className="text-sm text-muted-foreground mb-5">

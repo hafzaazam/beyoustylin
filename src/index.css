@@ -16,8 +16,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 300 60% 12%;
 
-    --primary: 328 85% 55%;
+    /* --primary is the readable pink: white text on it and pink text on the cream
+       background both pass WCAG AA (5.75:1 / 5.09:1). The original hot pink lives on
+       as --primary-bright for large accents, gradients, glows and chart fills. */
+    --primary: 328 82% 42%;
     --primary-foreground: 0 0% 100%;
+    --primary-bright: 328 85% 55%;
     --primary-glow: 335 92% 68%;
 
     --secondary: 335 80% 94%;
@@ -29,12 +33,12 @@
     --accent: 335 85% 90%;
     --accent-foreground: 300 60% 18%;
 
-    --destructive: 0 72% 52%;
+    --destructive: 0 70% 44%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 335 30% 88%;
     --input: 335 30% 88%;
-    --ring: 328 85% 55%;
+    --ring: 328 82% 42%;
 
     --radius: 0.875rem;
 
@@ -47,11 +51,12 @@
     --sidebar-border: 300 45% 22%;
     --sidebar-ring: 335 92% 62%;
 
-    --success: 152 45% 40%;
+    /* Semantic colours are deep enough to be used as small text on white and cream (≥5:1). */
+    --success: 152 55% 28%;
     --success-foreground: 0 0% 100%;
-    --warning: 32 88% 52%;
+    --warning: 28 90% 33%;
     --warning-foreground: 0 0% 100%;
-    --info: 214 70% 52%;
+    --info: 214 75% 40%;
     --info-foreground: 0 0% 100%;
 
     --gradient-primary: linear-gradient(135deg, hsl(300 70% 22%), hsl(328 85% 55%) 60%, hsl(335 92% 68%));
@@ -72,8 +77,9 @@
     --card-foreground: 340 40% 94%;
     --popover: 335 30% 12%;
     --popover-foreground: 340 40% 94%;
-    --primary: 334 45% 62%;
+    --primary: 334 55% 68%;
     --primary-foreground: 335 40% 10%;
+    --primary-bright: 334 60% 64%;
     --primary-glow: 334 55% 72%;
     --secondary: 335 25% 18%;
     --secondary-foreground: 340 40% 90%;
@@ -81,11 +87,19 @@
     --muted-foreground: 340 15% 60%;
     --accent: 335 30% 22%;
     --accent-foreground: 340 40% 94%;
-    --destructive: 0 62.8% 40%;
-    --destructive-foreground: 0 0% 100%;
+    /* Dark theme: semantic colours are light tints so they read as text on plum
+       surfaces (≥5:1); their foregrounds are dark. */
+    --destructive: 0 85% 70%;
+    --destructive-foreground: 335 40% 10%;
+    --success: 152 50% 55%;
+    --success-foreground: 335 40% 10%;
+    --warning: 36 90% 62%;
+    --warning-foreground: 335 40% 10%;
+    --info: 214 90% 72%;
+    --info-foreground: 335 40% 10%;
     --border: 335 20% 20%;
     --input: 335 20% 20%;
-    --ring: 334 45% 62%;
+    --ring: 334 55% 68%;
     --sidebar-background: 335 40% 8%;
     --sidebar-foreground: 340 30% 82%;
     --sidebar-primary: 334 45% 62%;
@@ -174,6 +188,12 @@
      without a positioned scroll container they escape it and widen the whole page on phones. */
   .overflow-x-auto {
     position: relative;
+  }
+
+  /* One focus style everywhere (custom chips and tabs used to fall back to browser blue). */
+  :where(a, button, [role='tab'], [role='button'], summary, [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 
   ::selection {

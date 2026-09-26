@@ -133,9 +133,12 @@ describe('vouchers & invoices pages', () => {
   it('shows discount, voucher and amount due on invoices', async () => {
     await renderAt(() => import('@/pages/InvoicesPage'), '/admin/invoices');
     expect((await screen.findAllByText('BYS-2026-00001')).length).toBeGreaterThan(0);
-    expect(screen.getByText(/EID20/)).toBeInTheDocument();
-    expect(screen.getByText('Due Rs. 700')).toBeInTheDocument();
-    fireEvent.click(screen.getAllByLabelText('Discount code or gift voucher')[0]);
+    // Phone cards and the desktop table are both in the DOM (CSS decides which shows).
+    expect(screen.getAllByText(/EID20/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Due Rs. 700').length).toBeGreaterThan(0);
+    const more = screen.getAllByRole('button', { name: 'More actions for BYS-2026-00001' })[0];
+    fireEvent.keyDown(more, { key: 'Enter' });
+    fireEvent.click(await screen.findByRole('menuitem', { name: /Discount code or gift voucher/ }));
     expect(await screen.findByText('Amount due')).toBeInTheDocument();
   }, 30_000);
 });

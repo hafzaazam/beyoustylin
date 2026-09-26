@@ -70,7 +70,7 @@ const AccountInvoices = () => {
           {[0, 1, 2].map(i => <div key={i} className="h-14 rounded-xl bg-muted animate-pulse" />)}
         </div>
       ) : invoices.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
+        <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-card/60">
           <FileText className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No invoices yet</p>
           <p className="text-sm text-muted-foreground">Invoices appear here once the salon books your appointment.</p>
@@ -81,7 +81,7 @@ const AccountInvoices = () => {
             Total paid: <span className="font-semibold text-foreground">{formatPKR(paidTotal)}</span>
             {dueTotal > 0 && <> · Still to pay: <span className="font-semibold text-foreground">{formatPKR(dueTotal)}</span></>}
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm">
+          <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card">
             <table className="w-full text-sm min-w-[560px]">
               <thead className="bg-muted/50 text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>

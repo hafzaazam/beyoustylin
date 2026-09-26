@@ -74,7 +74,7 @@ const MehndiPublic = () => {
 
           <div className="relative z-10 text-center max-w-4xl">
             <span
-              className="uppercase tracking-[0.4em] text-[11px] font-medium mb-8 block"
+              className="uppercase tracking-[0.2em] text-[11px] font-medium mb-8 block"
               style={{ color: C.gold }}
             >
               The House of Henna
@@ -99,8 +99,8 @@ const MehndiPublic = () => {
 
           <div className="absolute bottom-12 flex flex-col items-center gap-4">
             <span
-              className="text-[10px] uppercase tracking-widest"
-              style={{ color: `${C.gold}99` }}
+              className="text-xs uppercase tracking-widest"
+              style={{ color: C.gold }}
             >
               Scroll to Explore
             </span>
@@ -158,7 +158,7 @@ const MehndiPublic = () => {
                   />
                   <div className="absolute bottom-0 p-5 md:p-7 w-full">
                     <p
-                      className="text-[10px] mb-2 tracking-widest"
+                      className="text-xs mb-2 tracking-widest"
                       style={{ color: C.gold }}
                     >
                       {s.code} · {s.tag}
@@ -187,7 +187,7 @@ const MehndiPublic = () => {
                 The Catalogue
               </h2>
               <p
-                className="text-xs md:text-sm uppercase tracking-[0.3em]"
+                className="text-xs md:text-sm uppercase tracking-[0.18em]"
                 style={{ color: C.gold }}
               >
                 Artisanal Collections
@@ -232,7 +232,7 @@ const MehndiPublic = () => {
                       />
                       <div className="absolute top-4 left-4">
                         <span
-                          className="text-[10px] px-3 py-1 border tracking-widest uppercase font-medium"
+                          className="text-xs px-3 py-1 border tracking-widest uppercase font-medium"
                           style={{
                             background: C.ink,
                             borderColor: `${C.gold}4d`,

@@ -88,14 +88,26 @@ describe('point of sale pages', () => {
     expect((await screen.findByText('Rose Toner')).closest('button')).toBeDisabled();
   }, 30_000);
 
-  it('POS completes a sale and shows new voucher codes', async () => {
+  it('POS requires a seller before charging', async () => {
+    localStorage.removeItem('bys.pos.staffId');
     await renderPage(() => import('@/pages/PosPage'));
     fireEvent.click((await screen.findByText('Argan Hair Oil')).closest('button')!);
-    fireEvent.click(screen.getByRole('button', { name: /complete sale/i }));
+    fireEvent.click(screen.getByRole('button', { name: /charge rs\./i }));
+    expect(await screen.findByText(/Required, so the sale counts/)).toBeInTheDocument();
+    expect(createSale).not.toHaveBeenCalled();
+  }, 30_000);
+
+  it('POS completes a sale and shows new voucher codes', async () => {
+    // The seller is remembered per device from the previous sale.
+    localStorage.setItem('bys.pos.staffId', 'st1');
+    await renderPage(() => import('@/pages/PosPage'));
+    fireEvent.click((await screen.findByText('Argan Hair Oil')).closest('button')!);
+    fireEvent.click(screen.getByRole('button', { name: /charge rs\./i }));
     expect(await screen.findByText('Sale complete')).toBeInTheDocument();
     expect(screen.getByText('GV-7F3A9-C21B0')).toBeInTheDocument();
     expect(createSale).toHaveBeenCalledWith(expect.objectContaining({
       items: [{ kind: 'product', productId: 'p1', quantity: 1 }],
+      staffId: 'st1',
     }));
   }, 30_000);
 

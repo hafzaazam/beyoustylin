@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { CalendarHeart, CalendarClock, Pencil, Plus, Search, Trash2, Zap } from 'lucide-react';
+import { CalendarHeart, CalendarClock, MoreHorizontal, Pencil, Plus, ReceiptText, Search, Trash2, Zap } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import BookingFormDialog, { BookingFormMode } from '@/components/admin/BookingFormDialog';
 import { useConfirm } from '@/components/ConfirmDialog';
@@ -11,6 +11,9 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import { Booking, BookingStatus, BOOKING_STATUSES } from '@/types/salon';
@@ -37,6 +40,17 @@ const BookingsPage = () => {
   const [range, setRange] = useState<Range>('upcoming');
 
   const openForm = (mode: BookingFormMode, booking?: Booking) => { setEditing(booking); setFormMode(mode); };
+
+  // Keyboard shortcuts N / W land here as ?new=1 or ?new=walkin.
+  const [params, setParams] = useSearchParams();
+  useEffect(() => {
+    const intent = params.get('new');
+    if (!intent) return;
+    openForm(intent === 'walkin' ? 'walkin' : 'create');
+    const next = new URLSearchParams(params);
+    next.delete('new');
+    setParams(next, { replace: true });
+  }, [params, setParams]);
 
   const itemsLabel = (b: Booking) => {
     if (b.dealId) return salon.getDealById(b.dealId)?.name ?? 'Package';
@@ -103,6 +117,48 @@ const BookingsPage = () => {
 
   const noSetup = salon.staff.length === 0 || salon.chairs.length === 0;
 
+  const statusSelect = (booking: Booking, className = '') => (
+    <Select value={booking.status} onValueChange={v => changeStatus(booking, v as BookingStatus)}>
+      <SelectTrigger className={`text-xs ${className}`} aria-label={`Status: ${booking.status}. Change status`}>
+        <StatusBadge status={booking.status} />
+      </SelectTrigger>
+      <SelectContent>
+        {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{s === 'started' ? 'In progress' : capitalize(s)}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
+
+  const rowMenu = (booking: Booking, className = 'h-8 w-8') => {
+    const invoice = salon.getInvoiceByBookingId(booking.id);
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className={className} aria-label="More actions">
+            <MoreHorizontal className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          {invoice && (
+            <DropdownMenuItem asChild>
+              <Link to={`/admin/invoices?q=${encodeURIComponent(invoice.invoiceNumber)}`}>
+                <ReceiptText className="w-4 h-4 mr-2" />Open invoice {invoice.invoiceNumber.slice(-5)}
+              </Link>
+            </DropdownMenuItem>
+          )}
+          {canManage && (
+            <>
+              {invoice && <DropdownMenuSeparator />}
+              <DropdownMenuItem className="text-destructive focus:text-destructive" onSelect={() => remove(booking)}>
+                <Trash2 className="w-4 h-4 mr-2" />Delete booking
+              </DropdownMenuItem>
+            </>
+          )}
+          {!invoice && !canManage && <DropdownMenuItem disabled>No other actions</DropdownMenuItem>}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <AdminLayout
       title="Bookings"
@@ -136,9 +192,9 @@ const BookingsPage = () => {
             </button>
           ))}
         </div>
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative basis-full sm:basis-auto flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Customer, phone, booking # or invoice #" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          <Input data-shortcut="search" aria-label="Search bookings" placeholder="Customer, phone, booking # or invoice #" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={statusFilter} onValueChange={v => setStatusFilter(v as 'all' | BookingStatus)}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
@@ -166,7 +222,41 @@ const BookingsPage = () => {
         />
       ) : (
         <div className="bg-card rounded-xl border overflow-hidden">
-          <div className="overflow-x-auto">
+          <ul className="md:hidden divide-y divide-border" aria-label="Bookings">
+            {paged.pageItems.map(b => {
+              const customer = salon.getCustomerById(b.customerId);
+              const invoice = salon.getInvoiceByBookingId(b.id);
+              return (
+                <li key={b.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{customer?.name ?? 'Unknown'}</p>
+                      <p className="text-sm text-muted-foreground tabular-nums">
+                        {formatDate(b.startTime)} · {formatTime(b.startTime)}–{formatTime(b.endTime)}
+                      </p>
+                    </div>
+                    <p className="font-semibold tabular-nums whitespace-nowrap">{formatPKR(b.totalPrice)}</p>
+                  </div>
+                  <div className="text-sm">
+                    <p className="truncate">{itemsLabel(b)}</p>
+                    <p className="text-muted-foreground truncate">
+                      {salon.getStaffById(b.staffId)?.name ?? '—'} · {salon.getChairById(b.chairId)?.name ?? '—'}
+                      {invoice && <> · <span className="whitespace-nowrap">Invoice {invoice.status}</span></>}
+                    </p>
+                    {b.notes && <p className="text-muted-foreground truncate">“{b.notes}”</p>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {statusSelect(b, 'h-11 flex-1')}
+                    <Button variant="outline" className="h-11" onClick={() => openForm('edit', b)}>
+                      <Pencil className="w-4 h-4 mr-1.5" />Edit
+                    </Button>
+                    {rowMenu(b, 'h-11 w-11')}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50 text-left">
@@ -204,12 +294,7 @@ const BookingsPage = () => {
                       </td>
                       <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">{formatPKR(b.totalPrice)}</td>
                       <td className="px-4 py-3">
-                        <Select value={b.status} onValueChange={v => changeStatus(b, v as BookingStatus)}>
-                          <SelectTrigger className="h-8 text-xs w-32" aria-label="Change status"><StatusBadge status={b.status} /></SelectTrigger>
-                          <SelectContent>
-                            {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{s === 'started' ? 'In progress' : capitalize(s)}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
+                        {statusSelect(b, 'h-8 w-32')}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         {invoice ? (
@@ -221,14 +306,10 @@ const BookingsPage = () => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openForm('edit', b)} aria-label="Edit booking">
-                            <Pencil className="w-3.5 h-3.5" />
+                          <Button variant="ghost" size="sm" className="h-8" onClick={() => openForm('edit', b)}>
+                            <Pencil className="w-3.5 h-3.5 mr-1.5" />Edit
                           </Button>
-                          {canManage && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(b)} aria-label="Delete booking">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
+                          {rowMenu(b)}
                         </div>
                       </td>
                     </tr>

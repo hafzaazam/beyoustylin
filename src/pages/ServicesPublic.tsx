@@ -50,13 +50,12 @@ const ServicesPublic = () => {
       {/* Hero */}
       <section className="relative py-24 px-4 lg:px-8 border-b border-border/60">
         <div className="max-w-5xl mx-auto">
-          <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-6 font-medium">Signature Beauty Menu</p>
           <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-6">
-            Our <span className="italic text-primary/80">services.</span>
+            Our <span className="italic text-primary">services.</span>
           </h1>
           <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
-            Explore our complete menu of makeup, hair and skincare — thoughtfully priced and crafted.
-            Looking for mehndi? See our <Link to="/mehndi" className="text-primary/90 hover:underline">mehndi menu</Link>.
+            Explore our complete menu of makeup, hair and skincare, thoughtfully priced and crafted.
+            Looking for mehndi? See our <Link to="/mehndi" className="text-primary hover:underline">mehndi menu</Link>.
           </p>
         </div>
       </section>
@@ -82,7 +81,7 @@ const ServicesPublic = () => {
                   key={c}
                   onClick={() => setActiveCat(c)}
                   aria-pressed={activeCat === c}
-                  className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] whitespace-nowrap border-b transition-colors ${
+                  className={`px-3 py-1.5 text-xs uppercase tracking-[0.2em] whitespace-nowrap border-b transition-colors ${
                     activeCat === c
                       ? 'text-foreground border-primary'
                       : 'text-muted-foreground border-transparent hover:text-foreground'
@@ -106,12 +105,12 @@ const ServicesPublic = () => {
             </div>
           ) : grouped.length === 0 ? (
             <div className="text-center py-24 text-muted-foreground font-light">
-              {activeServices.length === 0 ? 'Our service menu is being updated — please check back soon.' : 'No services match your search.'}
+              {activeServices.length === 0 ? 'Our service menu is being updated. Please check back soon.' : 'No services match your search.'}
               {(query || activeCat !== 'All') && activeServices.length > 0 && (
                 <div className="mt-4">
                   <button
                     onClick={() => { setQuery(''); setActiveCat('All'); }}
-                    className="text-[10px] uppercase tracking-[0.2em] text-primary/90 hover:text-primary"
+                    className="text-xs uppercase tracking-[0.2em] text-primary hover:text-primary"
                   >
                     Clear filters
                   </button>
@@ -123,10 +122,9 @@ const ServicesPublic = () => {
               <div key={category}>
                 <div className="flex items-end justify-between mb-8 pb-6 border-b border-border/60">
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-2 font-medium">Category</p>
                     <h2 className="font-heading text-3xl md:text-4xl font-light tracking-tight">{category}</h2>
                   </div>
-                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground tabular-nums">
                     {String(items.length).padStart(2, '0')} · service{items.length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -134,8 +132,8 @@ const ServicesPublic = () => {
                   {items.map(s => (
                     <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
                       <div className="flex items-start justify-between">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
-                        <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums flex items-center gap-1">
+                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
+                        <span className="text-xs uppercase tracking-widest text-muted-foreground tabular-nums flex items-center gap-1">
                           <Clock className="w-3 h-3" strokeWidth={1.25} /> {formatDuration(s.duration)}
                           <FavoriteButton type="service" id={s.id} name={s.name} className="-my-1.5 -mr-1.5 ml-1" />
                         </span>
@@ -144,10 +142,10 @@ const ServicesPublic = () => {
                         {s.name}
                       </Link>
                       <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
-                        <span className="text-primary/90 font-medium text-sm tabular-nums">
+                        <span className="text-primary font-medium text-sm tabular-nums">
                           {s.price > 0 ? formatPKR(s.price) : 'On Request'}
                         </span>
-                        <Link to={`/?service=${s.id}#book`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors inline-flex items-center gap-1.5">
+                        <Link to={`/?service=${s.id}#book`} className="text-xs uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors inline-flex items-center gap-1.5">
                           Book <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
                         </Link>
                       </div>
@@ -163,7 +161,6 @@ const ServicesPublic = () => {
       {/* CTA */}
       <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-24 mt-8">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Reserve</p>
           <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Ready to book a session?</h2>
           <p className="text-muted-foreground mb-8 font-light">Reserve your appointment or ask our team for a personalised quote.</p>
           <div className="flex flex-wrap justify-center gap-3">

@@ -102,12 +102,12 @@ const AccountProfile = () => {
     <CustomerLayout title="Profile" subtitle="Personal details">
       {loading ? (
         <div className="grid lg:grid-cols-3 gap-6" aria-busy="true" aria-label="Loading profile">
-          <div className="lg:col-span-2 h-80 rounded-3xl bg-muted animate-pulse" />
+          <div className="lg:col-span-2 h-80 rounded-2xl bg-muted animate-pulse" />
           <div className="h-48 bg-muted animate-pulse" />
         </div>
       ) : (
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-3xl border border-border/60 bg-card/80 backdrop-blur-sm p-6 md:p-8">
+          <div className="lg:col-span-2 surface-panel p-6 md:p-8">
             <div className="flex items-center gap-4 mb-6 pb-6 border-b border-border/50">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.5)] shrink-0">
                 <User className="w-7 h-7" />
@@ -146,8 +146,8 @@ const AccountProfile = () => {
             </div>
           </div>
 
-          <div className="border border-border/60 p-8 bg-muted/30">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-medium">Glow Rewards</p>
+          <div className="surface-panel p-6 md:p-8">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-primary/80 font-medium">Glow Rewards</p>
             <p className="font-heading text-6xl font-light mt-4 tabular-nums">{loyalty}<span className="text-base opacity-60 ml-2">pts</span></p>
             <p className="text-sm text-muted-foreground mt-4 font-light leading-relaxed">Earn 10 points per completed visit. Save more with every glow-up.</p>
           </div>

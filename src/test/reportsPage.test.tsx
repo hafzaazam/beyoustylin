@@ -87,7 +87,7 @@ describe('Dashboard', () => {
     const { default: Dashboard } = await import('@/pages/Dashboard');
     render(<MemoryRouter><Dashboard /></MemoryRouter>);
     expect((await screen.findAllByText('Rs. 8,200')).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Low stock:/)).toBeInTheDocument();
-    expect(screen.getByText(/Argan Oil \(2 left\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Running low:/)).toBeInTheDocument();
+    expect(screen.getByText(/Argan Oil – 2 left/)).toBeInTheDocument();
   }, 30_000);
 });

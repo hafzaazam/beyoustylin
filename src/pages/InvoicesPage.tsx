@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Banknote, Download, Eye, FileSpreadsheet, Printer, ReceiptText, Search, TicketPercent, Undo2 } from 'lucide-react';
+import { Banknote, Download, Eye, FileSpreadsheet, MoreHorizontal, Printer, ReceiptText, Search, TicketPercent, Undo2 } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useConfirm } from '@/components/ConfirmDialog';
 import EmptyState from '@/components/EmptyState';
@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useSalon } from '@/context/SalonContext';
 import { Invoice, InvoiceStatus, PAYMENT_METHODS, amountDue } from '@/types/salon';
 import InvoiceCreditsDialog from '@/components/vouchers/InvoiceCreditsDialog';
@@ -22,8 +25,8 @@ import { downloadCsv, toCsv } from '@/lib/csv';
 const InvoicesPage = () => {
   const salon = useSalon();
   const { confirm, dialog: confirmDialog } = useConfirm();
-  const [params] = useSearchParams();
-  const [search, setSearch] = useState(params.get('q') ?? '');
+  const [params, setParams] = useSearchParams();
+  const [search, setSearch] = useState(params.get('q') ?? params.get('charge') ?? '');
   const [status, setStatus] = useState<'all' | InvoiceStatus>('all');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -34,6 +37,20 @@ const InvoicesPage = () => {
   const [creditsFor, setCreditsFor] = useState<string | null>(null);
 
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url); }, [preview]);
+
+  // "Charge" from the schedule lands here as ?charge=<invoice number>: open the payment step.
+  const chargeNumber = params.get('charge');
+  useEffect(() => {
+    if (!chargeNumber) return;
+    const inv = salon.invoices.find(i => i.invoiceNumber === chargeNumber);
+    if (!inv) return; // wait for invoices to load
+    if (inv.status === 'unpaid') { setMethod(PAYMENT_METHODS[0]); setPaying(inv); }
+    else toast.info(`${inv.invoiceNumber} is ${inv.status}.`);
+    const next = new URLSearchParams(params);
+    next.delete('charge');
+    next.set('q', chargeNumber);
+    setParams(next, { replace: true });
+  }, [chargeNumber, salon.invoices, params, setParams]);
 
   const pdfData = (inv: Invoice): InvoicePdfData => {
     const customer = salon.getCustomerById(inv.customerId);
@@ -104,6 +121,54 @@ const InvoicesPage = () => {
     onConfirm: async () => { if (await salon.markInvoiceUnpaid(inv.id)) toast.success('Invoice marked unpaid'); },
   });
 
+  const canApplyCredits = (inv: Invoice) => inv.status === 'unpaid' || (inv.status === 'paid' && inv.paymentMethod === 'Gift voucher');
+
+  const moneyLines = (inv: Invoice) => (
+    <>
+      {inv.discountAmount > 0 && (
+        <div className="text-xs text-success">−{formatPKR(inv.discountAmount)} {inv.discountCode}</div>
+      )}
+      {inv.voucherAmount > 0 && (
+        <div className="text-xs text-muted-foreground">Voucher {formatPKR(inv.voucherAmount)}</div>
+      )}
+      {inv.status === 'unpaid' && inv.voucherAmount > 0 && (
+        <div className="text-xs font-semibold text-foreground">Due {formatPKR(amountDue(inv))}</div>
+      )}
+    </>
+  );
+
+  const markPaidButton = (inv: Invoice, className = 'h-8') => (
+    <Button size="sm" variant="outline" className={className} onClick={() => { setMethod(PAYMENT_METHODS[0]); setPaying(inv); }}>
+      <Banknote className="w-3.5 h-3.5 mr-1.5" />Mark paid
+    </Button>
+  );
+
+  const invoiceMenu = (inv: Invoice, className = 'h-8 w-8') => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="icon" variant="ghost" className={className} aria-label={`More actions for ${inv.invoiceNumber}`}>
+          <MoreHorizontal className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {canApplyCredits(inv) && (
+          <DropdownMenuItem onSelect={() => setCreditsFor(inv.id)}>
+            <TicketPercent className="w-4 h-4 mr-2" />Discount code or gift voucher
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem onSelect={() => openPreview(inv)}><Eye className="w-4 h-4 mr-2" />Preview PDF</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => downloadInvoicePdf(pdfData(inv))}><Download className="w-4 h-4 mr-2" />Download PDF</DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => printInvoicePdf(pdfData(inv))}><Printer className="w-4 h-4 mr-2" />Print</DropdownMenuItem>
+        {inv.status === 'paid' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => markUnpaid(inv)}><Undo2 className="w-4 h-4 mr-2" />Mark unpaid</DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   const exportCsv = () => {
     const rows = filtered.map(inv => {
       const customer = salon.getCustomerById(inv.customerId);
@@ -148,9 +213,9 @@ const InvoicesPage = () => {
       </div>
 
       <div className="flex flex-wrap items-end gap-3 mb-4">
-        <div className="relative flex-1 min-w-[200px]">
+        <div className="relative basis-full sm:basis-auto flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Invoice #, customer or phone" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          <Input data-shortcut="search" aria-label="Search invoices" placeholder="Invoice #, customer or phone" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={status} onValueChange={v => setStatus(v as 'all' | InvoiceStatus)}>
           <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
@@ -186,7 +251,39 @@ const InvoicesPage = () => {
         />
       ) : (
         <div className="bg-card rounded-xl border overflow-hidden">
-          <div className="overflow-x-auto">
+          <ul className="md:hidden divide-y divide-border" aria-label="Invoices">
+            {paged.pageItems.map(inv => {
+              const customer = salon.getCustomerById(inv.customerId);
+              return (
+                <li key={inv.id} className="p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{customer?.name ?? 'Unknown'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-mono">{inv.invoiceNumber}</span> · {formatDate(inv.createdAt)}
+                      </p>
+                    </div>
+                    <div className="text-right tabular-nums shrink-0">
+                      <p className="font-semibold">{formatPKR(inv.totalAmount)}</p>
+                      {moneyLines(inv)}
+                    </div>
+                  </div>
+                  <p className="text-sm truncate">{inv.items.map(i => i.name).join(', ')}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 min-w-0 text-sm">
+                      <StatusBadge status={inv.status} />
+                      {inv.status === 'paid' && (
+                        <span className="ml-2 text-muted-foreground">{inv.paymentMethod}</span>
+                      )}
+                    </div>
+                    {inv.status === 'unpaid' && markPaidButton(inv, 'h-11')}
+                    {invoiceMenu(inv, 'h-11 w-11')}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50 text-left">
@@ -216,48 +313,18 @@ const InvoicesPage = () => {
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap">
                         <div className="font-semibold">{formatPKR(inv.totalAmount)}</div>
-                        {inv.discountAmount > 0 && (
-                          <div className="text-[11px] text-success">−{formatPKR(inv.discountAmount)} {inv.discountCode}</div>
-                        )}
-                        {inv.voucherAmount > 0 && (
-                          <div className="text-[11px] text-muted-foreground">Voucher {formatPKR(inv.voucherAmount)}</div>
-                        )}
-                        {inv.status === 'unpaid' && inv.voucherAmount > 0 && (
-                          <div className="text-[11px] font-semibold text-warning">Due {formatPKR(amountDue(inv))}</div>
-                        )}
+                        {moneyLines(inv)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <StatusBadge status={inv.status} />
                         {inv.status === 'paid' && (
-                          <div className="text-[11px] text-muted-foreground mt-1">{inv.paymentMethod}{inv.paidAt && ` · ${formatDate(inv.paidAt)}`}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{inv.paymentMethod}{inv.paidAt && ` · ${formatDate(inv.paidAt)}`}</div>
                         )}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          {(inv.status === 'unpaid' || (inv.status === 'paid' && inv.paymentMethod === 'Gift voucher')) && (
-                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setCreditsFor(inv.id)} aria-label="Discount code or gift voucher" title="Discount code / gift voucher">
-                              <TicketPercent className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          {inv.status === 'unpaid' && (
-                            <Button size="sm" variant="outline" className="h-8" onClick={() => { setMethod(PAYMENT_METHODS[0]); setPaying(inv); }}>
-                              <Banknote className="w-3.5 h-3.5 mr-1.5" />Mark paid
-                            </Button>
-                          )}
-                          {inv.status === 'paid' && (
-                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => markUnpaid(inv)} aria-label="Mark unpaid" title="Mark unpaid">
-                              <Undo2 className="w-3.5 h-3.5" />
-                            </Button>
-                          )}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openPreview(inv)} aria-label="Preview PDF" title="Preview">
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => downloadInvoicePdf(pdfData(inv))} aria-label="Download PDF" title="Download PDF">
-                            <Download className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => printInvoicePdf(pdfData(inv))} aria-label="Print" title="Print">
-                            <Printer className="w-3.5 h-3.5" />
-                          </Button>
+                          {inv.status === 'unpaid' && markPaidButton(inv)}
+                          {invoiceMenu(inv)}
                         </div>
                       </td>
                     </tr>
@@ -299,7 +366,7 @@ const InvoicesPage = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPaying(null)} disabled={busy}>Cancel</Button>
-            <Button onClick={confirmPaid} disabled={busy}>Mark paid</Button>
+            <Button onClick={confirmPaid} disabled={busy}>{paying ? `Record ${formatPKR(amountDue(paying))} · ${method}` : 'Mark paid'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

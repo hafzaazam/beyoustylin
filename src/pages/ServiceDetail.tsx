@@ -75,10 +75,10 @@ const ServiceDetail = () => {
       {/* Hero */}
       <section className="relative py-20 md:py-24 px-4 lg:px-8 border-b border-border/60">
         <div className="max-w-5xl mx-auto">
-          <Link to="/services" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors mb-10">
+          <Link to="/services" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors mb-10">
             <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.25} /> All services
           </Link>
-          <div className="flex items-center gap-4 mb-6 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="flex items-center gap-4 mb-6 text-xs uppercase tracking-[0.2em] text-muted-foreground">
             <span>{service.category}</span>
             <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
             <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" strokeWidth={1.25} /> {formatDuration(service.duration)}</span>
@@ -93,7 +93,7 @@ const ServiceDetail = () => {
             {service.price > 0 ? (
               <>
                 <span className="font-heading text-4xl md:text-5xl font-light text-foreground tabular-nums">{formatPKR(service.price)}</span>
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">/ session</span>
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">/ session</span>
               </>
             ) : (
               <span className="font-heading text-3xl font-light text-foreground">Price on Request</span>
@@ -118,13 +118,12 @@ const ServiceDetail = () => {
         <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-16">
           <div className="md:col-span-2 space-y-16">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">About</p>
               <h2 className="font-heading text-3xl font-light tracking-tight mb-6">About this service.</h2>
               {service.description ? (
                 <p className="text-muted-foreground leading-relaxed font-light whitespace-pre-line">{service.description}</p>
               ) : (
               <p className="text-muted-foreground leading-relaxed font-light">
-                Enjoy our signature <span className="text-foreground italic">{service.name.toLowerCase()}</span> —
+                Enjoy our signature <span className="text-foreground italic">{service.name.toLowerCase()}</span>,
                 a {service.category.toLowerCase()} experience crafted by our expert team. Every session is personalised
                 to your features, skin tone and preferences, using premium products for a flawless, long-lasting finish.
               </p>
@@ -132,12 +131,11 @@ const ServiceDetail = () => {
             </div>
 
             <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Included</p>
               <h2 className="font-heading text-3xl font-light tracking-tight mb-8">What's included.</h2>
               <ul className="grid sm:grid-cols-2 border-t border-l border-border/60">
                 {highlights.map(h => (
                   <li key={h.label} className="flex items-start gap-3 p-5 border-r border-b border-border/60">
-                    <h.icon className="w-4 h-4 text-primary/80 mt-0.5 shrink-0" strokeWidth={1.25} />
+                    <h.icon className="w-4 h-4 text-primary mt-0.5 shrink-0" strokeWidth={1.25} />
                     <span className="text-sm font-light">{h.label}</span>
                   </li>
                 ))}
@@ -146,7 +144,6 @@ const ServiceDetail = () => {
 
             {relatedInDeals.length > 0 && (
               <div>
-                <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Packages</p>
                 <h2 className="font-heading text-3xl font-light tracking-tight mb-8">Available in packages.</h2>
                 <div className="border-t border-border/60">
                   {relatedInDeals.map(d => (
@@ -156,10 +153,10 @@ const ServiceDetail = () => {
                       className="flex items-center justify-between p-5 border-b border-border/60 hover:bg-muted/30 transition-colors group"
                     >
                       <div className="flex items-center gap-4">
-                        <Tag className="w-4 h-4 text-primary/80" strokeWidth={1.25} />
+                        <Tag className="w-4 h-4 text-primary" strokeWidth={1.25} />
                         <div>
                           <div className="font-heading text-lg font-light">{d.name}</div>
-                          <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">
+                          <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">
                             {formatDuration(d.totalDuration)} · {formatPKR(d.discountedPrice)}
                           </div>
                         </div>
@@ -175,18 +172,17 @@ const ServiceDetail = () => {
           {/* Sticky booking card */}
           <aside className="md:sticky md:top-24 h-fit">
             <div className="border border-border/60 p-8">
-              <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-3 font-medium">Reserve</p>
               <h3 className="font-heading text-2xl font-light tracking-tight mb-1">{service.name}</h3>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-6">{service.category}</div>
+              <div className="text-xs uppercase tracking-widest text-muted-foreground mb-6">{service.category}</div>
 
               <div className="flex justify-between items-center py-3 border-t border-border/60 text-sm">
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Price</span>
-                <span className="font-medium text-primary/90 tabular-nums">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Price</span>
+                <span className="font-medium text-primary tabular-nums">
                   {service.price > 0 ? formatPKR(service.price) : 'On Request'}
                 </span>
               </div>
               <div className="flex justify-between items-center py-3 border-t border-border/60 text-sm">
-                <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Duration</span>
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Duration</span>
                 <span className="font-medium tabular-nums">{formatDuration(service.duration)}</span>
               </div>
 
@@ -195,7 +191,7 @@ const ServiceDetail = () => {
                   Book Now
                 </Button>
               </Link>
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground text-center mt-4">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground text-center mt-4">
                 Pre-selected on the form.
               </p>
             </div>
@@ -207,7 +203,6 @@ const ServiceDetail = () => {
       {related.length > 0 && (
         <section className="pb-24 px-4 lg:px-8 border-t border-border/60 pt-20">
           <div className="max-w-5xl mx-auto">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">More</p>
             <h2 className="font-heading text-3xl md:text-4xl font-light tracking-tight mb-10">More in {service.category.toLowerCase()}.</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/60">
               {related.map(s => (
@@ -216,13 +211,13 @@ const ServiceDetail = () => {
                   to={`/services/${s.id}`}
                   className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors"
                 >
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
                   <h3 className="font-heading text-2xl font-light tracking-tight group-hover:text-primary transition-colors">{s.name}</h3>
                   <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
-                    <span className="text-primary/90 font-medium text-sm tabular-nums">
+                    <span className="text-primary font-medium text-sm tabular-nums">
                       {s.price > 0 ? formatPKR(s.price) : 'On Request'}
                     </span>
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{formatDuration(s.duration)}</span>
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">{formatDuration(s.duration)}</span>
                   </div>
                 </Link>
               ))}

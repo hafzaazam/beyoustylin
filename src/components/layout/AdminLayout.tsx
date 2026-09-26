@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useAdminShortcuts } from '@/hooks/useAdminShortcuts';
+import ShortcutsDialog from '@/components/admin/ShortcutsDialog';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Gem, CalendarHeart, Scissors, Crown, Sparkles, HeartHandshake,
   ReceiptText, Menu, X, ChevronRight, MailOpen, LogOut, CalendarClock, Armchair, ShieldCheck, ExternalLink,
-  ShoppingBag, Package, Ticket, BarChart3, History,
+  ShoppingBag, Package, Ticket, BarChart3, History, Keyboard, WifiOff,
 } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,6 +69,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
   const { user, roles, signOut, canManage } = useAuth();
   const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
   usePageTitle(title);
+  const { helpOpen, setHelpOpen } = useAdminShortcuts();
 
   const handleSignOut = async () => {
     await signOut();
@@ -75,6 +78,12 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
 
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"
+      >
+        Skip to content
+      </a>
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -85,19 +94,15 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
         className={`print:hidden fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col overflow-hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: 'var(--gradient-sidebar)' }}
       >
-        {/* Ambient pink glow accents */}
-        <div className="pointer-events-none absolute -top-24 -right-16 h-56 w-56 rounded-full bg-sidebar-primary/25 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 -left-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
-
         <div className="relative flex items-center gap-3 px-5 py-4 border-b border-sidebar-border/60">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
+          <div className="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center bg-white/95 ring-1 ring-sidebar-primary/40 overflow-hidden">
             <Logo className="w-10 h-10" />
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-accent-foreground">BeYou Stylin</h1>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">Admin Suite</p>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-sidebar-primary font-semibold">Admin Suite</p>
           </div>
-          <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
+          <button className="ml-auto -mr-2 lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground transition-colors" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -106,7 +111,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
           {navGroups.map((group, gi) => (
             <div key={group.label ?? gi} className={gi > 0 ? 'pt-3' : undefined}>
               {group.label && (
-                <p className="px-4 pb-1.5 text-[10px] uppercase tracking-[0.2em] font-semibold text-sidebar-foreground/45">{group.label}</p>
+                <p className="px-4 pb-1.5 text-[11px] uppercase tracking-[0.16em] font-semibold text-sidebar-foreground/60">{group.label}</p>
               )}
               <div className="space-y-1">
           {group.items.filter(item => !item.managersOnly || canManage).map(item => {
@@ -116,20 +121,21 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className={`group relative flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                aria-current={active ? 'page' : undefined}
+                className={`group relative flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring ${
                   active
-                    ? 'text-sidebar-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.7)]'
-                    : 'text-sidebar-foreground/75 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
+                    ? 'text-sidebar-primary-foreground font-semibold'
+                    : 'text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60'
                 }`}
                 style={active ? { background: 'var(--gradient-primary)' } : undefined}
               >
-                {active && (
-                  <span className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-1.5 rounded-r-full bg-sidebar-primary shadow-[0_0_12px_hsl(335_92%_62%/0.9)]" />
-                )}
-                <item.icon className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary group-hover:scale-110'}`} />
+                <item.icon className={`w-4 h-4 shrink-0 transition-transform ${active ? 'text-sidebar-primary-foreground' : 'text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground'}`} />
                 <span className="flex-1">{item.label}</span>
                 {item.path === '/admin/requests' && pendingRequests > 0 && (
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ${active ? 'bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground ring-sidebar-primary-foreground/30' : 'bg-primary text-primary-foreground ring-primary/40 shadow-[0_0_10px_hsl(328_85%_55%/0.5)]'}`}>
+                  <span
+                    className={`min-w-[1.25rem] text-center text-[11px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-sidebar-primary-foreground/20 text-sidebar-primary-foreground' : 'bg-sidebar-primary text-sidebar-primary-foreground'}`}
+                    aria-label={`${pendingRequests} pending`}
+                  >
                     {pendingRequests}
                   </span>
                 )}
@@ -149,7 +155,15 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
           >
             <ExternalLink className="w-3.5 h-3.5" /> View public site
           </Link>
-          <div className="flex items-center gap-3 pl-3 pr-1.5 py-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10 backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => setHelpOpen(true)}
+            className="hidden lg:flex w-full items-center gap-3 px-4 py-2 mb-1 rounded-xl text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60 transition-colors"
+          >
+            <Keyboard className="w-3.5 h-3.5" /> Keyboard shortcuts
+            <kbd className="ml-auto rounded border border-sidebar-border px-1.5 text-[11px] font-sans text-sidebar-foreground/70">?</kbd>
+          </button>
+          <div className="flex items-center gap-3 pl-3 pr-1 py-1.5 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10">
             <div
               className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
               style={{ background: 'var(--gradient-primary)' }}
@@ -158,13 +172,13 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium text-sidebar-accent-foreground truncate">{user?.email}</p>
-              <p className="text-[10px] text-sidebar-primary/80 uppercase tracking-wider font-semibold">{roles[0] || 'staff'}</p>
+              <p className="text-[11px] text-sidebar-primary capitalize font-semibold">{roles[0] || 'staff'}</p>
             </div>
             <button
               onClick={handleSignOut}
               aria-label="Sign out"
               title="Sign out"
-              className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-lg text-sidebar-foreground/70 hover:bg-destructive/25 hover:text-sidebar-accent-foreground transition-colors"
+              className="shrink-0 w-11 h-11 inline-flex items-center justify-center rounded-lg text-sidebar-foreground/70 hover:bg-destructive/25 hover:text-sidebar-accent-foreground transition-colors"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -174,47 +188,38 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="print:hidden sticky top-0 z-30 relative overflow-hidden px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
-          {/* Top hairline gradient */}
-          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-          {/* Soft pink glow */}
-          <span className="pointer-events-none absolute -top-16 left-1/4 h-32 w-64 rounded-full bg-primary/20 blur-3xl" />
-
+        <header className="print:hidden sticky top-0 z-30 px-4 lg:px-8 py-3 lg:py-4 flex items-center gap-3 lg:gap-4 border-b border-border bg-background/90 backdrop-blur-md">
           <button
-            className="relative lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
+            className="relative -ml-2 lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
-          <div className="relative flex-1 min-w-0 pl-4">
-            <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1.5 rounded-full shadow-[0_0_12px_hsl(328_85%_55%/0.6)]"
-              style={{ background: 'var(--gradient-primary)' }}
-            />
-            <p className="text-[10px] uppercase tracking-[0.28em] font-bold text-primary leading-none mb-1.5">
-              BeYou Stylin
-            </p>
-            <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">
+          <div className="relative flex-1 min-w-0">
+            <h2 className="font-heading text-2xl lg:text-[1.75rem] font-semibold text-foreground tracking-tight leading-tight truncate">
               {title}
             </h2>
           </div>
 
           <div className="relative flex items-center gap-2">
             {actions && <div className="hidden sm:flex items-center gap-2">{actions}</div>}
-            <ThemeToggle />
-            <div
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/70 border border-primary/15 backdrop-blur-sm shadow-sm"
-              title={live ? 'Changes from other devices appear automatically' : 'Live updates unavailable — refresh to see changes from other devices'}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${live ? 'bg-success animate-pulse shadow-[0_0_8px_hsl(152_45%_40%/0.8)]' : 'bg-muted-foreground/50'}`} />
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{live ? 'Live' : 'Offline'}</span>
-            </div>
+            {/* Only speak up when something is wrong: live updates are the normal state. */}
+            {privateLoaded && !live && (
+              <div
+                role="status"
+                className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-warning/40 bg-warning/10 text-xs font-medium text-foreground"
+              >
+                <WifiOff className="w-3.5 h-3.5 text-warning" aria-hidden />
+                Offline — refresh to see changes from other devices
+              </div>
+            )}
+            <ThemeToggle className="max-lg:!w-11 max-lg:!h-11" />
           </div>
         </header>
 
 
-        <main className="flex-1 p-4 lg:p-8 animate-fade-in">
+        <main id="main" tabIndex={-1} className="flex-1 p-4 lg:p-8 animate-fade-in focus:outline-none">
           {actions && <div className="flex sm:hidden flex-wrap gap-2 mb-4">{actions}</div>}
           {privateLoaded ? children : (
             <div className="space-y-4" aria-busy="true" aria-label="Loading">
@@ -227,6 +232,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
           )}
         </main>
       </div>
+      <ShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 };

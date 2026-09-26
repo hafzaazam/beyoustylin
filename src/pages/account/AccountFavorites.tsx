@@ -21,7 +21,7 @@ const AccountFavorites = () => {
           {[0, 1, 2].map(i => <div key={i} className="h-32 rounded-2xl bg-muted animate-pulse" />)}
         </div>
       ) : isEmpty ? (
-        <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
+        <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-card/60">
           <Heart className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No favorites yet</p>
           <p className="text-sm text-muted-foreground mb-4">Tap the heart on any service or package to save it here.</p>
@@ -37,10 +37,10 @@ const AccountFavorites = () => {
               <h3 className="text-xs uppercase tracking-widest font-bold text-primary mb-3">Services</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {favServices.map(s => (
-                  <div key={s.id} className="rounded-2xl border border-border/60 bg-card/80 p-5 hover:shadow-[0_12px_30px_-16px_hsl(328_85%_55%/0.3)] transition-all">
+                  <div key={s.id} className="rounded-2xl border border-border/60 bg-card/80 p-5 hover:shadow-[var(--shadow-soft)] transition-all">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{s.category}</p>
+                        <p className="text-[11px] uppercase font-bold tracking-wider text-muted-foreground">{s.category}</p>
                         <h3 className="font-heading text-lg font-semibold">{s.name}</h3>
                       </div>
                       <button onClick={() => toggle('service', s.id)} className="text-primary hover:scale-110 transition-transform" aria-label={`Remove ${s.name} from favorites`}>
@@ -64,7 +64,7 @@ const AccountFavorites = () => {
                   <div key={d.id} className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/5 to-accent/10 p-5">
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <div className="inline-flex items-center gap-1 text-[10px] uppercase font-bold tracking-wider text-primary mb-1">
+                        <div className="inline-flex items-center gap-1 text-[11px] uppercase font-bold tracking-wider text-primary mb-1">
                           <Sparkles className="w-3 h-3" /> Package
                         </div>
                         <h3 className="font-heading text-lg font-semibold">{d.name}</h3>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AlertTriangle, Check, ChevronsUpDown, Loader2, UserPlus, Users } from 'lucide-react';
 import { useSalon } from '@/context/SalonContext';
@@ -43,6 +43,19 @@ interface BookingFormDialogProps {
   onSaved?: (booking: Booking) => void;
 }
 
+type FieldKey = 'customer' | 'newName' | 'newPhone' | 'newEmail' | 'services' | 'staff' | 'chair' | 'start' | 'customTotal';
+type FieldErrors = Partial<Record<FieldKey, string>>;
+
+/** Which inline error a form field clears when the user edits it. */
+const FIELD_FOR: Partial<Record<string, FieldKey>> = {
+  customerId: 'customer', newName: 'newName', newPhone: 'newPhone', newEmail: 'newEmail',
+  serviceIds: 'services', dealId: 'services', useDeal: 'services',
+  staffId: 'staff', chairId: 'chair', startLocal: 'start', customTotal: 'customTotal',
+};
+
+const FieldError = ({ id, message }: { id: string; message?: string }) =>
+  message ? <p id={id} className="text-xs font-medium text-destructive">{message}</p> : null;
+
 interface FormState {
   customerMode: 'existing' | 'new';
   customerId: string;
@@ -80,11 +93,16 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
   const [error, setError] = useState<string | null>(null);
   const [customerOpen, setCustomerOpen] = useState(false);
   const [serviceFilter, setServiceFilter] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const customerTriggerRef = useRef<HTMLButtonElement>(null);
+  const newNameRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
   // (Re)initialise whenever the dialog opens.
   useEffect(() => {
     if (!open) return;
     setError(null);
+    setFieldErrors({});
     setServiceFilter('');
     if (mode === 'edit' && booking) {
       setForm({
@@ -123,7 +141,14 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm(p => ({ ...p, [key]: value }));
+  const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setForm(p => ({ ...p, [key]: value }));
+    const field = FIELD_FOR[key as string];
+    if (field) setFieldErrors(e => (e[field] ? { ...e, [field]: undefined } : e));
+  };
+  const errProps = (field: FieldKey) => fieldErrors[field]
+    ? { 'aria-invalid': true as const, 'aria-describedby': `bf-${field}-error` }
+    : {};
 
   const activeCustomers = salon.customers.filter(c => c.status === 'active' || c.id === form.customerId);
   const activeStaff = salon.staff.filter(s => s.status === 'active' || s.id === form.staffId);
@@ -147,6 +172,19 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
     ? salon.checkConflict({ staffId: form.staffId, chairId: form.chairId, startTime: startIso, duration: totals.duration, excludeId: booking?.id })
     : null;
   const inPast = mode === 'create' && startIso && new Date(startIso).getTime() < Date.now() - 5 * 60_000;
+  // With a time and duration known, a single free chair is the obvious choice: pick it.
+  const freeChairIds = useMemo(() => {
+    if (!startIso || totals.duration <= 0) return [];
+    return salon.chairs
+      .filter(c => c.status === 'active')
+      .filter(c => !salon.checkConflict({ staffId: '__none__', chairId: c.id, startTime: startIso, duration: totals.duration, excludeId: booking?.id }))
+      .map(c => c.id);
+  }, [salon, startIso, totals.duration, booking?.id]);
+  useEffect(() => {
+    if (!open || form.chairId || freeChairIds.length !== 1) return;
+    set('chairId', freeChairIds[0]);
+  }, [open, form.chairId, freeChairIds]);
+
   const invoice = booking ? salon.getInvoiceByBookingId(booking.id) : undefined;
   const invoicePaid = invoice?.status === 'paid';
   const selectedCustomer = salon.getCustomerById(form.customerId);
@@ -154,14 +192,36 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
   const toggleService = (id: string) =>
     set('serviceIds', form.serviceIds.includes(id) ? form.serviceIds.filter(s => s !== id) : [...form.serviceIds, id]);
 
+  /** Every problem at once, shown next to its field. */
+  const validate = (): FieldErrors => {
+    const e: FieldErrors = {};
+    if (form.customerMode === 'existing' && !form.customerId) e.customer = 'Choose a customer, or add a new one.';
+    if (form.customerMode === 'new') {
+      const parsed = customerSchema.safeParse({ name: form.newName, phone: form.newPhone, email: form.newEmail });
+      if (!parsed.success) {
+        for (const issue of parsed.error.issues) {
+          const key = issue.path[0] === 'name' ? 'newName' : issue.path[0] === 'phone' ? 'newPhone' : issue.path[0] === 'email' ? 'newEmail' : undefined;
+          if (key && !e[key]) e[key] = issue.message;
+        }
+      }
+    }
+    if (form.useDeal ? !form.dealId : form.serviceIds.length === 0) e.services = form.useDeal ? 'Choose a package.' : 'Select at least one service.';
+    if (!form.staffId) e.staff = 'Choose who will do it.';
+    if (!form.chairId) e.chair = activeChairs.length ? 'Choose a chair.' : 'Add a chair on the Chairs page first.';
+    if (!form.startLocal) e.start = 'Choose a start time.';
+    if (customTotal !== undefined && (Number.isNaN(customTotal) || customTotal < 0)) e.customTotal = 'Enter zero or more, or leave it empty.';
+    return e;
+  };
+
   const submit = async () => {
     setError(null);
-    if (form.customerMode === 'existing' && !form.customerId) return setError('Choose a customer, or add a new one.');
-    if (!form.staffId) return setError('Choose a staff member.');
-    if (!form.chairId) return setError('Choose a chair.');
-    if (!form.startLocal) return setError('Choose a start time.');
-    if (form.useDeal ? !form.dealId : form.serviceIds.length === 0) return setError('Select at least one service or a package.');
-    if (customTotal !== undefined && (Number.isNaN(customTotal) || customTotal < 0)) return setError('Custom total must be zero or more.');
+    const problems = validate();
+    setFieldErrors(problems);
+    const count = Object.keys(problems).length;
+    if (count > 0) {
+      setError(count === 1 ? 'Fix the highlighted field.' : `Fix the ${count} highlighted fields.`);
+      return;
+    }
     if (conflict) return setError(conflictMessage(conflict));
 
     setSaving(true);
@@ -169,8 +229,7 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
       let customerId = form.customerId;
       if (form.customerMode === 'new') {
         const parsed = customerSchema.safeParse({ name: form.newName, phone: form.newPhone, email: form.newEmail });
-        const problem = firstError(parsed);
-        if (problem || !parsed.success) return setError(problem);
+        if (!parsed.success) return setError(firstError(parsed));
         const existing = salon.findCustomerByPhone(parsed.data.phone);
         if (existing) {
           customerId = existing.id;
@@ -257,9 +316,18 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
 
   return (
     <Dialog open={open} onOpenChange={o => { if (!saving) onOpenChange(o); }}>
-      <DialogContent className="max-w-2xl p-0 gap-0 max-h-[92vh] flex flex-col">
+      <DialogContent
+        className="max-w-2xl p-0 gap-0 max-h-[92vh] flex flex-col"
+        // Start where a receptionist starts: who is it for?
+        onOpenAutoFocus={e => {
+          e.preventDefault();
+          const target = mode === 'edit' ? titleRef.current
+            : form.customerMode === 'new' ? newNameRef.current : customerTriggerRef.current;
+          target?.focus();
+        }}
+      >
         <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="font-heading text-2xl">{heading}</DialogTitle>
+          <DialogTitle ref={titleRef} tabIndex={-1} className="font-heading text-2xl focus:outline-none">{heading}</DialogTitle>
           <DialogDescription>
             {description ?? (mode === 'walkin'
               ? 'For customers being served right now. Saved as completed with an invoice.'
@@ -278,7 +346,7 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
           {/* Customer */}
           <section className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Customer *</Label>
+              <Label htmlFor={form.customerMode === 'existing' ? 'bf-customer' : 'bf-new-name'}>Customer</Label>
               {mode !== 'edit' && (
                 <button
                   type="button"
@@ -294,7 +362,11 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
             {form.customerMode === 'existing' ? (
               <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" aria-expanded={customerOpen} className="w-full justify-between font-normal">
+                  <Button
+                    ref={customerTriggerRef} id="bf-customer" variant="outline" role="combobox" aria-expanded={customerOpen}
+                    className={cn('w-full justify-between font-normal', fieldErrors.customer && 'border-destructive')}
+                    {...errProps('customer')}
+                  >
                     {selectedCustomer ? `${selectedCustomer.name} · ${selectedCustomer.phone}` : <span className="text-muted-foreground">Search by name or phone…</span>}
                     <ChevronsUpDown className="w-4 h-4 opacity-50" />
                   </Button>
@@ -322,40 +394,30 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
               </Popover>
             ) : (
               <div className="grid sm:grid-cols-3 gap-2">
-                <Input placeholder="Full name" value={form.newName} onChange={e => set('newName', e.target.value)} maxLength={100} />
-                <Input placeholder="Phone" type="tel" value={form.newPhone} onChange={e => set('newPhone', e.target.value)} maxLength={20} />
-                <Input placeholder="Email (optional)" type="email" value={form.newEmail} onChange={e => set('newEmail', e.target.value)} maxLength={255} />
+                <div className="space-y-1">
+                  <Label htmlFor="bf-new-name" className="text-xs text-muted-foreground">Full name</Label>
+                  <Input ref={newNameRef} id="bf-new-name" value={form.newName} onChange={e => set('newName', e.target.value)} maxLength={100} autoComplete="off" {...errProps('newName')} />
+                  <FieldError id="bf-newName-error" message={fieldErrors.newName} />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bf-new-phone" className="text-xs text-muted-foreground">Phone</Label>
+                  <Input id="bf-new-phone" type="tel" inputMode="tel" placeholder="03XX XXXXXXX" value={form.newPhone} onChange={e => set('newPhone', e.target.value)} maxLength={20} {...errProps('newPhone')} />
+                  <FieldError id="bf-newPhone-error" message={fieldErrors.newPhone} />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="bf-new-email" className="text-xs text-muted-foreground">Email (optional)</Label>
+                  <Input id="bf-new-email" type="email" value={form.newEmail} onChange={e => set('newEmail', e.target.value)} maxLength={255} {...errProps('newEmail')} />
+                  <FieldError id="bf-newEmail-error" message={fieldErrors.newEmail} />
+                </div>
               </div>
             )}
-          </section>
-
-          {/* Who / where / when */}
-          <section className="grid sm:grid-cols-3 gap-3">
-            <div className="space-y-1.5">
-              <Label>Staff *</Label>
-              <Select value={form.staffId} onValueChange={v => set('staffId', v)}>
-                <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
-                <SelectContent>{activeStaff.map(s => <SelectItem key={s.id} value={s.id}>{s.name} · {s.role}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Chair *</Label>
-              <Select value={form.chairId} onValueChange={v => set('chairId', v)}>
-                <SelectTrigger><SelectValue placeholder={activeChairs.length ? 'Select chair' : 'No chairs yet'} /></SelectTrigger>
-                <SelectContent>{activeChairs.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-              </Select>
-              {activeChairs.length === 0 && <p className="text-xs text-muted-foreground">Add chairs under Chairs first.</p>}
-            </div>
-            <div className="space-y-1.5">
-              <Label>Start *</Label>
-              <Input type="datetime-local" step={300} value={form.startLocal} onChange={e => set('startLocal', e.target.value)} />
-            </div>
+            <FieldError id="bf-customer-error" message={fieldErrors.customer} />
           </section>
 
           {/* What */}
           <section className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>{form.useDeal ? 'Package *' : 'Services *'}</Label>
+              <Label id="bf-services-label">{form.useDeal ? 'Package' : 'Services'}</Label>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 Use a package
                 <Switch checked={form.useDeal} onCheckedChange={v => setForm(p => ({ ...p, useDeal: v, dealId: '', serviceIds: [] }))} />
@@ -363,7 +425,7 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
             </div>
             {form.useDeal ? (
               <Select value={form.dealId} onValueChange={v => set('dealId', v)}>
-                <SelectTrigger><SelectValue placeholder="Select package" /></SelectTrigger>
+                <SelectTrigger aria-labelledby="bf-services-label" className={cn(fieldErrors.services && 'border-destructive')} {...errProps('services')}><SelectValue placeholder="Select package" /></SelectTrigger>
                 <SelectContent>
                   {activeDeals.map(d => (
                     <SelectItem key={d.id} value={d.id}>{d.name} — {formatPKR(d.discountedPrice)} · {formatDuration(d.totalDuration)}</SelectItem>
@@ -373,9 +435,12 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
             ) : (
               <>
                 {activeServices.length > 8 && (
-                  <Input placeholder="Filter services…" value={serviceFilter} onChange={e => setServiceFilter(e.target.value)} className="h-9" />
+                  <Input placeholder="Filter services…" aria-label="Filter services" value={serviceFilter} onChange={e => setServiceFilter(e.target.value)} className="h-9" />
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+                <div
+                  role="group" aria-labelledby="bf-services-label" {...errProps('services')}
+                  className={cn('grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1 rounded-lg', fieldErrors.services && 'ring-1 ring-destructive p-1')}
+                >
                   {filteredServices.map(s => {
                     const selected = form.serviceIds.includes(s.id);
                     return (
@@ -404,21 +469,56 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
                 </div>
               </>
             )}
+            <FieldError id="bf-services-error" message={fieldErrors.services} />
+          </section>
+
+          {/* Who / where / when */}
+          <section className="grid sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="bf-staff">Staff</Label>
+              <Select value={form.staffId} onValueChange={v => set('staffId', v)}>
+                <SelectTrigger id="bf-staff" className={cn(fieldErrors.staff && 'border-destructive')} {...errProps('staff')}><SelectValue placeholder="Select staff" /></SelectTrigger>
+                <SelectContent>{activeStaff.map(s => <SelectItem key={s.id} value={s.id}>{s.name} · {s.role}</SelectItem>)}</SelectContent>
+              </Select>
+              <FieldError id="bf-staff-error" message={fieldErrors.staff} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bf-chair">Chair</Label>
+              <Select value={form.chairId} onValueChange={v => set('chairId', v)}>
+                <SelectTrigger id="bf-chair" className={cn(fieldErrors.chair && 'border-destructive')} {...errProps('chair')}><SelectValue placeholder={activeChairs.length ? 'Select chair' : 'No chairs yet'} /></SelectTrigger>
+                <SelectContent>
+                  {activeChairs.map(c => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}{startIso && totals.duration > 0 && !freeChairIds.includes(c.id) ? ' · busy' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {fieldErrors.chair
+                ? <FieldError id="bf-chair-error" message={fieldErrors.chair} />
+                : activeChairs.length === 0 && <p className="text-xs text-muted-foreground">Add chairs under Chairs first.</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="bf-start">Start</Label>
+              <Input id="bf-start" type="datetime-local" step={300} value={form.startLocal} onChange={e => set('startLocal', e.target.value)} {...errProps('start')} />
+              <FieldError id="bf-start-error" message={fieldErrors.start} />
+            </div>
           </section>
 
           {/* Price + notes */}
           <section className="grid sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Custom total (optional)</Label>
+              <Label htmlFor="bf-custom-total">Custom total (optional)</Label>
               <Input
-                type="number" min={0} inputMode="numeric" placeholder={`List price ${formatPKR(totals.listPrice)}`}
-                value={form.customTotal} onChange={e => set('customTotal', e.target.value)}
+                id="bf-custom-total" type="number" min={0} inputMode="numeric" placeholder={`List price ${formatPKR(totals.listPrice)}`}
+                value={form.customTotal} onChange={e => set('customTotal', e.target.value)} {...errProps('customTotal')}
               />
+              <FieldError id="bf-customTotal-error" message={fieldErrors.customTotal} />
               <p className="text-xs text-muted-foreground">For quotes, discounts or "price on request" services.</p>
             </div>
             <div className="space-y-1.5">
-              <Label>Notes</Label>
-              <Textarea rows={3} maxLength={1000} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Occasion, allergies, preferences…" />
+              <Label htmlFor="bf-notes">Notes</Label>
+              <Textarea id="bf-notes" rows={3} maxLength={1000} value={form.notes} onChange={e => set('notes', e.target.value)} placeholder="Occasion, allergies, preferences…" />
             </div>
           </section>
 
@@ -452,18 +552,18 @@ const BookingFormDialog = ({ open, onOpenChange, mode, booking, prefill, title, 
                   <div className="space-y-1">
                     <Label htmlFor="wi-discount" className="text-xs text-muted-foreground">Discount code (optional)</Label>
                     <Input
-                      id="wi-discount" className="h-9 font-mono uppercase" placeholder="EID20" maxLength={30}
+                      id="wi-discount" className="h-9 font-mono" placeholder="e.g. EID20" maxLength={30}
                       value={form.discountCode} onChange={e => set('discountCode', e.target.value.toUpperCase())}
                     />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="wi-voucher" className="text-xs text-muted-foreground">Gift voucher (optional)</Label>
                     <Input
-                      id="wi-voucher" className="h-9 font-mono uppercase" placeholder="GV-XXXXX-XXXXX" maxLength={20}
+                      id="wi-voucher" className="h-9 font-mono" placeholder="GV-XXXXX-XXXXX" maxLength={20}
                       value={form.voucherCode} onChange={e => set('voucherCode', e.target.value.toUpperCase())}
                     />
                   </div>
-                  <p className="text-[11px] text-muted-foreground sm:col-span-2">
+                  <p className="text-xs text-muted-foreground sm:col-span-2">
                     Codes are checked when you save. The payment method is used for anything the voucher doesn't cover.
                   </p>
                 </div>

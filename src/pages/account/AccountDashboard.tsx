@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarCheck, Inbox, FileText, Heart, Sparkles, ArrowRight, TrendingUp } from 'lucide-react';
+import { CalendarCheck, Inbox, FileText, Heart, Sparkles, ArrowRight, TrendingUp, CalendarPlus, Scissors, Crown, UserRound } from 'lucide-react';
 import CustomerLayout from '@/components/layout/CustomerLayout';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { formatPKR } from '@/lib/format';
@@ -16,6 +17,18 @@ interface Stats {
   fullName: string;
   nextAppointment?: { date: string; time: string; label: string };
 }
+
+/** "ayesha khan" / "AYESHA" → "Ayesha Khan". */
+const titleCase = (s: string) =>
+  s.trim().toLowerCase().replace(/(^|[\s'-])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase());
+
+/** Profile name first; the email only as a last resort, never shown lower-case. */
+const displayName = (fullName: string | null | undefined, email: string | undefined) => {
+  const fromProfile = fullName?.trim();
+  if (fromProfile) return titleCase(fromProfile);
+  const local = email?.split('@')[0]?.replace(/[._\d]+/g, ' ').trim();
+  return local ? titleCase(local) : '';
+};
 
 const AccountDashboard = () => {
   const { user } = useAuth();
@@ -55,9 +68,9 @@ const AccountDashboard = () => {
         if (next) {
           const d = new Date(next.start_time);
           nextAppointment = {
-            date: d.toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' }),
+            date: d.toLocaleDateString('en-PK', { weekday: 'long', month: 'long', day: 'numeric' }),
             time: d.toLocaleTimeString('en-PK', { hour: 'numeric', minute: '2-digit' }),
-            label: next.deal_id ? 'Package booking' : 'Service booking',
+            label: next.deal_id ? 'Package' : 'Appointment',
           };
         }
       }
@@ -69,94 +82,134 @@ const AccountDashboard = () => {
         totalSpent,
         loyaltyPoints: profileRes.data?.loyalty_points ?? 0,
         favorites: (favRes.data || []).length,
-        fullName: profileRes.data?.full_name || user.email?.split('@')[0] || 'Guest',
+        fullName: displayName(profileRes.data?.full_name, user.email),
         nextAppointment,
       });
       setLoading(false);
     })();
   }, [user]);
 
+  const firstName = stats.fullName.split(' ')[0];
+  const isNew = !loading && stats.pastVisits === 0 && stats.upcoming === 0;
+  const title = loading
+    ? 'Welcome'
+    : `${isNew ? 'Welcome' : 'Welcome back'}${firstName ? `, ${firstName}` : ''}`;
+
+  // Only show counts that mean something; a row of zeros tells a new customer nothing.
   const tiles = [
     { label: 'Upcoming', value: stats.upcoming, icon: CalendarCheck, to: '/account/appointments' },
-    { label: 'Past Visits', value: stats.pastVisits, icon: TrendingUp, to: '/account/appointments' },
-    { label: 'Requests', value: stats.pendingRequests, icon: Inbox, to: '/account/requests' },
+    { label: 'Past visits', value: stats.pastVisits, icon: TrendingUp, to: '/account/appointments' },
+    { label: 'Open requests', value: stats.pendingRequests, icon: Inbox, to: '/account/requests' },
     { label: 'Favorites', value: stats.favorites, icon: Heart, to: '/account/favorites' },
-  ];
+  ].filter(t => t.value > 0);
 
   return (
-    <CustomerLayout title={loading ? 'Welcome back' : `Welcome back, ${stats.fullName.split(' ')[0]}`} subtitle="Overview">
-      {/* Loyalty band */}
-      <div className="grid md:grid-cols-3 border-t border-l border-border/60 mb-10">
-        <div className="p-8 md:p-10 border-r border-b border-border/60 md:col-span-2">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
-            <Sparkles className="w-3 h-3" strokeWidth={1.25} /> Glow Rewards
-          </div>
-          <p className="font-heading text-6xl md:text-7xl font-light leading-none tabular-nums">
-            {loading ? '—' : stats.loyaltyPoints}<span className="text-lg opacity-60 ml-2">pts</span>
+    <CustomerLayout title={title} subtitle="Overview">
+      <div className="grid gap-5 lg:grid-cols-3 mb-6">
+        {/* Next visit, or the invitation to make one */}
+        <section className="surface-panel lg:col-span-2 p-6 md:p-8 flex flex-col">
+          {loading ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Loading">
+              <div className="h-4 w-28 rounded bg-muted animate-pulse" />
+              <div className="h-9 w-2/3 rounded bg-muted animate-pulse" />
+              <div className="h-4 w-1/2 rounded bg-muted animate-pulse" />
+            </div>
+          ) : stats.nextAppointment ? (
+            <>
+              <p className="text-sm font-medium text-muted-foreground">Your next visit</p>
+              <p className="font-heading text-3xl md:text-4xl font-semibold tracking-tight mt-2">{stats.nextAppointment.date}</p>
+              <p className="text-muted-foreground mt-1">{stats.nextAppointment.time} · {stats.nextAppointment.label}</p>
+              <div className="flex flex-wrap gap-3 mt-auto pt-6">
+                <Button asChild><Link to="/account/appointments">View details</Link></Button>
+                <Button asChild variant="outline"><Link to="/#book">Book another visit</Link></Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-muted-foreground">{isNew ? 'Your first visit' : 'Nothing booked yet'}</p>
+              <p className="font-heading text-3xl md:text-4xl font-semibold tracking-tight mt-2 max-w-lg">
+                {isNew ? 'Let’s plan your first appointment.' : 'Ready for your next appointment?'}
+              </p>
+              <p className="text-muted-foreground mt-2 max-w-lg">
+                Pick a service or a bridal package and a time that suits you. The team confirms every booking personally.
+              </p>
+              <div className="flex flex-wrap gap-3 mt-auto pt-6">
+                <Button asChild><Link to="/#book"><CalendarPlus className="w-4 h-4" /> Book an appointment</Link></Button>
+                <Button asChild variant="outline"><Link to="/services">Browse services</Link></Button>
+              </div>
+            </>
+          )}
+        </section>
+
+        {/* Rewards: a balance once there is one, otherwise how it works */}
+        <section className="surface-panel p-6 md:p-8 flex flex-col">
+          <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <Sparkles className="w-4 h-4 text-primary" /> Glow Rewards
           </p>
-          <p className="text-sm text-muted-foreground mt-4 max-w-md font-light leading-relaxed">
-            Earn 10 points every completed visit. Redeem at the salon for exclusive perks.
-          </p>
-        </div>
-        {stats.nextAppointment ? (
-          <div className="p-8 border-r border-b border-border/60 bg-muted/30 flex flex-col">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 font-medium">Next visit</p>
-            <p className="font-heading text-2xl font-light tracking-tight mb-1">{stats.nextAppointment.date}</p>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-auto">
-              {stats.nextAppointment.time} · {stats.nextAppointment.label}
+          {!loading && stats.loyaltyPoints > 0 ? (
+            <>
+              <p className="font-heading text-5xl font-semibold leading-none tabular-nums mt-4">
+                {stats.loyaltyPoints}<span className="text-lg font-normal text-muted-foreground ml-2">points</span>
+              </p>
+              <p className="text-sm text-muted-foreground mt-3">You earn 10 points for every completed visit. Ask at the front desk to redeem them.</p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              Earn 10 points for every completed visit and redeem them at the salon for treats and upgrades. Your balance appears here after your first visit.
             </p>
-            <Link to="/account/appointments" className="mt-6 text-[10px] uppercase tracking-[0.2em] text-primary/90 hover:text-primary inline-flex items-center gap-2">
-              View details <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
+          )}
+        </section>
+      </div>
+
+      {tiles.length > 0 && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {tiles.map(t => (
+            <Link key={t.label} to={t.to} className="stat-card !p-5 flex flex-col gap-2 group">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{t.label}</p>
+                <t.icon className="w-4 h-4 text-primary" />
+              </div>
+              <p className="font-heading text-3xl font-semibold tabular-nums leading-none">{t.value}</p>
             </Link>
-          </div>
-        ) : (
-          <Link to="/#book" className="p-8 border-r border-b border-border/60 hover:bg-muted/30 transition-colors flex flex-col">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-3 font-medium">No upcoming visit</p>
-            <p className="font-heading text-2xl font-light tracking-tight mb-auto">Book your next glow-up.</p>
-            <span className="mt-6 text-[10px] uppercase tracking-[0.2em] text-primary/90 inline-flex items-center gap-2">
-              Reserve now <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
-            </span>
-          </Link>
+          ))}
+        </div>
+      )}
+
+      <div className="grid gap-5 md:grid-cols-2">
+        {!loading && stats.totalSpent > 0 && (
+          <section className="surface-panel p-6">
+            <p className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <FileText className="w-4 h-4 text-primary" /> Total paid
+            </p>
+            <p className="font-heading text-3xl font-semibold tabular-nums mt-3">{formatPKR(stats.totalSpent)}</p>
+            <Link to="/account/invoices" className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+              View invoices <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </section>
         )}
-      </div>
-
-      {/* Stat tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 border-t border-l border-border/60 mb-10">
-        {tiles.map(t => (
-          <Link
-            key={t.label}
-            to={t.to}
-            className="group relative p-6 border-r border-b border-border/60 hover:bg-muted/30 transition-colors"
-          >
-            <t.icon className="w-4 h-4 text-primary/80 mb-6" strokeWidth={1.25} />
-            <p className="font-heading text-4xl font-light tabular-nums text-foreground">{loading ? '—' : t.value}</p>
-            <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-2">{t.label}</p>
-            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity" strokeWidth={1.25} />
-          </Link>
-        ))}
-      </div>
-
-      {/* Bottom row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-border/60">
-        <div className="p-8 border-r border-b border-border/60">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
-            <FileText className="w-3 h-3" strokeWidth={1.25} /> Lifetime spend
+        <section className="surface-panel p-6">
+          <p className="text-sm font-medium text-muted-foreground mb-3">Quick links</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {[
+              { to: '/services', label: 'Services', icon: Scissors },
+              { to: '/packages', label: 'Bridal packages', icon: Crown },
+              { to: '/account/profile', label: 'Your profile', icon: UserRound },
+            ].map(l => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="flex items-center gap-2 min-h-11 rounded-xl border px-3 py-2 text-sm hover:border-primary/40 hover:bg-primary/5 transition-colors"
+              >
+                <l.icon className="w-4 h-4 text-primary shrink-0" /> {l.label}
+              </Link>
+            ))}
           </div>
-          <p className="font-heading text-4xl font-light tabular-nums">{loading ? '—' : formatPKR(stats.totalSpent)}</p>
-          <Link to="/account/invoices" className="text-[10px] uppercase tracking-[0.2em] text-primary/90 mt-4 inline-flex items-center gap-2">
-            View invoices <ArrowRight className="w-3 h-3" strokeWidth={1.25} />
-          </Link>
-        </div>
-        <div className="p-8 border-r border-b border-border/60">
-          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">
-            <Sparkles className="w-3 h-3" strokeWidth={1.25} /> Quick actions
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/services" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Browse services</Link>
-            <Link to="/packages" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Bridal packages</Link>
-            <Link to="/account/profile" className="text-[10px] uppercase tracking-[0.2em] px-3 py-2 border border-border/60 hover:border-primary/60 hover:text-primary transition-colors">Update profile</Link>
-          </div>
-        </div>
+          {!loading && stats.favorites === 0 && (
+            <p className="text-sm text-muted-foreground mt-4">
+              Tip: tap the heart on any service to save it to your favorites.
+            </p>
+          )}
+        </section>
       </div>
     </CustomerLayout>
   );

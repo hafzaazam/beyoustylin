@@ -116,7 +116,7 @@ const RequestsPage = () => {
                 <div key={r.id} className="p-5 rounded-2xl border border-border bg-card flex flex-col">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="min-w-0">
-                      <span className={`inline-block mb-1 text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold border ${
+                      <span className={`inline-block mb-1 text-[11px] uppercase tracking-wide px-2 py-0.5 rounded-full font-semibold border ${
                         r.type === 'quote' ? 'bg-accent text-accent-foreground border-border' : 'bg-primary/10 text-primary border-primary/20'
                       }`}>
                         {r.type === 'quote' ? 'Quote' : 'Booking'}

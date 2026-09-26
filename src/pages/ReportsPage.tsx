@@ -218,7 +218,7 @@ const ReportsPage = () => {
                         stackId="money"
                         fill={SERIES_VARS[src]}
                         stroke="hsl(var(--card))"
-                        strokeWidth={1}
+                        strokeWidth={2}
                         maxBarSize={36}
                         radius={i === MONEY_SOURCES.length - 1 ? [4, 4, 0, 0] : 0}
                         isAnimationActive={false}

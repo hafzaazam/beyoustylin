@@ -65,13 +65,27 @@ const Dashboard = () => {
   const chairsInUse = activeChairs.filter(c => busyChairIds.has(c.id)).length;
   const pendingRequests = appointmentRequests.filter(r => r.status === 'pending').length;
 
+  // Pending/confirmed bookings whose time has already passed still need a status update.
+  const needsUpdate = todayBookings.filter(b => ['pending', 'confirmed'].includes(b.status) && new Date(b.endTime).getTime() <= nowTs);
+  const bookingsSub = [
+    `${upcomingToday.length} still to come`,
+    needsUpdate.length > 0 && `${needsUpdate.length} to update`,
+  ].filter(Boolean).join(' · ');
+
+  // Secondary figures; "Collected today" gets its own, larger tile.
   const stats = [
-    { label: "Today's bookings", value: todayBookings.length, sub: `${upcomingToday.length} still to come`, icon: CalendarCheck, to: '/admin/schedule' },
-    { label: 'In progress', value: inProgress.length, sub: 'customers in the chair now', icon: Clock, to: '/admin/bookings' },
-    { label: 'Collected today', value: formatPKR(today.collected), sub: collectedSub(today), icon: Wallet, to: '/admin/reports' },
-    { label: 'Collected this month', value: formatPKR(month.collected), sub: now.toLocaleString('en-US', { month: 'long', year: 'numeric' }), icon: TrendingUp, to: '/admin/reports' },
+    { label: "Today's bookings", value: todayBookings.length, sub: bookingsSub, icon: CalendarCheck, to: '/admin/schedule' },
+    { label: 'In the chair now', value: inProgress.length, sub: inProgress.length === 1 ? 'customer being served' : 'customers being served', icon: Clock, to: '/admin/schedule' },
     { label: 'Outstanding', value: formatPKR(outstanding), sub: `${unpaid.length} unpaid invoice${unpaid.length === 1 ? '' : 's'}`, icon: AlertCircle, to: '/admin/invoices' },
-    { label: 'Chairs free now', value: `${activeChairs.length - chairsInUse}/${activeChairs.length}`, sub: `${chairsInUse} in use · ${staff.filter(s => s.status === 'active').length} active staff`, icon: Armchair, to: '/admin/chairs' },
+    { label: 'Chairs free now', value: `${activeChairs.length - chairsInUse}/${activeChairs.length}`, sub: `${staff.filter(s => s.status === 'active').length} active staff`, icon: Armchair, to: '/admin/chairs' },
+  ];
+  const outOfStock = lowStock.filter(p => p.stock <= 0);
+  const runningLow = lowStock.filter(p => p.stock > 0);
+  const SCHEDULE_PREVIEW = 5;
+  // Put what is still ahead first so the preview shows the next customers, not the morning.
+  const schedulePreview = [
+    ...todayBookings.filter(b => new Date(b.endTime).getTime() > nowTs),
+    ...todayBookings.filter(b => new Date(b.endTime).getTime() <= nowTs),
   ];
 
   // Last 14 days of collected money (all sources, single series).
@@ -133,36 +147,62 @@ const Dashboard = () => {
       {lowStock.length > 0 && (
         <Link
           to="/admin/products"
-          className="mb-6 flex items-center gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm hover:bg-warning/15 transition-colors"
+          className="mb-6 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm hover:bg-warning/15 transition-colors"
         >
-          <PackageX className="w-4 h-4 text-warning shrink-0" />
-          <span className="flex-1 min-w-0 truncate">
-            <strong>Low stock:</strong>{' '}
-            <span>
-              {lowStock.slice(0, 3).map(p => `${p.name} (${p.stock} left)`).join(', ')}
-              {lowStock.length > 3 && ` and ${lowStock.length - 3} more`}
-            </span>
+          <PackageX className="w-4 h-4 mt-0.5 text-warning shrink-0" />
+          <span className="flex-1 min-w-0 space-y-0.5">
+            {outOfStock.length > 0 && (
+              <span className="block sm:truncate">
+                <strong>Out of stock:</strong> {outOfStock.slice(0, 3).map(p => p.name).join(', ')}
+                {outOfStock.length > 3 && ` and ${outOfStock.length - 3} more`}
+              </span>
+            )}
+            {runningLow.length > 0 && (
+              <span className="block sm:truncate">
+                <strong>Running low:</strong> {runningLow.slice(0, 3).map(p => `${p.name} – ${p.stock} left`).join(', ')}
+                {runningLow.length > 3 && ` and ${runningLow.length - 3} more`}
+              </span>
+            )}
           </span>
-          <ArrowRight className="w-4 h-4 text-warning shrink-0" />
+          <ArrowRight className="w-4 h-4 mt-0.5 text-warning shrink-0" />
         </Link>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 mb-8">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-8">
+        {/* The number the front desk checks all day gets the most weight. */}
+        <Link
+          to="/admin/reports"
+          className="stat-card col-span-2 xl:row-span-2 flex flex-col justify-between gap-6 !p-6 lg:!p-7"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-medium text-muted-foreground">Collected today</p>
+            <Wallet className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <p className="font-heading text-4xl lg:text-5xl font-semibold text-foreground tabular-nums leading-none">{formatPKR(today.collected)}</p>
+            <p className="text-sm text-muted-foreground mt-3">{collectedSub(today)}</p>
+          </div>
+          <div className="flex items-center gap-2 pt-4 border-t text-sm">
+            <TrendingUp className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-muted-foreground">
+              {now.toLocaleString('en-US', { month: 'long' })} so far
+            </span>
+            <span className="ml-auto font-semibold tabular-nums">{formatPKR(month.collected)}</span>
+          </div>
+        </Link>
         {stats.map(stat => (
-          <Link key={stat.label} to={stat.to} className="stat-card flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-primary/10 text-primary">
-              <stat.icon className="w-6 h-6" />
+          <Link key={stat.label} to={stat.to} className="stat-card !p-4 lg:!p-5 flex flex-col gap-2 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground truncate">{stat.label}</p>
+              <stat.icon className="w-4 h-4 text-primary shrink-0" />
             </div>
-            <div className="min-w-0">
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-              <p className="text-2xl font-heading font-bold text-foreground truncate tabular-nums">{stat.value}</p>
-              <p className="text-xs text-muted-foreground mt-0.5 truncate">{stat.sub}</p>
-            </div>
+            <p className="text-2xl font-heading font-semibold text-foreground truncate tabular-nums leading-none">{stat.value}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{stat.sub}</p>
           </Link>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
         {/* Today's schedule */}
         <div className="bg-card rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">
@@ -172,8 +212,8 @@ const Dashboard = () => {
           {todayBookings.length === 0 ? (
             <p className="text-muted-foreground text-sm">No bookings today.</p>
           ) : (
-            <ul className="space-y-2 max-h-80 overflow-y-auto pr-1">
-              {todayBookings.map(b => (
+            <ul className="space-y-2">
+              {schedulePreview.slice(0, SCHEDULE_PREVIEW).map(b => (
                 <li key={b.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <div className="w-16 shrink-0 text-xs font-semibold tabular-nums">{formatTime(b.startTime)}</div>
                   <div className="flex-1 min-w-0">
@@ -185,6 +225,13 @@ const Dashboard = () => {
                   <StatusBadge status={b.status} />
                 </li>
               ))}
+              {schedulePreview.length > SCHEDULE_PREVIEW && (
+                <li>
+                  <Link to="/admin/schedule" className="flex items-center justify-center gap-1.5 rounded-lg border border-dashed px-3 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors">
+                    {schedulePreview.length - SCHEDULE_PREVIEW} more today · open schedule <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </li>
+              )}
             </ul>
           )}
         </div>
@@ -210,7 +257,7 @@ const Dashboard = () => {
                     labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
                     formatter={(v: number) => [formatPKR(v), 'Collected']}
                   />
-                  <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                  <Bar dataKey="revenue" fill="hsl(var(--primary-bright))" radius={[4, 4, 0, 0]} maxBarSize={28} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -220,7 +267,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Recent bookings */}
         <div className="bg-card rounded-xl border p-6">
           <div className="flex items-center justify-between mb-4">

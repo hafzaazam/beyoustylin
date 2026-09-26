@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Armchair, CalendarClock, ChevronLeft, ChevronRight, Pencil, Phone, Plus, Sparkles, Zap } from 'lucide-react';
+import { Armchair, Banknote, CalendarClock, ChevronLeft, ChevronRight, MoveRight, Pencil, Phone, Plus, ReceiptText, Sparkles, Zap } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { useSalon } from '@/context/SalonContext';
 import { Button } from '@/components/ui/button';
@@ -20,13 +20,17 @@ import { Booking, BookingStatus, BOOKING_STATUSES } from '@/types/salon';
 const SLOT_MIN = 15;
 const PX_PER_MIN = 48 / 30;
 const COL_MIN_W = 150;
+/** Columns with nothing booked that day get less room so busy people stay in view. */
+const EMPTY_COL_W = 104;
 
+// Status reads from the tint, the border and the words in the block, never colour alone.
 const blockStyle: Partial<Record<BookingStatus, string>> = {
-  pending: 'bg-warning/15 border-l-warning hover:bg-warning/25',
-  confirmed: 'bg-info/15 border-l-info hover:bg-info/25',
-  started: 'bg-primary/15 border-l-primary hover:bg-primary/25',
-  completed: 'bg-success/15 border-l-success hover:bg-success/25',
+  pending: 'bg-warning/15 border-warning/60 hover:bg-warning/25',
+  confirmed: 'bg-info/15 border-info/60 hover:bg-info/25',
+  started: 'bg-primary/15 border-primary/60 hover:bg-primary/25',
+  completed: 'bg-success/15 border-success/60 hover:bg-success/25',
 };
+const statusLabel = (s: BookingStatus) => (s === 'started' ? 'In progress' : capitalize(s));
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -62,6 +66,10 @@ const SchedulePage = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<{ open: boolean; mode: BookingFormMode; booking?: Booking; prefill?: BookingPrefill }>({ open: false, mode: 'create' });
   const [now, setNow] = useState(() => Date.now());
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const detailsTitleRef = useRef<HTMLHeadingElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 60_000);
@@ -96,6 +104,20 @@ const SchedulePage = () => {
     }
     return map;
   }, [columns, dayBookings, view, dayStart, dayEnd]);
+
+  const colWidth = (colId: string) => ((placedByColumn.get(colId)?.length ?? 0) > 0 ? COL_MIN_W : EMPTY_COL_W);
+  const gridMinWidth = 64 + columns.reduce((sum, c) => sum + colWidth(c.id), 0);
+
+  // On phones only a couple of columns fit: say so instead of hiding the rest silently.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setOverflowing(el.scrollWidth > el.clientWidth + 4 && el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    check();
+    el.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => { el.removeEventListener('scroll', check); window.removeEventListener('resize', check); };
+  }, [gridMinWidth]);
 
   const hours = Array.from({ length: endHour - startHour }, (_, i) => startHour + i);
   const slotsPerHour = 60 / SLOT_MIN;
@@ -144,17 +166,24 @@ const SchedulePage = () => {
       {/* Controls */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setDay(d => addDays(d, -1))} aria-label="Previous day">
+          <Button variant="outline" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => setDay(d => addDays(d, -1))} aria-label="Previous day">
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button variant="outline" size="sm" className="h-9" onClick={() => setDay(startOfDay(new Date()))} disabled={isToday}>Today</Button>
-          <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => setDay(d => addDays(d, 1))} aria-label="Next day">
+          <Button
+            variant="outline" size="sm"
+            className={cn('h-11 sm:h-9', isToday && 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary')}
+            onClick={() => setDay(startOfDay(new Date()))}
+            aria-pressed={isToday}
+          >
+            Today
+          </Button>
+          <Button variant="outline" size="icon" className="h-11 w-11 sm:h-9 sm:w-9" onClick={() => setDay(d => addDays(d, 1))} aria-label="Next day">
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
         <Input
           type="date"
-          className="h-9 w-auto"
+          className="h-11 sm:h-9 w-auto"
           value={toLocalDateKey(day)}
           onChange={e => { if (e.target.value) setDay(new Date(`${e.target.value}T00:00`)); }}
           aria-label="Choose date"
@@ -167,7 +196,7 @@ const SchedulePage = () => {
               role="tab"
               aria-selected={view === v}
               onClick={() => setView(v)}
-              className={cn('px-3 py-1.5 rounded-md transition-colors inline-flex items-center gap-1.5', view === v ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
+              className={cn('px-3 py-2 sm:py-1.5 rounded-md transition-colors inline-flex items-center gap-1.5', view === v ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground')}
             >
               {v === 'staff' ? <Sparkles className="w-3.5 h-3.5" /> : <Armchair className="w-3.5 h-3.5" />}
               By {v}
@@ -176,9 +205,14 @@ const SchedulePage = () => {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3 mb-3 text-[11px] text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-xs text-muted-foreground">
         <span>{dayBookings.length} booking{dayBookings.length === 1 ? '' : 's'}</span>
         <span className="hidden sm:inline">· Click an empty slot to book it</span>
+        {overflowing && (
+          <span className="ml-auto inline-flex items-center gap-1 font-medium text-foreground">
+            Swipe for more {view === 'staff' ? 'staff' : 'chairs'} <MoveRight className="w-3.5 h-3.5" aria-hidden />
+          </span>
+        )}
         {dayBookings.some(b => new Date(b.startTime).getTime() < dayStart || new Date(b.endTime).getTime() > dayEnd) && (
           <span className="text-warning">· Some bookings fall outside {startHour}:00–{endHour}:00 and are clipped</span>
         )}
@@ -192,15 +226,15 @@ const SchedulePage = () => {
         )
       ) : (
         <div className="bg-card rounded-2xl border overflow-hidden">
-          <div className="overflow-auto max-h-[calc(100vh-15rem)]">
-            <div className="relative" style={{ minWidth: 64 + columns.length * COL_MIN_W }}>
+          <div ref={scrollRef} className="overflow-auto max-h-[calc(100vh-15rem)]">
+            <div className="relative" style={{ minWidth: gridMinWidth }}>
               {/* Column headers */}
               <div className="sticky top-0 z-20 flex bg-card/95 backdrop-blur border-b">
                 <div className="sticky left-0 z-30 w-16 shrink-0 bg-card/95 border-r" />
                 {columns.map(col => {
                   const count = placedByColumn.get(col.id)?.length ?? 0;
                   return (
-                    <div key={col.id} className="flex-1 px-3 py-2.5 border-r last:border-r-0" style={{ minWidth: COL_MIN_W }}>
+                    <div key={col.id} className={cn('px-3 py-2.5 border-r last:border-r-0', count > 0 ? 'flex-[1_1_0]' : 'flex-[0.6_1_0]')} style={{ minWidth: colWidth(col.id) }}>
                       <p className="text-sm font-semibold truncate">{col.name}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{col.sub ? `${col.sub} · ` : ''}{count} booking{count === 1 ? '' : 's'}</p>
                     </div>
@@ -212,7 +246,7 @@ const SchedulePage = () => {
                 {/* Time gutter */}
                 <div className="sticky left-0 z-10 w-16 shrink-0 bg-card border-r" style={{ height: gridHeight }}>
                   {hours.map(h => (
-                    <div key={h} className="relative text-[10px] text-muted-foreground tabular-nums" style={{ height: 60 * PX_PER_MIN }}>
+                    <div key={h} className="relative text-[11px] text-muted-foreground tabular-nums" style={{ height: 60 * PX_PER_MIN }}>
                       <span className="absolute top-0.5 right-2 bg-card px-0.5">
                         {new Date(2000, 0, 1, h).toLocaleTimeString('en-PK', { hour: 'numeric' })}
                       </span>
@@ -224,8 +258,8 @@ const SchedulePage = () => {
                 {columns.map(col => (
                   <div
                     key={col.id}
-                    className="relative flex-1 border-r last:border-r-0 cursor-pointer"
-                    style={{ minWidth: COL_MIN_W, height: gridHeight }}
+                    className={cn('relative border-r last:border-r-0 cursor-pointer', (placedByColumn.get(col.id)?.length ?? 0) > 0 ? 'flex-[1_1_0]' : 'flex-[0.6_1_0]')}
+                    style={{ minWidth: colWidth(col.id), height: gridHeight }}
                     onClick={e => openSlot(col, e)}
                     role="presentation"
                   >
@@ -256,17 +290,17 @@ const SchedulePage = () => {
                           type="button"
                           onClick={e => { e.stopPropagation(); setSelectedId(b.id); }}
                           className={cn(
-                            'absolute flex flex-col justify-start rounded-md border-l-4 px-2 py-1 text-left overflow-hidden shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                            blockStyle[b.status] ?? 'bg-muted border-l-muted-foreground/40 hover:bg-muted/80',
+                            'absolute flex flex-col justify-start rounded-md border px-2 py-1 text-left overflow-hidden transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            blockStyle[b.status] ?? 'bg-muted border-border hover:bg-muted/80',
                           )}
                           style={{ top: p.top + 1, height: p.height, left: `calc(${p.lane * width}% + 2px)`, width: `calc(${width}% - 4px)` }}
-                          title={`${customer?.name ?? 'Customer'} · ${labelFor(b)}`}
+                          aria-label={`${customer?.name ?? 'Customer'}, ${labelFor(b)}, ${formatTime(b.startTime)} to ${formatTime(b.endTime)}, ${statusLabel(b.status)}`}
                         >
                           <p className="text-xs font-semibold truncate text-foreground">{customer?.name ?? 'Unknown customer'}</p>
                           {p.height > 34 && <p className="text-[11px] truncate text-foreground/80">{labelFor(b)}</p>}
                           {p.height > 52 && (
-                            <p className="text-[10px] truncate text-muted-foreground tabular-nums">
-                              {formatTime(b.startTime)}–{formatTime(b.endTime)}{other ? ` · ${other}` : ''}
+                            <p className="text-[11px] truncate text-muted-foreground tabular-nums">
+                              {statusLabel(b.status)} · {formatTime(b.startTime)}–{formatTime(b.endTime)}{other ? ` · ${other}` : ''}
                             </p>
                           )}
                         </button>
@@ -289,11 +323,15 @@ const SchedulePage = () => {
 
       {/* Booking details */}
       <Dialog open={!!selected} onOpenChange={o => { if (!o) setSelectedId(null); }}>
-        <DialogContent className="max-w-md">
+        <DialogContent
+          className="max-w-md"
+          // Start on the heading, not the status select: Enter must never change a status by accident.
+          onOpenAutoFocus={e => { e.preventDefault(); detailsTitleRef.current?.focus(); }}
+        >
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle className="font-heading text-xl">{selCustomer?.name ?? 'Unknown customer'}</DialogTitle>
+                <DialogTitle ref={detailsTitleRef} tabIndex={-1} className="font-heading text-xl focus:outline-none">{selCustomer?.name ?? 'Unknown customer'}</DialogTitle>
                 <DialogDescription>
                   {formatTime(selected.startTime)} – {formatTime(selected.endTime)} · {formatDuration(selected.totalDuration)}
                 </DialogDescription>
@@ -324,19 +362,34 @@ const SchedulePage = () => {
                   </>
                 )}
               </dl>
-              <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
-                <Select value={selected.status} onValueChange={v => changeStatus(selected, v as BookingStatus)}>
-                  <SelectTrigger className="w-40 h-9" aria-label="Booking status"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{s === 'started' ? 'In progress' : capitalize(s)}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Button
-                  variant="outline" size="sm" className="ml-auto"
-                  onClick={() => { setForm({ open: true, mode: 'edit', booking: selected }); setSelectedId(null); }}
-                >
-                  <Pencil className="w-3.5 h-3.5 mr-1.5" />Edit
-                </Button>
+              <div className="space-y-3 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground w-[6.5rem] shrink-0">Status</span>
+                  <Select value={selected.status} onValueChange={v => changeStatus(selected, v as BookingStatus)}>
+                    <SelectTrigger className="flex-1 h-10" aria-label="Booking status"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{statusLabel(s)}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setForm({ open: true, mode: 'edit', booking: selected }); setSelectedId(null); }}
+                  >
+                    <Pencil className="w-4 h-4 mr-1.5" />Edit
+                  </Button>
+                  {selInvoice && (
+                    <Button variant="outline" onClick={() => navigate(`/admin/invoices?q=${encodeURIComponent(selInvoice.invoiceNumber)}`)}>
+                      <ReceiptText className="w-4 h-4 mr-1.5" />Open invoice
+                    </Button>
+                  )}
+                  {selInvoice?.status === 'unpaid' && (
+                    <Button className="sm:ml-auto" onClick={() => navigate(`/admin/invoices?charge=${encodeURIComponent(selInvoice.invoiceNumber)}`)}>
+                      <Banknote className="w-4 h-4 mr-1.5" />Charge {formatPKR(Math.max(0, selInvoice.totalAmount - selInvoice.voucherAmount))}
+                    </Button>
+                  )}
+                </div>
               </div>
             </>
           )}

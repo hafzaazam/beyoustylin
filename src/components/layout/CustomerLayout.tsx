@@ -51,16 +51,16 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
           <Link to="/" className="flex items-center gap-3 flex-1 min-w-0">
             <Logo className="h-10 w-auto" />
             <div className="min-w-0">
-              <h1 className="font-heading text-lg font-light tracking-tight text-foreground truncate">BeYou Stylin</h1>
-              <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">My Account</p>
+              <h1 className="font-heading text-lg font-semibold tracking-tight text-foreground truncate">BeYou Stylin</h1>
+              <p className="text-xs text-muted-foreground">My account</p>
             </div>
           </Link>
-          <button className="lg:hidden text-muted-foreground hover:text-foreground transition-colors" onClick={() => setOpen(false)} aria-label="Close menu">
-            <X className="w-4 h-4" strokeWidth={1.25} />
+          <button className="lg:hidden inline-flex items-center justify-center w-11 h-11 -mr-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={() => setOpen(false)} aria-label="Close menu">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="p-3 flex-1 overflow-y-auto">
+        <nav className="p-3 flex-1 overflow-y-auto space-y-1" aria-label="My account">
           {navItems.map(item => {
             const active = location.pathname === item.path;
             return (
@@ -69,16 +69,13 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
                 to={item.path}
                 onClick={() => setOpen(false)}
                 aria-current={active ? 'page' : undefined}
-                className={`group relative flex items-center gap-3 px-4 py-3 text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                className={`group relative flex items-center gap-3 px-4 min-h-11 rounded-xl text-sm font-medium transition-colors ${
                   active
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
               >
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-px bg-primary" />
-                )}
-                <item.icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-primary' : 'text-muted-foreground/60'}`} strokeWidth={1.25} />
+                <item.icon className={`w-4 h-4 shrink-0 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -86,54 +83,54 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
           <Link
             to="/#book"
             onClick={() => setOpen(false)}
-            className="md:hidden mt-4 mx-4 flex items-center justify-center px-5 py-2.5 border border-primary/40 text-[10px] uppercase tracking-[0.2em] text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+            className="md:hidden mt-4 flex items-center justify-center min-h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            Book new
+            Book an appointment
           </Link>
         </nav>
 
         <div className="p-4 border-t border-border/60 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-[11px] font-medium">
+            <div className="w-9 h-9 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
               {initial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-foreground truncate font-light">{user?.email}</p>
-              <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">Member</p>
+              <p className="text-sm text-foreground truncate">{user?.email}</p>
+              <p className="text-xs text-muted-foreground">Member</p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-2.5 px-3 py-2 text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors border-t border-border/60 pt-3"
+            className="w-full flex items-center gap-2.5 px-3 min-h-11 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
-            <LogOut className="w-3.5 h-3.5" strokeWidth={1.25} /> Sign Out
+            <LogOut className="w-4 h-4" /> Sign out
           </button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 px-4 lg:px-10 py-6 flex items-center gap-4 border-b border-border/60 bg-background/90 backdrop-blur">
+        <header className="sticky top-0 z-30 px-4 lg:px-10 py-4 lg:py-5 flex items-center gap-4 border-b border-border/60 bg-background/90 backdrop-blur">
           <button
-            className="lg:hidden inline-flex items-center justify-center w-9 h-9 border border-border/60 hover:border-primary/40 transition-colors"
+            className="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-xl border hover:border-primary/40 transition-colors"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
           >
-            <Menu className="w-4 h-4 text-foreground" strokeWidth={1.25} />
+            <Menu className="w-5 h-5 text-foreground" />
           </button>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-medium mb-1.5">
-              {subtitle || 'My Account'}
+            <p className="text-sm text-muted-foreground mb-1">
+              {subtitle || 'My account'}
             </p>
-            <h2 className="font-heading text-2xl lg:text-3xl font-light text-foreground tracking-tight leading-none truncate">
+            <h2 className="font-heading text-2xl lg:text-3xl font-semibold text-foreground tracking-tight leading-tight truncate">
               {title}
             </h2>
           </div>
           <ThemeToggle />
           <Link
             to="/#book"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-[10px] uppercase tracking-[0.2em] text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+            className="hidden md:inline-flex items-center gap-2 min-h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
           >
-            Book new
+            Book an appointment
           </Link>
         </header>
 

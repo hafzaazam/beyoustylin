@@ -4,7 +4,16 @@
 // two sets of opening hours).
 //
 // TODO(owner): confirm these values. Leave a social URL empty to hide its icon.
+import heroSalon from '@/assets/hero-salon.jpg';
+
 export const SITE = {
+  // TODO(owner): replace with real studio / bridal-client photography.
+  // The current placeholder is a stock interior with another salon's sign on its
+  // left side, so it is cropped to its right half (see heroImagePosition).
+  // Ideal: 2400×1600 JPG/WebP, portrait-friendly subject on the right third.
+  heroImage: heroSalon,
+  heroImageAlt: 'Salon interior with styling chairs and lit mirrors',
+  heroImagePosition: '85% center',
   name: 'BeYou Stylin',
   tagline: 'Premium Salon & Bridal Studio',
   city: 'Karachi, Pakistan',

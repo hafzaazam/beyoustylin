@@ -15,30 +15,39 @@ import { AccountButton } from '@/components/layout/PublicLayout';
 import { SITE } from '@/config/site';
 import { bookingRequestSchema, firstError, quoteRequestSchema } from '@/lib/validation';
 import { formatDuration, formatPKR, toLocalDateKey } from '@/lib/format';
-import heroImage from '@/assets/hero-salon.jpg';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Logo from '@/components/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
 import {
-  Scissors, Sparkles, Flower2, Palette, Crown, HeartHandshake,
-  Star, Calendar, Award, ShieldCheck, Clock, MapPin, Phone, Mail,
+  Sparkles, Flower2, Crown,
+  Star, MapPin, Phone, Mail,
   Instagram, Facebook, ArrowRight, Check, Send, CheckCircle2, Loader2, Menu,
 } from 'lucide-react';
 
-const featureCards = [
-  { icon: Crown, title: 'Bridal Specialists', desc: 'Signature Barat, Walima, Nikah & Engagement makeup crafted by senior artists.', to: '/packages' },
-  { icon: Sparkles, title: 'Hydra & 3D Facials', desc: 'Advanced skincare treatments for radiant, camera-ready glow.', to: '/services' },
-  { icon: Scissors, title: 'Precision Hair Cutting', desc: 'Signature cuts, layers, feathers & kids styling by expert stylists.', to: '/services' },
-  { icon: Palette, title: 'Hair Colour & Keratin', desc: 'Fashion colours, rebonding, extenso & keratin smoothing treatments.', to: '/services' },
-  { icon: Flower2, title: 'Bridal Mehndi', desc: 'Delicate Sodani & classic mehndi artistry for your big day.', to: '/mehndi' },
-  { icon: HeartHandshake, title: 'Party Packages', desc: 'Full glam party looks, hairstyles & lashes for every occasion.', to: '/packages' },
+// The three things the studio is known for. Copy comes from the original service descriptions.
+const pillars = [
+  {
+    icon: Crown, title: 'Bridal & party', to: '/packages', cta: 'See bridal packages', span: 'md:col-span-5',
+    desc: 'Signature Barat, Walima, Nikah & Engagement makeup crafted by senior artists.',
+    items: ['Barat, Walima, Nikah & Engagement looks', 'Full glam party looks, hairstyles & lashes', 'Complete bridal packages'],
+  },
+  {
+    icon: Flower2, title: 'Mehndi', to: '/mehndi', cta: 'Explore mehndi', span: 'md:col-span-3', mehndi: true,
+    desc: 'Delicate Sodani & classic mehndi artistry for your big day.',
+    items: ['Bridal Sodani & classic styles', 'Party & Eid bookings welcome'],
+  },
+  {
+    icon: Sparkles, title: 'Hair & skin', to: '/services', cta: 'Browse services', span: 'md:col-span-4',
+    desc: 'Everyday care by expert stylists, for radiant, camera-ready glow.',
+    items: ['Signature cuts, layers, feathers & kids styling', 'Fashion colours, rebonding, extenso & keratin', 'Hydra & 3D facials'],
+  },
 ];
 
 const perks = [
-  { icon: Award, label: '10+ Years Experience' },
-  { icon: ShieldCheck, label: 'Certified Artists' },
-  { icon: Clock, label: 'Punctual Service' },
-  { icon: Star, label: '5-Star Rated Studio' },
+  { label: '10+ years experience' },
+  { label: 'Certified artists' },
+  { label: 'Punctual service' },
+  { label: '5-star rated studio' },
 ];
 
 const testimonials = [
@@ -52,7 +61,7 @@ const selectClass =
 
 const Landing = () => {
   usePageTitle();
-  const { deals, services, addAppointmentRequest } = useSalon();
+  const { deals, services, addAppointmentRequest, loading } = useSalon();
   const { user, isCustomer } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -185,6 +194,16 @@ const Landing = () => {
     setQuoteForm(initialQuote);
   };
 
+  // Hero price proof, from the live menu.
+  const bridalFrom = useMemo(() => {
+    const prices = activeDeals.map(d => d.discountedPrice).filter(p => p > 0);
+    return prices.length ? Math.min(...prices) : null;
+  }, [activeDeals]);
+  const servicesFrom = useMemo(() => {
+    const prices = activeServices.map(s => s.price).filter(p => p > 0);
+    return prices.length ? Math.min(...prices) : null;
+  }, [activeServices]);
+
   // Cheapest published mehndi service, for the "From Rs. …" badge.
   const mehndiFrom = useMemo(() => {
     const prices = activeServices
@@ -215,7 +234,7 @@ const Landing = () => {
             <AccountButton className="hidden sm:block" />
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
-                <button className="md:hidden inline-flex items-center justify-center w-9 h-9 border border-border/60" aria-label="Open menu">
+                <button className="md:hidden inline-flex items-center justify-center w-11 h-11 border border-border/60" aria-label="Open menu">
                   <Menu className="w-4 h-4" strokeWidth={1.25} />
                 </button>
               </SheetTrigger>
@@ -225,10 +244,10 @@ const Landing = () => {
                 </SheetHeader>
                 <div className="mt-8 flex flex-col" onClick={() => setMenuOpen(false)}>
                   {[['/services', 'Services'], ['/packages', 'Packages'], ['/mehndi', 'Mehndi']].map(([to, label]) => (
-                    <Link key={to} to={to} className="py-3 border-b border-border/60 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">{label}</Link>
+                    <Link key={to} to={to} className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground">{label}</Link>
                   ))}
                   {[['#book', 'Book'], ['#about', 'About'], ['#contact', 'Contact']].map(([href, label]) => (
-                    <a key={href} href={href} className="py-3 border-b border-border/60 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground">{label}</a>
+                    <a key={href} href={href} className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground">{label}</a>
                   ))}
                   <div className="mt-6"><AccountButton /></div>
                 </div>
@@ -238,78 +257,108 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative pt-16 min-h-[92vh] flex items-center overflow-hidden border-b border-border/60">
-        <div className="absolute inset-0">
-          <img src={heroImage} alt="BeYou Stylin luxury salon" className="w-full h-full object-cover" width={1600} height={1024} />
-          <div className="absolute inset-0 bg-background/85" />
-        </div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 lg:px-8 py-24 w-full">
-          <div className="max-w-3xl">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-8 font-medium">
-              Premium Bridal & Beauty Studio
-            </p>
-            <h1 className="font-heading text-6xl md:text-7xl lg:text-8xl font-light leading-[1.02] tracking-tight mb-8">
-              Where every bride<br />becomes <span className="italic text-primary/80">iconic.</span>
+      {/* Hero: text on the page colour, photo shown at full strength beside it.
+          The placeholder photo is cropped to its right side (SITE.heroImagePosition). */}
+      <section className="relative pt-16 border-b border-border/60 lg:min-h-[88vh] lg:grid lg:grid-cols-12">
+        <div className="lg:col-span-7 flex items-center px-4 lg:pl-8 lg:pr-12 xl:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] pt-10 pb-12 lg:py-20">
+          <div className="max-w-2xl">
+            <h1 className="font-heading text-[3.25rem] leading-[1] sm:text-7xl lg:text-8xl font-light tracking-tight mb-6 text-balance">
+              Where every bride becomes <span className="italic text-primary">iconic.</span>
             </h1>
-            <p className="text-base md:text-lg text-muted-foreground mb-10 max-w-xl font-light leading-relaxed">
-              Signature bridal makeup, hair, mehndi and skincare — thoughtfully crafted for your most beautiful moments.
+            <p className="text-base md:text-lg text-muted-foreground mb-6 max-w-xl leading-relaxed">
+              Bridal makeup, hair, mehndi and skincare by senior artists in {SITE.city.split(',')[0]}.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <a href="#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></a>
-              <Link to="/packages"><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">View Packages</Button></Link>
+
+            {/* Real prices up front: computed from the live menu. */}
+            <dl className="mb-8 flex flex-wrap gap-x-8 gap-y-3 min-h-[3.25rem]" aria-live="polite">
+              {loading ? (
+                <div className="h-12 w-72 max-w-full bg-muted/60 animate-pulse" aria-label="Loading prices" />
+              ) : (
+                <>
+                  {bridalFrom !== null && (
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Bridal packages</dt>
+                      <dd className="font-heading text-2xl md:text-3xl tabular-nums">from {formatPKR(bridalFrom)}</dd>
+                    </div>
+                  )}
+                  {servicesFrom !== null && (
+                    <div>
+                      <dt className="text-sm text-muted-foreground">Everyday services</dt>
+                      <dd className="font-heading text-2xl md:text-3xl tabular-nums">from {formatPKR(servicesFrom)}</dd>
+                    </div>
+                  )}
+                  {bridalFrom === null && servicesFrom === null && (
+                    <p className="text-sm text-muted-foreground self-center">Prices on request. Tell us about your occasion.</p>
+                  )}
+                </>
+              )}
+            </dl>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a href="#book" className="sm:w-auto"><Button size="lg" className="w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">Book appointment</Button></a>
+              <Link to="/packages" className="sm:w-auto"><Button size="lg" variant="outline" className="w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">See bridal packages</Button></Link>
             </div>
-            <div className="mt-16 pt-10 border-t border-border/60 grid grid-cols-2 sm:grid-cols-4 gap-6">
+
+            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
               {perks.map(p => (
-                <div key={p.label} className="flex items-center gap-2.5 text-xs uppercase tracking-widest text-muted-foreground">
-                  <p.icon className="w-4 h-4 text-primary/80 shrink-0" strokeWidth={1.25} />
-                  <span>{p.label}</span>
-                </div>
+                <li key={p.label} className="flex items-center gap-2">
+                  <Check className="w-3.5 h-3.5 text-primary shrink-0" strokeWidth={1.5} aria-hidden />
+                  {p.label}
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
+        </div>
+        <div className="lg:col-span-5 relative h-[46vh] min-h-[280px] lg:h-auto">
+          <img
+            src={SITE.heroImage}
+            alt={SITE.heroImageAlt}
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: SITE.heroImagePosition }}
+            width={1600}
+            height={1024}
+          />
         </div>
       </section>
 
 
-      {/* Features */}
-      <section id="services" className="py-24 px-4 lg:px-8">
-        <div className="max-w-6xl mx-auto border border-border/60">
-          <div className="p-10 md:p-16 border-b border-border/60">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-6 font-light">What We Offer</p>
-            <h2 className="font-heading text-4xl md:text-6xl font-normal tracking-tight leading-[1.05] max-w-2xl">
-              Curated beauty, <span className="italic font-normal text-primary/70">every detail.</span>
+      {/* What we do: three real pillars instead of a grid of same-size feature cards */}
+      <section id="services" className="py-20 md:py-28 px-4 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mb-12 md:mb-16">
+            <h2 className="font-heading text-4xl md:text-6xl font-normal tracking-tight leading-[1.05]">
+              Curated beauty, <span className="italic font-normal text-primary">every detail.</span>
             </h2>
-            <p className="mt-6 text-muted-foreground text-base font-light leading-relaxed max-w-md">
-              From your everyday glow-up to once-in-a-lifetime bridal moments — services designed to celebrate you.
+            <p className="mt-6 text-muted-foreground text-base leading-relaxed max-w-md">
+              From your everyday glow-up to once-in-a-lifetime bridal moments. Services designed to celebrate you.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3">
-            {featureCards.map((f, i) => {
-              const isLastRow = i >= featureCards.length - (featureCards.length % 3 || 3);
-              const isLastCol = (i + 1) % 3 === 0;
-              return (
-                <Link
-                  key={f.title}
-                  to={f.to}
-                  className={`group block p-10 transition-colors duration-700 hover:bg-muted/40 ${!isLastCol ? 'md:border-r border-border/60' : ''} ${!isLastRow ? 'border-b border-border/60' : 'border-b md:border-b-0 border-border/60'}`}
-                >
-                  <div className="flex justify-between items-start mb-12">
-                    <f.icon className="w-6 h-6 text-primary/80" strokeWidth={1} />
-                    <span className="text-[10px] text-muted-foreground/60 tabular-nums">
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-                  <h3 className="font-heading text-xl font-normal mb-4 tracking-tight">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground font-light leading-relaxed mb-8 min-h-[3rem]">{f.desc}</p>
-                  <div className="inline-flex items-center text-[10px] tracking-[0.2em] uppercase text-primary/80 group-hover:text-foreground transition-colors">
-                    Explore
-                    <ArrowRight className="ml-2 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" strokeWidth={1.25} />
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-border/60 border border-border/60">
+            {pillars.map(p => (
+              <Link
+                key={p.title}
+                to={p.to}
+                className={`group flex flex-col p-8 md:p-10 transition-colors duration-500 ${p.span} ${p.mehndi ? 'text-[#f5efdf]' : 'bg-background hover:bg-muted/40'}`}
+                style={p.mehndi ? { background: 'linear-gradient(180deg, #12241a, #0b1a12)' } : undefined}
+              >
+                <p.icon className="w-6 h-6 mb-10" strokeWidth={1} style={{ color: p.mehndi ? '#e3c47a' : undefined }} aria-hidden />
+                <h3 className="font-heading text-3xl md:text-4xl font-light tracking-tight mb-4">{p.title}</h3>
+                <p className={`text-sm leading-relaxed mb-6 max-w-sm ${p.mehndi ? 'text-[#dfe8db]' : 'text-muted-foreground'}`}>{p.desc}</p>
+                <ul className={`space-y-2 mb-10 text-sm ${p.mehndi ? 'text-[#e8f0e5]' : 'text-foreground/85'}`}>
+                  {p.items.map(item => (
+                    <li key={item} className="flex gap-2.5">
+                      <Check className="w-3.5 h-3.5 mt-1 shrink-0" strokeWidth={1.5} style={{ color: p.mehndi ? '#e3c47a' : 'hsl(var(--primary))' }} aria-hidden />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <span className={`mt-auto inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] ${p.mehndi ? 'text-[#f1dfa4]' : 'text-primary'} group-hover:gap-3 transition-all`}>
+                  {p.cta}
+                  <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.25} aria-hidden />
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -321,11 +370,8 @@ const Landing = () => {
       <section className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-14">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Signature Menu</p>
-              <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Most loved services.</h2>
-            </div>
-            <Link to="/services" className="text-[10px] uppercase tracking-[0.2em] text-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
+            <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Most loved services.</h2>
+            <Link to="/services" className="min-h-11 text-xs uppercase tracking-[0.2em] text-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
               View all <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.25} />
             </Link>
           </div>
@@ -333,13 +379,15 @@ const Landing = () => {
             {featuredServices.map(s => (
               <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-start justify-between">
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
-                  <span className="text-[10px] uppercase tracking-widest text-muted-foreground tabular-nums">{formatDuration(s.duration)}</span>
+                  <span className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{s.category}</span>
+                  <span className="text-xs text-muted-foreground tabular-nums">{formatDuration(s.duration)}</span>
                 </div>
                 <h3 className="font-heading text-2xl font-light tracking-tight">{s.name}</h3>
                 <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">
-                  <span className="text-primary/90 font-medium text-sm tabular-nums">{formatPKR(s.price)}</span>
-                  <Link to={`/services/${s.id}`} className="text-[10px] uppercase tracking-[0.2em] text-foreground/70 group-hover:text-primary transition-colors">Details →</Link>
+                  <span className="text-primary font-semibold text-sm tabular-nums">{formatPKR(s.price)}</span>
+                  <Link to={`/services/${s.id}`} className="min-h-11 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.18em] text-foreground/75 group-hover:text-primary transition-colors">
+                    Details <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.25} aria-hidden />
+                  </Link>
                 </div>
               </div>
             ))}
@@ -353,9 +401,8 @@ const Landing = () => {
       <section id="packages" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-14">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Bridal Packages</p>
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-4">Complete Barat packages.</h2>
-            <p className="text-muted-foreground font-light leading-relaxed">All-inclusive bridal experiences — everything you need for your perfect day, in one seamless package.</p>
+            <p className="text-muted-foreground leading-relaxed">All-inclusive bridal experiences. Everything you need for your perfect day, in one seamless package.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-l border-border/60">
             {featuredDeals.map((d, idx) => {
@@ -363,19 +410,19 @@ const Landing = () => {
               return (
                 <div key={d.id} className={`relative p-10 border-r border-b border-border/60 ${isPopular ? 'bg-muted/30' : ''}`}>
                   {isPopular && (
-                    <span className="absolute top-6 right-6 text-[9px] uppercase tracking-[0.25em] text-primary/80">Most Popular</span>
+                    <span className="absolute top-6 right-6 text-xs uppercase tracking-[0.18em] text-primary font-semibold">Most popular</span>
                   )}
                   <h3 className="font-heading text-3xl font-light tracking-tight mb-6">{d.name}</h3>
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="font-heading text-4xl text-foreground tabular-nums">{formatPKR(d.discountedPrice)}</span>
                   </div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-8">{formatDuration(d.totalDuration)} session</div>
+                  <div className="text-sm text-muted-foreground mb-8">{formatDuration(d.totalDuration)} session</div>
                   <ul className="space-y-3 mb-10 pt-6 border-t border-border/60">
                     {d.serviceIds.map(sid => {
                       const svc = services.find(x => x.id === sid);
                       return svc ? (
-                        <li key={sid} className="flex items-start gap-3 text-sm text-muted-foreground font-light">
-                          <Check className="w-3.5 h-3.5 text-primary/80 mt-1 shrink-0" strokeWidth={1.5} />
+                        <li key={sid} className="flex items-start gap-3 text-sm text-muted-foreground">
+                          <Check className="w-3.5 h-3.5 text-primary mt-1 shrink-0" strokeWidth={1.5} aria-hidden />
                           <span>{svc.name}</span>
                         </li>
                       ) : null;
@@ -446,7 +493,7 @@ const Landing = () => {
                 <Flower2 className="w-5 h-5" style={{ color: '#f1dfa4' }} />
               </div>
               <div>
-                <p className="text-xs" style={{ color: '#7a6a3a' }}>Mehndi artistry</p>
+                <p className="text-xs" style={{ color: '#5f5024' }}>Mehndi artistry</p>
                 <p className="font-heading font-semibold" style={{ color: '#12241a' }}>
                   {mehndiFrom !== null ? `From ${formatPKR(mehndiFrom)}` : 'Custom quotes'}
                 </p>
@@ -455,28 +502,12 @@ const Landing = () => {
           </div>
 
           <div className="order-1 md:order-2">
-            <p
-              className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.28em] font-semibold mb-4 px-3 py-1 rounded-full"
-              style={{
-                color: '#f1dfa4',
-                background: 'linear-gradient(90deg, rgba(201,162,74,0.22), rgba(201,162,74,0.05))',
-                border: '1px solid rgba(201,162,74,0.55)',
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#c9a24a' }} />
-              Mehndi Artistry
-            </p>
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-5 tracking-tight" style={{ color: '#f5efdf' }}>
-              Delicate Motifs,{' '}
-              <span
-                className="italic bg-clip-text text-transparent"
-                style={{ backgroundImage: 'linear-gradient(90deg, #c9a24a, #f1dfa4, #c9a24a)' }}
-              >
-                Deep Stain
-              </span>
+            <h2 className="font-heading text-4xl md:text-6xl font-light mb-5 tracking-tight" style={{ color: '#f5efdf' }}>
+              Delicate motifs,{' '}
+              <span className="italic" style={{ color: '#e3c47a' }}>deep stain.</span>
             </h2>
-            <p className="mb-6 leading-relaxed" style={{ color: 'rgba(232,240,229,0.75)' }}>
-              From intricate Sodani bridal work to modern Arabic flow — our senior mehndi artists design every pattern around your outfit, hands and event.
+            <p className="mb-6 leading-relaxed max-w-prose" style={{ color: '#d3ddcf' }}>
+              From intricate Sodani bridal work to modern Arabic flow, our senior mehndi artists design every pattern around your outfit, hands and event.
             </p>
             <ul className="space-y-3 mb-8">
               {[
@@ -530,25 +561,21 @@ const Landing = () => {
       <section id="about" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Our Story</p>
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight mb-8">Beauty meets craftsmanship.</h2>
             <p className="text-muted-foreground mb-4 leading-relaxed font-light">
-              BeYou Stylin was born from a simple idea — that every woman deserves to feel iconic on her most important days. Our team of senior artists brings over a decade of experience in bridal makeup, hair styling, and skincare.
+              BeYou Stylin was born from a simple idea: every woman deserves to feel iconic on her most important days. Our team of senior artists brings over a decade of experience in bridal makeup, hair styling, and skincare.
             </p>
             <p className="text-muted-foreground mb-10 leading-relaxed font-light">
               Using only premium products and modern techniques, we tailor every look to your unique features.
             </p>
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border/60">
-              {[['500+', 'Brides Styled'], ['50+', 'Signature Services'], ['10+', 'Years of Craft']].map(([n, l]) => (
-                <div key={l}>
-                  <div className="font-heading text-4xl font-light text-foreground tabular-nums">{n}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-2">{l}</div>
-                </div>
+            <p className="pt-6 border-t border-border/60 text-sm text-muted-foreground">
+              {[['500+', 'brides styled'], ['50+', 'signature services'], ['10+', 'years of craft']].map(([n, l], i) => (
+                <span key={l}>{i > 0 && ' · '}<strong className="font-semibold text-foreground tabular-nums">{n}</strong> {l}</span>
               ))}
-            </div>
+            </p>
           </div>
           <div className="relative aspect-[4/5] overflow-hidden">
-            <img src={heroImage} alt="BeYou Stylin studio interior" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" loading="lazy" />
+            <img src={SITE.heroImage} alt={SITE.heroImageAlt} className="w-full h-full object-cover" style={{ objectPosition: SITE.heroImagePosition }} loading="lazy" />
           </div>
         </div>
       </section>
@@ -557,19 +584,18 @@ const Landing = () => {
       <section className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-14">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">Kind Words</p>
             <h2 className="font-heading text-4xl md:text-5xl font-light tracking-tight">Loved by our clients.</h2>
           </div>
           <div className="grid md:grid-cols-3 border-t border-l border-border/60">
             {testimonials.map(t => (
               <div key={t.name} className="p-10 border-r border-b border-border/60">
-                <div className="flex gap-1 mb-6">
-                  {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-primary/80 text-primary/80" strokeWidth={1} />)}
+                <div className="flex gap-1 mb-6" role="img" aria-label={`${t.rating} out of 5 stars`}>
+                  {Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="w-3 h-3 fill-primary text-primary" strokeWidth={1} aria-hidden />)}
                 </div>
                 <p className="font-heading text-xl font-light italic leading-relaxed mb-8 text-foreground/90">"{t.text}"</p>
                 <div className="pt-6 border-t border-border/60">
                   <div className="text-sm font-medium tracking-tight">{t.name}</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{t.role}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{t.role}</div>
                 </div>
               </div>
             ))}
@@ -582,9 +608,6 @@ const Landing = () => {
       <section id="book" className="py-24 px-4 lg:px-8 border-t border-border/60 scroll-mt-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-2">
-            <p className="text-sm uppercase tracking-widest text-primary font-medium mb-3">
-              {mode === 'booking' ? 'Book Appointment' : 'Request a Quote'}
-            </p>
             <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
               {mode === 'booking' ? 'Reserve Your Glow Session' : 'Get a Personalised Quote'}
             </h2>
@@ -598,7 +621,7 @@ const Landing = () => {
                 <>
                   <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Personal consultation before every booking</li>
                   <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Confirmation via WhatsApp or phone call</li>
-                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Flexible rescheduling — no hidden fees</li>
+                  <li className="flex items-start gap-3"><Check className="w-4 h-4 text-primary mt-0.5" /> Flexible rescheduling, no hidden fees</li>
                 </>
               ) : (
                 <>
@@ -610,7 +633,7 @@ const Landing = () => {
             </ul>
             <div className="mt-8 p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-2 text-sm font-medium mb-1"><Phone className="w-4 h-4 text-primary" /> Prefer to call?</div>
-              <p className="text-sm text-muted-foreground">Reach us at <a href={SITE.phoneHref} className="text-primary font-medium">{SITE.phoneDisplay}</a> — {SITE.hours}.</p>
+              <p className="text-sm text-muted-foreground">Reach us at <a href={SITE.phoneHref} className="text-primary font-medium">{SITE.phoneDisplay}</a>, {SITE.hours}.</p>
             </div>
           </div>
 
@@ -673,18 +696,18 @@ const Landing = () => {
                     required
                     className={selectClass}
                   >
-                    <option value="">— Choose one —</option>
+                    <option value="">Choose one</option>
                     {activeDeals.length > 0 && (
                       <optgroup label="Bridal Packages">
                         {activeDeals.map(d => (
-                          <option key={d.id} value={`deal:${d.id}`}>{d.name} — {formatPKR(d.discountedPrice)}</option>
+                          <option key={d.id} value={`deal:${d.id}`}>{d.name} · {formatPKR(d.discountedPrice)}</option>
                         ))}
                       </optgroup>
                     )}
                     <optgroup label="Services">
                       {activeServices.map(s => (
                         <option key={s.id} value={`service:${s.id}`}>
-                          {s.name}{s.price > 0 ? ` — ${formatPKR(s.price)}` : ' — Custom price'}
+                          {s.name}{s.price > 0 ? ` · ${formatPKR(s.price)}` : ' · Custom price'}
                         </option>
                       ))}
                     </optgroup>
@@ -744,7 +767,7 @@ const Landing = () => {
                     onChange={e => setQuoteForm({ ...quoteForm, selection: e.target.value })}
                     className={selectClass}
                   >
-                    <option value="">Not sure — need guidance</option>
+                    <option value="">Not sure yet, I need guidance</option>
                     {activeDeals.length > 0 && (
                       <optgroup label="Bridal Packages">
                         {activeDeals.map(d => (
@@ -780,7 +803,7 @@ const Landing = () => {
                   {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Request Quote
                 </Button>
                 <p className="text-xs text-muted-foreground text-center">
-                  We'll respond within 24 hours with a personalised quote — no obligation.
+                  We'll respond within 24 hours with a personalised quote, no obligation.
                 </p>
               </form>
             )}
@@ -791,8 +814,7 @@ const Landing = () => {
       {/* CTA */}
       <section id="contact" className="py-24 px-4 lg:px-8 border-t border-border/60">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-6 font-medium">Contact</p>
-          <h2 className="font-heading text-5xl md:text-6xl font-light tracking-tight mb-6">Ready to look <span className="italic text-primary/80">iconic?</span></h2>
+          <h2 className="font-heading text-5xl md:text-6xl font-light tracking-tight mb-6">Ready to look <span className="italic text-primary">iconic?</span></h2>
           <p className="text-muted-foreground mb-10 max-w-xl mx-auto font-light leading-relaxed">
             Book your consultation today. Our artists are ready to design a look that is uniquely you.
           </p>
@@ -800,10 +822,10 @@ const Landing = () => {
             <a href="#book"><Button size="lg" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Book Appointment</Button></a>
             <a href={SITE.phoneHref}><Button size="lg" variant="outline" className="rounded-none px-8 text-xs uppercase tracking-[0.2em]">Call Us</Button></a>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6 text-xs uppercase tracking-widest text-muted-foreground pt-10 border-t border-border/60">
-            <div className="flex items-center justify-center gap-2"><MapPin className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.city}</div>
-            <a href={SITE.phoneHref} className="flex items-center justify-center gap-2 hover:text-foreground"><Phone className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.phoneDisplay}</a>
-            <a href={`mailto:${SITE.email}`} className="flex items-center justify-center gap-2 hover:text-foreground normal-case tracking-normal"><Mail className="w-3.5 h-3.5 text-primary/80" strokeWidth={1.25} /> {SITE.email}</a>
+          <div className="grid sm:grid-cols-3 gap-6 text-sm text-muted-foreground pt-10 border-t border-border/60">
+            <div className="flex items-center justify-center gap-2"><MapPin className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} aria-hidden /> {SITE.city}</div>
+            <a href={SITE.phoneHref} className="flex items-center justify-center gap-2 hover:text-foreground"><Phone className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} aria-hidden /> {SITE.phoneDisplay}</a>
+            <a href={`mailto:${SITE.email}`} className="flex items-center justify-center gap-2 hover:text-foreground"><Mail className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} aria-hidden /> {SITE.email}</a>
           </div>
         </div>
       </section>
@@ -813,16 +835,16 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo className="h-8 w-auto" />
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">© {new Date().getFullYear()} {SITE.name}</span>
+            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} {SITE.name}</span>
           </div>
           <div className="flex items-center gap-5 text-muted-foreground">
             {SITE.instagramUrl && (
-              <a href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
+              <a href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-11 h-11 inline-flex items-center justify-center hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
             )}
             {SITE.facebookUrl && (
-              <a href={SITE.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
+              <a href={SITE.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-11 h-11 inline-flex items-center justify-center hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
             )}
-            <Link to="/auth" className="text-[10px] uppercase tracking-widest hover:text-primary transition-colors">Staff &amp; client sign in</Link>
+            <Link to="/auth" className="min-h-11 inline-flex items-center text-xs uppercase tracking-[0.16em] hover:text-primary transition-colors">Staff &amp; client sign in</Link>
           </div>
         </div>
       </footer>

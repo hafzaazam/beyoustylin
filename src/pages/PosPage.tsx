@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
-  AlertTriangle, Check, ChevronsUpDown, Copy, Download, Gift, Loader2, Minus, Package, Plus, Printer,
+  AlertTriangle, Check, ChevronDown, ChevronsUpDown, Copy, Download, Gift, Loader2, Minus, Package, Plus, Printer,
   Search, ShoppingBag, Trash2, UserPlus, Users, X,
 } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
@@ -32,6 +32,10 @@ const readLastMethod = () => {
   try { return localStorage.getItem(PAYMENT_KEY) || PAYMENT_METHODS[0]; } catch { return PAYMENT_METHODS[0]; }
 };
 const saveLastMethod = (m: string) => { try { localStorage.setItem(PAYMENT_KEY, m); } catch { /* private mode */ } };
+// Front desks usually have one person on the till: remember who sold last on this device.
+const STAFF_KEY = 'bys.pos.staffId';
+const readLastStaff = () => { try { return localStorage.getItem(STAFF_KEY) || ''; } catch { return ''; } };
+const saveLastStaff = (id: string) => { try { localStorage.setItem(STAFF_KEY, id); } catch { /* private mode */ } };
 
 let keySeq = 0;
 const nextKey = () => `l${++keySeq}`;
@@ -46,7 +50,10 @@ const PosPage = () => {
   const [customerId, setCustomerId] = useState('');
   const [walkInName, setWalkInName] = useState('');
   const [customerOpen, setCustomerOpen] = useState(false);
-  const [staffId, setStaffId] = useState('');
+  const [staffId, setStaffId] = useState(readLastStaff);
+  const [staffMissing, setStaffMissing] = useState(false);
+  const [extrasOpen, setExtrasOpen] = useState(false);
+  const [params, setParams] = useSearchParams();
   const [discountCode, setDiscountCode] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<string>(readLastMethod);
@@ -55,6 +62,19 @@ const PosPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [completed, setCompleted] = useState<Sale | null>(null);
   const cartRef = useRef<HTMLDivElement>(null);
+
+  // "Sell a gift voucher" from the Vouchers page lands here as ?sell=voucher.
+  useEffect(() => {
+    if (params.get('sell') !== 'voucher') return;
+    setVoucherOpen(true);
+    const next = new URLSearchParams(params);
+    next.delete('sell');
+    setParams(next, { replace: true });
+  }, [params, setParams]);
+
+  const activeStaff = salon.staff.filter(s => s.status === 'active');
+  // Forget a remembered seller who has since been disabled or removed.
+  const sellerValid = !!staffId && activeStaff.some(s => s.id === staffId);
 
   const activeProducts = salon.products.filter(p => p.status === 'active');
   const categories = useMemo(() => Array.from(new Set(activeProducts.map(p => p.category))).sort(), [activeProducts]);
@@ -92,13 +112,15 @@ const PosPage = () => {
   const selectedCustomer = salon.getCustomerById(customerId);
 
   const reset = () => {
-    setLines([]); setCustomerMode('walkin'); setCustomerId(''); setWalkInName(''); setStaffId('');
-    setDiscountCode(''); setVoucherCode(''); setNotes(''); setError(null); setSearch('');
+    // Keep the seller: the same person usually rings up the next sale.
+    setLines([]); setCustomerMode('walkin'); setCustomerId(''); setWalkInName('');
+    setDiscountCode(''); setVoucherCode(''); setNotes(''); setError(null); setSearch(''); setExtrasOpen(false);
   };
 
   const complete = async () => {
     setError(null);
     if (lines.length === 0) return setError('Add at least one item.');
+    if (!sellerValid) { setStaffMissing(true); return setError('Choose who made the sale so it counts toward their performance.'); }
     if (customerMode === 'existing' && !customerId) return setError('Choose a customer, or switch to walk-in.');
     if (discountCode.trim() && productSubtotal === 0) return setError('Discount codes apply to products, not to gift vouchers.');
     if (voucherCode.trim() && productSubtotal === 0) return setError('A gift voucher can pay for products, not for other gift vouchers.');
@@ -110,7 +132,7 @@ const PosPage = () => {
       items,
       customerId: customerMode === 'existing' ? customerId : undefined,
       customerName: customerMode === 'walkin' ? walkInName : undefined,
-      staffId: staffId || undefined,
+      staffId,
       discountCode: discountCode || undefined,
       giftVoucherCode: voucherCode || undefined,
       paymentMethod,
@@ -119,6 +141,7 @@ const PosPage = () => {
     setSaving(false);
     if (typeof result === 'string') { setError(result); return; }
     saveLastMethod(paymentMethod);
+    saveLastStaff(staffId);
     setCompleted(result);
     reset();
   };
@@ -168,25 +191,28 @@ const PosPage = () => {
                   </p>
                 </div>
                 <span className="text-sm font-semibold tabular-nums">{formatPKR(l.value)}</span>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => removeLine(l.key)} aria-label="Remove gift voucher"><X className="w-4 h-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => removeLine(l.key)} aria-label="Remove gift voucher"><X className="w-4 h-4" /></Button>
               </div>
             );
           }
           const p = salon.getProductById(l.productId);
           if (!p) return null;
           return (
-            <div key={l.key} className="flex items-center gap-2 rounded-xl border p-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{p.name}</p>
-                <p className="text-xs text-muted-foreground tabular-nums">{formatPKR(p.price)} each</p>
+            // Two rows so long product names stay readable in a narrow basket.
+            <div key={l.key} className="rounded-xl border p-3 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-sm font-medium leading-snug min-w-0">{p.name}</p>
+                <span className="text-sm font-semibold tabular-nums whitespace-nowrap">{formatPKR(p.price * l.quantity)}</span>
               </div>
-              <div className="flex items-center rounded-lg border">
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-r-none" onClick={() => setQty(l.key, l.quantity - 1)} aria-label={`One less ${p.name}`}><Minus className="w-3.5 h-3.5" /></Button>
-                <span className="w-8 text-center text-sm font-semibold tabular-nums" aria-live="polite">{l.quantity}</span>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-l-none" onClick={() => setQty(l.key, l.quantity + 1)} disabled={l.quantity >= p.stock} aria-label={`One more ${p.name}`}><Plus className="w-3.5 h-3.5" /></Button>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-lg border">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-r-none" onClick={() => setQty(l.key, l.quantity - 1)} aria-label={`One less ${p.name}`}><Minus className="w-3.5 h-3.5" /></Button>
+                  <span className="w-8 text-center text-sm font-semibold tabular-nums" aria-live="polite">{l.quantity}</span>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-l-none" onClick={() => setQty(l.key, l.quantity + 1)} disabled={l.quantity >= p.stock} aria-label={`One more ${p.name}`}><Plus className="w-3.5 h-3.5" /></Button>
+                </div>
+                <span className="flex-1 text-xs text-muted-foreground tabular-nums">× {formatPKR(p.price)}</span>
+                <Button variant="ghost" size="icon" className="h-10 w-10 text-muted-foreground hover:text-destructive" onClick={() => removeLine(l.key)} aria-label={`Remove ${p.name}`}><Trash2 className="w-4 h-4" /></Button>
               </div>
-              <span className="w-20 text-right text-sm font-semibold tabular-nums">{formatPKR(p.price * l.quantity)}</span>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => removeLine(l.key)} aria-label={`Remove ${p.name}`}><Trash2 className="w-3.5 h-3.5" /></Button>
             </div>
           );
         })}
@@ -236,41 +262,59 @@ const PosPage = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1.5">
-            <Label>Sold by</Label>
-            <Select value={staffId || 'none'} onValueChange={v => setStaffId(v === 'none' ? '' : v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">—</SelectItem>
-                {salon.staff.filter(s => s.status === 'active').map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Payment</Label>
-            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
-            </Select>
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="pos-seller">Sold by</Label>
+          <Select value={sellerValid ? staffId : ''} onValueChange={v => { setStaffId(v); setStaffMissing(false); if (error?.startsWith('Choose who')) setError(null); }}>
+            <SelectTrigger
+              id="pos-seller"
+              aria-invalid={staffMissing}
+              aria-describedby={staffMissing ? 'pos-seller-error' : undefined}
+              className={cn(staffMissing && 'border-destructive focus:ring-destructive')}
+            >
+              <SelectValue placeholder="Choose staff member" />
+            </SelectTrigger>
+            <SelectContent>
+              {activeStaff.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {staffMissing && <p id="pos-seller-error" className="text-xs font-medium text-destructive">Required, so the sale counts toward their performance.</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="pos-discount">Discount code</Label>
-            <Input id="pos-discount" value={discountCode} onChange={e => setDiscountCode(e.target.value.toUpperCase())} placeholder="e.g. EID20" className="uppercase" maxLength={30} />
+        {/* Codes and notes are occasional: keep them out of the way until needed. */}
+        {!(extrasOpen || discountCode || voucherCode || notes) ? (
+          <button
+            type="button"
+            onClick={() => setExtrasOpen(true)}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            aria-expanded={false}
+            aria-controls="pos-extras"
+          >
+            <Plus className="w-4 h-4" />Add discount, voucher or note
+          </button>
+        ) : (
+          <div id="pos-extras" className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="pos-discount">Discount code</Label>
+                <Input id="pos-discount" value={discountCode} onChange={e => setDiscountCode(e.target.value.toUpperCase())} placeholder="e.g. EID20" maxLength={30} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="pos-voucher">Pay with voucher</Label>
+                <Input id="pos-voucher" value={voucherCode} onChange={e => setVoucherCode(e.target.value.toUpperCase())} placeholder="GV-XXXXX-XXXXX" className="font-mono text-xs" maxLength={20} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Checked when you charge. Both apply to products only, not to gift vouchers.</p>
+            <div className="space-y-1.5">
+              <Label htmlFor="pos-notes">Note</Label>
+              <Textarea id="pos-notes" rows={2} maxLength={500} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" />
+            </div>
+            {!(discountCode || voucherCode || notes) && (
+              <button type="button" onClick={() => setExtrasOpen(false)} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                <ChevronDown className="w-3.5 h-3.5 rotate-180" />Hide
+              </button>
+            )}
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="pos-voucher">Pay with voucher</Label>
-            <Input id="pos-voucher" value={voucherCode} onChange={e => setVoucherCode(e.target.value.toUpperCase())} placeholder="GV-XXXXX-XXXXX" className="uppercase font-mono text-xs" maxLength={20} />
-          </div>
-        </div>
-        {(discountCode || voucherCode) && (
-          <p className="text-[11px] text-muted-foreground">Codes are checked when you complete the sale and apply to products only, not to gift vouchers.</p>
         )}
-
-        <Textarea rows={2} maxLength={500} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes (optional)" />
 
         {/* Totals */}
         <div className="rounded-xl bg-muted/50 p-3 text-sm space-y-1">
@@ -289,10 +333,24 @@ const PosPage = () => {
           </p>
         )}
 
-        <Button className="w-full h-12 text-base" onClick={complete} disabled={saving || lines.length === 0}>
+        <div className="flex items-center gap-3">
+          <Label htmlFor="pos-method" className="shrink-0">Payment</Label>
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger id="pos-method" className="h-11 flex-1"><SelectValue /></SelectTrigger>
+            <SelectContent>{PAYMENT_METHODS.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <Button
+          className="w-full h-12 text-base disabled:opacity-100 disabled:bg-muted disabled:text-muted-foreground disabled:shadow-none"
+          onClick={complete}
+          disabled={saving || lines.length === 0}
+        >
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-          Complete sale
+          {lines.length === 0 ? 'Add items to charge' : `Charge ${formatPKR(total)} · ${paymentMethod}`}
         </Button>
+        {lines.length > 0 && (discountCode || voucherCode) && (
+          <p className="text-xs text-muted-foreground text-center">Final amount after codes is shown on the receipt.</p>
+        )}
       </div>
     </div>
   );
@@ -302,14 +360,16 @@ const PosPage = () => {
       title="Point of sale"
       actions={<Button variant="outline" asChild><Link to="/admin/sales">Sales history</Link></Button>}
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_400px] pb-20 lg:pb-0">
+      <div className="grid gap-6 grid-cols-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_400px] pb-24 lg:pb-0">
         {/* Catalogue */}
         <section aria-label="Products" className="min-w-0">
           <div className="flex flex-col sm:flex-row gap-3 mb-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search or scan SKU — Enter adds a single match"
+                placeholder="Search products or scan barcode"
+                aria-label="Search products or scan barcode"
+                data-shortcut="search"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 onKeyDown={onSearchKey}
@@ -328,7 +388,7 @@ const PosPage = () => {
                   key={c}
                   onClick={() => setCategory(c)}
                   aria-pressed={category === c}
-                  className={cn('px-3 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap transition-colors',
+                  className={cn('px-3 py-2 rounded-full text-xs font-medium border whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
                     category === c ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground hover:text-foreground')}
                 >
                   {c === 'all' ? 'All' : c}
@@ -379,7 +439,7 @@ const PosPage = () => {
         </section>
 
         {/* Cart */}
-        <aside aria-label="Current sale">{cartPanel}</aside>
+        <aside aria-label="Current sale" className="min-w-0">{cartPanel}</aside>
       </div>
 
       {/* Mobile summary bar */}
@@ -390,7 +450,7 @@ const PosPage = () => {
             <span className="font-semibold">{itemCount} item{itemCount === 1 ? '' : 's'}</span>
             <span className="text-muted-foreground"> · {formatPKR(total)}</span>
           </div>
-          <Button size="sm" onClick={() => cartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Checkout</Button>
+          <Button className="h-11" onClick={() => cartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Checkout</Button>
         </div>
       )}
 

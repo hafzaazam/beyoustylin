@@ -62,7 +62,7 @@ const AccountRequests = () => {
           {[0, 1].map(i => <div key={i} className="h-24 rounded-2xl bg-muted animate-pulse" />)}
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border p-12 text-center bg-card/50">
+        <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-card/60">
           <MailOpen className="w-10 h-10 text-primary mx-auto mb-3" />
           <p className="font-heading text-xl font-semibold mb-1">No requests yet</p>
           <p className="text-sm text-muted-foreground mb-5">Submit a booking or quote request and track it here.</p>
@@ -71,10 +71,10 @@ const AccountRequests = () => {
       ) : (
         <div className="space-y-3">
           {rows.map(r => (
-            <div key={r.id} className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 flex flex-wrap items-center justify-between gap-4">
+            <div key={r.id} className="rounded-2xl border border-border/60 bg-card p-5 flex flex-wrap items-center justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">{r.type}</span>
+                  <span className="text-[11px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">{r.type}</span>
                   <h3 className="font-heading text-lg font-semibold">{label(r)}</h3>
                 </div>
                 <p className="text-xs text-muted-foreground">
