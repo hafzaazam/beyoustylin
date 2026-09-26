@@ -1,318 +1,65 @@
-# Salon Harmony
+# BeYou Stylin
 
-Create a Salon / Parlour Management Web App (Admin Panel Only) using:
+Salon & bridal studio web app: a public website with online booking/quote requests,
+a customer portal, and an admin panel for bookings, schedule, services, packages,
+staff, chairs, customers, invoices and team access.
 
-Backend: PHP (Core PHP or Laravel-style structure)
+Live: https://beyoustylin.lovable.app · Lovable project: https://lovable.dev/projects/7d760cbf-72ab-409b-b3a5-445552489598
 
-Database: MySQL (phpMyAdmin compatible)
+## Stack
 
-Frontend: Clean responsive UI (Bootstrap or Tailwind)
+- **Frontend:** Vite + React 18 + TypeScript, Tailwind + shadcn/ui (Radix), react-router, sonner toasts, recharts, jsPDF.
+- **Backend:** Supabase (Postgres + Row Level Security + Auth + Realtime). There is no custom server —
+  business rules that must hold for everyone (no double-booking, prices, invoices) live in the database.
 
-Architecture: MVC pattern preferred
-
-🧠 SYSTEM OVERVIEW
-
-This is a multi-resource booking system where:
-
-Bookings depend on Staff (workers) and Service Chairs (slots)
-
-NO overlapping bookings allowed for:
-
-Same staff
-
-Same chair (slot)
-
-Each booking includes:
-
-Services or Deals
-
-Staff assignment
-
-Time slot
-
-Customer
-
-Invoice auto-generation
-
-📊 ADMIN PANEL MODULES
-
-1. Dashboard
-
-Show:
-
-Total bookings today
-
-Active bookings (live orders)
-
-Total revenue (daily/monthly)
-
-Staff performance summary
-
-Occupied vs available slots
-
-📅 2. Booking / Live Order
-
-Features:
-
-Create booking (form)
-
-Update booking
-
-Assign:
-
-Customer
-
-Staff member
-
-Chair/Slot
-
-Services OR Deals
-
-Start time
-
-Auto Logic:
-
-End time = based on total service duration
-
-Prevent overlapping bookings using:
-(new_start < existing_end) AND (new_end > existing_start)
-
-Status Functions:
-
-Pending
-
-Confirmed
-
-Started
-
-Completed
-
-Canceled
-
-Delete
-
-Live Order:
-
-Walk-in customer
-
-Directly create booking and mark as Completed
-
-Auto-generate invoice instantly
-
-💄 3. Services (Salon Services)
-
-Fields:
-
-Name
-
-Category (Hair, Facial, Makeup, etc.)
-
-Price
-
-Duration (minutes)
-
-Status
-
-Functions:
-
-Create
-
-Update
-
-Available / Disable
-
-Delete
-
-🎁 4. Deals (Service Bundles)
-
-Features:
-
-Create bundle of multiple services
-
-Set custom discounted price
-
-Calculate total duration automatically
-
-Functions:
-
-Create
-
-Update
-
-Available / Disable
-
-Delete
-
-👩‍🔧 5. Staff Management
-
-Fields:
-
-Name
-
-Role (Hairdresser, Makeup Artist, etc.)
-
-Phone
-
-Status
-
-Functions:
-
-Create
-
-Update
-
-Active / Disable
-
-Delete
-
-👤 6. Customer Management
-
-Fields:
-
-Name
-
-Phone
-
-Optional: Email, Address
-
-Functions:
-
-Create
-
-Update
-
-Active / Disable
-
-Delete
-
-🧾 7. Invoice System (AUTO GENERATED)
-
-Trigger:
-
-On booking creation OR live order
-
-Include:
-
-Customer details
-
-Booking ID
-
-Staff name
-
-Services / Deals list
-
-Individual prices
-
-Total amount
-
-Date & time
-
-Status
-
-Features:
-
-Printable invoice (PDF format)
-
-Unique invoice number
-
-Stored in database
-
-🗂️ DATABASE STRUCTURE (MySQL)
-
-Create tables:
-
-staff
-
-customers
-
-services
-
-deals
-
-deal_services (mapping table)
-
-chairs (slots)
-
-bookings
-
-booking_services
-
-invoices
-
-🔒 CORE LOGIC
-
-Prevent overlapping bookings for:
-
-Same staff
-
-Same chair
-
-Total booking price:
-SUM of services OR deal price
-
-Total duration:
-SUM of service durations
-
-🎨 UI REQUIREMENTS
-
-Admin dashboard layout (sidebar + top bar)
-
-Tables with search + filters
-
-Forms with validation
-
-Status badges (color-coded)
-
-Calendar/time-slot friendly booking UI
-
-⚙️ EXTRA (IMPORTANT)
-
-Use AJAX for smooth booking updates
-
-Use proper relational database constraints
-
-Clean code structure for future SaaS scalability
-
-Error handling for booking conflicts
-
-🎯 FINAL GOAL
-
-Generate a fully functional Admin Panel for Salon Booking System
-with:
-
-No overlapping bookings
-
-Staff + slot management
-
-Services & deals
-
-Live orders
-
-Automatic invoice generation
-
-Revenue tracking
-
-Ensure the system is production-ready and scalable.
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://beyoustylin.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/7d760cbf-72ab-409b-b3a5-445552489598).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Run locally
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+npm install
+npm run dev        # http://localhost:8080
+npm test           # unit tests (vitest)
+npm run lint
+npm run build
 ```
+
+Supabase URL and publishable (anon) key are in `.env` / `src/integrations/supabase/client.ts`.
+The anon key is public by design; access is controlled by RLS policies.
+
+## Database migrations
+
+Migrations live in `supabase/migrations/` and must be applied in filename order.
+**The app on this branch requires the two `20260926…` migrations** (new columns, RPC functions and triggers).
+Apply them with one of:
+
+- Supabase dashboard → SQL editor → run each file in order, or
+- `supabase link --project-ref tcdoebddgkwxgcexuhrx && supabase db push`
+
+## Roles
+
+| Role | Can do |
+|---|---|
+| **Owner** | Everything, including granting any role (the first account to sign up becomes owner). |
+| **Manager** | Everything including deletes and the team page; cannot change owners or create managers. |
+| **Receptionist / Stylist** | Bookings, schedule, customers, invoices, requests. No deletes. |
+| **Customer** | Any signed-up account without a role. Uses `/account`: appointments (with online cancellation up to 2 h before), requests, invoices, favourites, profile, loyalty points. |
+
+Grant roles under **Admin → Team & Access** (the person must create an account first).
+
+## How the core rules work
+
+- **No overlapping bookings** for the same staff member or chair: `(new_start < existing_end) AND (new_end > existing_start)`
+  across pending/confirmed/in-progress bookings. Checked instantly in the form and enforced by the
+  `bookings_prevent_overlap` trigger (with advisory locks so two receptionists can't race).
+- **Prices and durations** are computed by the `bookings_compute_totals` trigger from the chosen services or package
+  (optional custom total for quotes/discounts). Old bookings keep their price when a service price changes later.
+- **Invoices** are created by the database for every booking, numbered `BYS-YYYY-00001`. Canceling a booking voids an
+  unpaid invoice; reopening restores it. Staff record payments (method + date) on the Invoices page. PDFs are generated
+  on demand in the browser.
+- **Customer accounts** are linked to customer records by verified email (`ensure_customer_record`), or manually by
+  staff from the Customers page.
+- **Delete safety:** customers, services, packages, staff and chairs with history can't be deleted (disable them instead);
+  bookings with a paid invoice can't be deleted (cancel them instead).
+
+## Business details
+
+Contact details, opening hours and social links are in `src/config/site.ts` — update them there.

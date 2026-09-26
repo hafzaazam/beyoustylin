@@ -1,282 +1,253 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { CalendarHeart, CalendarClock, Pencil, Plus, Search, Trash2, Zap } from 'lucide-react';
 import AdminLayout from '@/components/layout/AdminLayout';
-import { useSalon } from '@/context/SalonContext';
+import BookingFormDialog, { BookingFormMode } from '@/components/admin/BookingFormDialog';
+import { useConfirm } from '@/components/ConfirmDialog';
+import EmptyState from '@/components/EmptyState';
+import Pager, { usePaged } from '@/components/Pager';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Plus, Zap, Search, Trash2 } from 'lucide-react';
-import { BookingStatus } from '@/types/salon';
+import { useSalon } from '@/context/SalonContext';
+import { useAuth } from '@/hooks/useAuth';
+import { Booking, BookingStatus, BOOKING_STATUSES } from '@/types/salon';
+import { capitalize, formatDate, formatPKR, formatTime } from '@/lib/format';
+
+type Range = 'today' | 'upcoming' | 'past' | 'all';
+
+const RANGES: { key: Range; label: string }[] = [
+  { key: 'today', label: 'Today' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'past', label: 'Past' },
+  { key: 'all', label: 'All' },
+];
 
 const BookingsPage = () => {
   const salon = useSalon();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [walkInOpen, setWalkInOpen] = useState(false);
+  const { canManage } = useAuth();
+  const { confirm, dialog: confirmDialog } = useConfirm();
+  const [formMode, setFormMode] = useState<BookingFormMode | null>(null);
+  const [editing, setEditing] = useState<Booking | undefined>();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus>('all');
+  const [staffFilter, setStaffFilter] = useState('all');
+  const [range, setRange] = useState<Range>('upcoming');
 
-  const [form, setForm] = useState({
-    customerId: '', staffId: '', chairId: '', serviceIds: [] as string[], dealId: '', startTime: '', useDeal: false,
+  const openForm = (mode: BookingFormMode, booking?: Booking) => { setEditing(booking); setFormMode(mode); };
+
+  const itemsLabel = (b: Booking) => {
+    if (b.dealId) return salon.getDealById(b.dealId)?.name ?? 'Package';
+    return b.serviceIds.map(id => salon.getServiceById(id)?.name).filter(Boolean).join(', ') || '—';
+  };
+
+  const filtered = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const endOfToday = startOfToday + 86_400_000;
+    const q = search.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    const rows = salon.bookings.filter(b => {
+      const start = new Date(b.startTime).getTime();
+      if (range === 'today' && (start < startOfToday || start >= endOfToday)) return false;
+      if (range === 'upcoming' && (new Date(b.endTime).getTime() < now.getTime() || b.status === 'canceled' || b.status === 'completed')) return false;
+      if (range === 'past' && start >= now.getTime()) return false;
+      if (statusFilter !== 'all' && b.status !== statusFilter) return false;
+      if (staffFilter !== 'all' && b.staffId !== staffFilter) return false;
+      if (!q) return true;
+      const customer = salon.getCustomerById(b.customerId);
+      const invoice = salon.getInvoiceByBookingId(b.id);
+      return (
+        customer?.name.toLowerCase().includes(q) ||
+        (qDigits.length >= 3 && customer?.phone.replace(/\D/g, '').includes(qDigits)) ||
+        b.id.startsWith(q.replace('#', '')) ||
+        invoice?.invoiceNumber.toLowerCase().includes(q)
+      );
+    });
+    // Upcoming/today read top-down in time; history shows the most recent first.
+    const asc = range === 'today' || range === 'upcoming';
+    return rows.sort((a, b) => (asc ? 1 : -1) * (new Date(a.startTime).getTime() - new Date(b.startTime).getTime()));
+    // salon getters change with their underlying arrays
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [salon.bookings, salon.customers, salon.invoices, search, statusFilter, staffFilter, range]);
+
+  const paged = usePaged(filtered, 25, `${search}|${statusFilter}|${staffFilter}|${range}`);
+
+  const changeStatus = (b: Booking, status: BookingStatus) => {
+    if (status === b.status) return;
+    const apply = async () => {
+      if (await salon.updateBookingStatus(b.id, status)) toast.success(`Booking marked ${status === 'started' ? 'in progress' : status}`);
+    };
+    if (status === 'canceled') {
+      confirm({
+        title: 'Cancel this booking?',
+        description: 'The time slot is released and an unpaid invoice is voided. You can reopen it later by changing the status back.',
+        confirmLabel: 'Cancel booking',
+        destructive: true,
+        onConfirm: apply,
+      });
+    } else {
+      apply();
+    }
+  };
+
+  const remove = (b: Booking) => confirm({
+    title: 'Delete this booking permanently?',
+    description: 'This also deletes its invoice. Prefer "Canceled" to keep history. Bookings with a paid invoice cannot be deleted.',
+    confirmLabel: 'Delete',
+    destructive: true,
+    onConfirm: async () => { if (await salon.deleteBooking(b.id)) toast.success('Booking deleted'); },
   });
 
-  const resetForm = () => setForm({ customerId: '', staffId: '', chairId: '', serviceIds: [], dealId: '', startTime: '', useDeal: false });
-
-  const nowLocalInput = () => {
-    const d = new Date();
-    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-    return d.toISOString().slice(0, 16);
-  };
-  const openWalkIn = () => { resetForm(); setForm(p => ({ ...p, startTime: nowLocalInput() })); setWalkInOpen(true); };
-
-  // Live preview of computed duration/price + overlap warning
-  const preview = (() => {
-    let duration = 0, price = 0;
-    if (form.useDeal && form.dealId) {
-      const deal = salon.getDealById(form.dealId);
-      if (deal) { duration = deal.totalDuration; price = deal.discountedPrice; }
-    } else {
-      form.serviceIds.forEach(sid => {
-        const svc = salon.getServiceById(sid);
-        if (svc) { duration += svc.duration; price += svc.price; }
-      });
-    }
-    const conflict = form.staffId && form.chairId && form.startTime && duration > 0
-      ? salon.checkOverlap(form.staffId, form.chairId, new Date(form.startTime).toISOString(), duration)
-      : false;
-    return { duration, price, conflict };
-  })();
-
-  const handleSubmit = async (isWalkIn = false) => {
-    if (!form.customerId || !form.staffId || !form.chairId || !form.startTime) {
-      toast({ title: 'Missing fields', description: 'Fill all required fields.', variant: 'destructive' });
-      return;
-    }
-    if (!form.useDeal && form.serviceIds.length === 0) {
-      toast({ title: 'No services', description: 'Select at least one service or a deal.', variant: 'destructive' });
-      return;
-    }
-
-    const bookingData = {
-      customerId: form.customerId,
-      staffId: form.staffId,
-      chairId: form.chairId,
-      serviceIds: form.useDeal ? [] : form.serviceIds,
-      dealId: form.useDeal ? form.dealId : undefined,
-      startTime: new Date(form.startTime).toISOString(),
-    };
-
-    const result = isWalkIn
-      ? await salon.createWalkIn(bookingData)
-      : await salon.addBooking({ ...bookingData, status: 'pending' as BookingStatus });
-
-    if (typeof result === 'string') {
-      toast({ title: 'Booking Conflict', description: result, variant: 'destructive' });
-    } else {
-      toast({ title: isWalkIn ? 'Walk-in Created' : 'Booking Created', description: `Invoice auto-generated.` });
-      resetForm();
-      setOpen(false);
-      setWalkInOpen(false);
-    }
-  };
-
-  const toggleService = (id: string) => {
-    setForm(prev => ({
-      ...prev,
-      serviceIds: prev.serviceIds.includes(id) ? prev.serviceIds.filter(s => s !== id) : [...prev.serviceIds, id]
-    }));
-  };
-
-  const filteredBookings = salon.bookings.filter(b => {
-    const customer = salon.getCustomerById(b.customerId);
-    const matchSearch = !search || customer?.name.toLowerCase().includes(search.toLowerCase()) || b.id.includes(search);
-    const matchStatus = statusFilter === 'all' || b.status === statusFilter;
-    return matchSearch && matchStatus;
-  }).reverse();
-
-  const activeStaff = salon.staff.filter(s => s.status === 'active');
-  const activeServices = salon.services.filter(s => s.status === 'active');
-  const activeDeals = salon.deals.filter(d => d.status === 'active');
-  const activeCustomers = salon.customers.filter(c => c.status === 'active');
-  const activeChairs = salon.chairs.filter(c => c.status === 'active');
-
-  const renderForm = (isWalkIn: boolean) => (
-    <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-      <div>
-        <Label>Customer *</Label>
-        <Select value={form.customerId} onValueChange={v => setForm(p => ({ ...p, customerId: v }))}>
-          <SelectTrigger><SelectValue placeholder="Select customer" /></SelectTrigger>
-          <SelectContent>{activeCustomers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label>Staff *</Label>
-        <Select value={form.staffId} onValueChange={v => setForm(p => ({ ...p, staffId: v }))}>
-          <SelectTrigger><SelectValue placeholder="Select staff" /></SelectTrigger>
-          <SelectContent>{activeStaff.map(s => <SelectItem key={s.id} value={s.id}>{s.name} ({s.role})</SelectItem>)}</SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label>Chair/Slot *</Label>
-        <Select value={form.chairId} onValueChange={v => setForm(p => ({ ...p, chairId: v }))}>
-          <SelectTrigger><SelectValue placeholder="Select chair" /></SelectTrigger>
-          <SelectContent>{activeChairs.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
-        </Select>
-      </div>
-      <div>
-        <Label>Start Time *</Label>
-        <Input type="datetime-local" value={form.startTime} onChange={e => setForm(p => ({ ...p, startTime: e.target.value }))} />
-      </div>
-      <div className="flex items-center gap-3">
-        <Label>Use Deal?</Label>
-        <input type="checkbox" checked={form.useDeal} onChange={e => setForm(p => ({ ...p, useDeal: e.target.checked, serviceIds: [], dealId: '' }))} className="rounded" />
-      </div>
-      {form.useDeal ? (
-        <div>
-          <Label>Deal</Label>
-          <Select value={form.dealId} onValueChange={v => setForm(p => ({ ...p, dealId: v }))}>
-            <SelectTrigger><SelectValue placeholder="Select deal" /></SelectTrigger>
-            <SelectContent>{activeDeals.map(d => <SelectItem key={d.id} value={d.id}>{d.name} - Rs. {d.discountedPrice}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-      ) : (
-        <div>
-          <Label>Services</Label>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            {activeServices.map(s => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => toggleService(s.id)}
-                className={`p-2 rounded-lg border text-left text-sm transition-colors ${
-                  form.serviceIds.includes(s.id) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-foreground hover:bg-muted'
-                }`}
-              >
-                <span className="font-medium">{s.name}</span>
-                <span className="block text-xs text-muted-foreground">Rs. {s.price} · {s.duration}min</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {preview.duration > 0 && (
-        <div className={`rounded-lg border p-3 text-sm ${preview.conflict ? 'border-destructive/60 bg-destructive/5' : 'border-border bg-muted/40'}`}>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Duration</span>
-            <span className="font-medium">{preview.duration} min</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Total</span>
-            <span className="font-semibold">Rs. {preview.price}</span>
-          </div>
-          {preview.conflict && (
-            <div className="mt-2 text-destructive font-medium">
-              ⚠ Conflicts with an existing booking (staff or chair overlap).
-            </div>
-          )}
-        </div>
-      )}
-
-      <Button className="w-full" disabled={preview.conflict} onClick={() => handleSubmit(isWalkIn)}>
-        {isWalkIn ? 'Create Walk-in & Invoice' : 'Create Booking'}
-      </Button>
-    </div>
-  );
-
-  const statuses: BookingStatus[] = ['pending', 'confirmed', 'started', 'completed', 'canceled'];
+  const noSetup = salon.staff.length === 0 || salon.chairs.length === 0;
 
   return (
-    <AdminLayout title="Bookings">
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}><Plus className="w-4 h-4 mr-2" />New Booking</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle className="font-heading">Create Booking</DialogTitle></DialogHeader>
-            {renderForm(false)}
-          </DialogContent>
-        </Dialog>
-        <Dialog open={walkInOpen} onOpenChange={(o) => { if (!o) setWalkInOpen(false); }}>
-          <DialogTrigger asChild>
-            <Button variant="outline" onClick={openWalkIn}><Zap className="w-4 h-4 mr-2" />Walk-in Order</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle className="font-heading">Walk-in Order (Live)</DialogTitle></DialogHeader>
-            {renderForm(true)}
-          </DialogContent>
-        </Dialog>
-      </div>
+    <AdminLayout
+      title="Bookings"
+      actions={
+        <>
+          <Button onClick={() => openForm('create')}><Plus className="w-4 h-4 mr-2" />New booking</Button>
+          <Button variant="outline" onClick={() => openForm('walkin')}><Zap className="w-4 h-4 mr-2" />Walk-in</Button>
+        </>
+      }
+    >
+      {noSetup && (
+        <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm">
+          Before taking bookings, add at least one{' '}
+          {salon.staff.length === 0 && <Link to="/admin/staff" className="font-medium text-primary underline">staff member</Link>}
+          {salon.staff.length === 0 && salon.chairs.length === 0 && ' and one '}
+          {salon.chairs.length === 0 && <Link to="/admin/chairs" className="font-medium text-primary underline">chair</Link>}.
+        </div>
+      )}
 
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="inline-flex rounded-lg border bg-muted p-0.5 text-sm font-medium" role="tablist" aria-label="Date range">
+          {RANGES.map(r => (
+            <button
+              key={r.key}
+              role="tab"
+              aria-selected={range === r.key}
+              onClick={() => setRange(r.key)}
+              className={`px-3 py-1.5 rounded-md transition-colors ${range === r.key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search bookings..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Customer, phone, booking # or invoice #" value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={v => setStatusFilter(v as 'all' | BookingStatus)}>
           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            {statuses.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
+            <SelectItem value="all">All statuses</SelectItem>
+            {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{s === 'started' ? 'In progress' : capitalize(s)}</SelectItem>)}
           </SelectContent>
         </Select>
+        <Select value={staffFilter} onValueChange={setStaffFilter}>
+          <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All staff</SelectItem>
+            {salon.staff.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Button asChild variant="ghost" size="sm"><Link to="/admin/schedule"><CalendarClock className="w-4 h-4 mr-1.5" />Schedule view</Link></Button>
       </div>
 
-      <div className="bg-card rounded-xl border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">ID</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Customer</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Staff</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Chair</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Time</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Total</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBookings.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No bookings found.</td></tr>
-              ) : filteredBookings.map(b => {
-                const customer = salon.getCustomerById(b.customerId);
-                const staffMember = salon.getStaffById(b.staffId);
-                const chair = salon.getChairById(b.chairId);
-                return (
-                  <tr key={b.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs">#{b.id.slice(0, 8)}</td>
-                    <td className="px-4 py-3">{customer?.name || 'Unknown'}</td>
-                    <td className="px-4 py-3">{staffMember?.name || 'Unknown'}</td>
-                    <td className="px-4 py-3">{chair?.name || 'Unknown'}</td>
-                    <td className="px-4 py-3 text-xs">{new Date(b.startTime).toLocaleString()}</td>
-                    <td className="px-4 py-3 font-semibold">Rs. {b.totalPrice}</td>
-                    <td className="px-4 py-3"><StatusBadge status={b.status} /></td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1">
-                        <Select value={b.status} onValueChange={v => salon.updateBookingStatus(b.id, v as BookingStatus)}>
-                          <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
+      {filtered.length === 0 ? (
+        <EmptyState
+          icon={CalendarHeart}
+          title={salon.bookings.length === 0 ? 'No bookings yet' : 'No bookings match'}
+          description={salon.bookings.length === 0 ? 'Create a booking, or convert an online request from the Requests page.' : 'Try another date range or clear the filters.'}
+          action={salon.bookings.length === 0 && <Button onClick={() => openForm('create')}><Plus className="w-4 h-4 mr-2" />New booking</Button>}
+        />
+      ) : (
+        <div className="bg-card rounded-xl border overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/50 text-left">
+                  <th className="px-4 py-3 font-medium text-muted-foreground">When</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Customer</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Services</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Staff · Chair</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground text-right">Total</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">Invoice</th>
+                  <th className="px-4 py-3"><span className="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.pageItems.map(b => {
+                  const customer = salon.getCustomerById(b.customerId);
+                  const invoice = salon.getInvoiceByBookingId(b.id);
+                  return (
+                    <tr key={b.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors align-top">
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="font-medium">{formatDate(b.startTime)}</div>
+                        <div className="text-xs text-muted-foreground tabular-nums">{formatTime(b.startTime)} – {formatTime(b.endTime)}</div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{customer?.name ?? 'Unknown'}</div>
+                        <div className="text-xs text-muted-foreground">{customer?.phone}</div>
+                      </td>
+                      <td className="px-4 py-3 max-w-[16rem]">
+                        <div className="truncate" title={itemsLabel(b)}>{itemsLabel(b)}</div>
+                        {b.notes && <div className="text-xs text-muted-foreground truncate" title={b.notes}>“{b.notes}”</div>}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div>{salon.getStaffById(b.staffId)?.name ?? '—'}</div>
+                        <div className="text-xs text-muted-foreground">{salon.getChairById(b.chairId)?.name ?? '—'}</div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold tabular-nums whitespace-nowrap">{formatPKR(b.totalPrice)}</td>
+                      <td className="px-4 py-3">
+                        <Select value={b.status} onValueChange={v => changeStatus(b, v as BookingStatus)}>
+                          <SelectTrigger className="h-8 text-xs w-32" aria-label="Change status"><StatusBadge status={b.status} /></SelectTrigger>
                           <SelectContent>
-                            {statuses.map(s => <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>)}
+                            {BOOKING_STATUSES.map(s => <SelectItem key={s} value={s}>{s === 'started' ? 'In progress' : capitalize(s)}</SelectItem>)}
                           </SelectContent>
                         </Select>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => salon.deleteBooking(b.id)}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {invoice ? (
+                          <Link to={`/admin/invoices?q=${encodeURIComponent(invoice.invoiceNumber)}`} className="inline-flex flex-col gap-1 hover:opacity-80">
+                            <StatusBadge status={invoice.status} />
+                            <span className="font-mono text-[11px] text-muted-foreground">{invoice.invoiceNumber}</span>
+                          </Link>
+                        ) : <span className="text-xs text-muted-foreground">—</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openForm('edit', b)} aria-label="Edit booking">
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                          {canManage && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => remove(b)} aria-label="Delete booking">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <Pager {...paged} />
         </div>
-      </div>
+      )}
+
+      <BookingFormDialog
+        open={formMode !== null}
+        onOpenChange={o => { if (!o) setFormMode(null); }}
+        mode={formMode ?? 'create'}
+        booking={editing}
+      />
+      {confirmDialog}
     </AdminLayout>
   );
 };
