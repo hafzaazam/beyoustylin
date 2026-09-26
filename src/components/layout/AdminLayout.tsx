@@ -82,19 +82,19 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col overflow-hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`print:hidden fixed inset-y-0 left-0 z-50 w-64 text-sidebar-foreground transform transition-transform duration-200 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto lg:self-start flex flex-col overflow-hidden ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: 'var(--gradient-sidebar)' }}
       >
         {/* Ambient pink glow accents */}
         <div className="pointer-events-none absolute -top-24 -right-16 h-56 w-56 rounded-full bg-sidebar-primary/25 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 -left-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
 
-        <div className="relative flex items-center gap-3 px-6 py-6 border-b border-sidebar-border/60">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
-            <Logo className="w-14 h-14" />
+        <div className="relative flex items-center gap-3 px-5 py-4 border-b border-sidebar-border/60">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-white/95 ring-2 ring-sidebar-primary/40 shadow-[0_8px_24px_-8px_hsl(328_85%_55%/0.6)] overflow-hidden">
+            <Logo className="w-10 h-10" />
           </div>
           <div>
-            <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-primary-foreground">BeYou Stylin</h1>
+            <h1 className="font-heading text-xl font-semibold tracking-tight text-sidebar-accent-foreground">BeYou Stylin</h1>
             <p className="text-[10px] uppercase tracking-[0.2em] text-sidebar-primary/80 font-semibold">Admin Suite</p>
           </div>
           <button className="ml-auto lg:hidden text-sidebar-foreground hover:text-sidebar-primary transition-colors" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
@@ -119,7 +119,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
                 className={`group relative flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   active
                     ? 'text-sidebar-primary-foreground shadow-[0_8px_24px_-10px_hsl(328_85%_55%/0.7)]'
-                    : 'text-sidebar-foreground/75 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
+                    : 'text-sidebar-foreground/75 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60 hover:translate-x-0.5'
                 }`}
                 style={active ? { background: 'var(--gradient-primary)' } : undefined}
               >
@@ -145,34 +145,36 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
         <div className="relative mt-auto p-3 border-t border-sidebar-border/60">
           <Link
             to="/"
-            className="flex items-center gap-3 px-4 py-2 mb-1 rounded-xl text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-primary-foreground hover:bg-sidebar-accent/60 transition-colors"
+            className="flex items-center gap-3 px-4 py-2 mb-1 rounded-xl text-xs font-medium text-sidebar-foreground/70 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60 transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" /> View public site
           </Link>
-          <div className="flex items-center gap-3 px-3 py-2.5 mb-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10 backdrop-blur-sm">
+          <div className="flex items-center gap-3 pl-3 pr-1.5 py-2 rounded-xl bg-sidebar-accent/40 ring-1 ring-sidebar-primary/10 backdrop-blur-sm">
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
+              className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-sidebar-primary-foreground ring-2 ring-sidebar-primary/30"
               style={{ background: 'var(--gradient-primary)' }}
             >
               {(user?.email?.[0] || 'A').toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-sidebar-primary-foreground truncate">{user?.email}</p>
+              <p className="text-xs font-medium text-sidebar-accent-foreground truncate">{user?.email}</p>
               <p className="text-[10px] text-sidebar-primary/80 uppercase tracking-wider font-semibold">{roles[0] || 'staff'}</p>
             </div>
+            <button
+              onClick={handleSignOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-lg text-sidebar-foreground/70 hover:bg-destructive/25 hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/20 hover:text-destructive-foreground transition-all group"
-          >
-            <LogOut className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" /> Sign Out
-          </button>
         </div>
       </aside>
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-30 relative overflow-hidden px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
+        <header className="print:hidden sticky top-0 z-30 relative overflow-hidden px-4 lg:px-8 py-4 flex items-center gap-4 border-b border-primary/10 bg-gradient-to-r from-background/85 via-secondary/40 to-background/85 backdrop-blur-xl shadow-[0_1px_0_hsl(0_0%_100%/0.6)_inset,0_10px_30px_-20px_hsl(328_85%_55%/0.35)]">
           {/* Top hairline gradient */}
           <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
           {/* Soft pink glow */}
@@ -190,10 +192,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
               className="absolute left-0 top-1/2 -translate-y-1/2 h-10 w-1.5 rounded-full shadow-[0_0_12px_hsl(328_85%_55%/0.6)]"
               style={{ background: 'var(--gradient-primary)' }}
             />
-            <p
-              className="text-[10px] uppercase tracking-[0.28em] font-bold bg-clip-text text-transparent leading-none mb-1.5"
-              style={{ backgroundImage: 'var(--gradient-primary)' }}
-            >
+            <p className="text-[10px] uppercase tracking-[0.28em] font-bold text-primary leading-none mb-1.5">
               BeYou Stylin
             </p>
             <h2 className="font-heading text-xl lg:text-2xl font-semibold text-foreground tracking-tight leading-tight truncate">

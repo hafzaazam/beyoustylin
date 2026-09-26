@@ -162,6 +162,20 @@
     letter-spacing: -0.01em;
   }
 
+  /* Cormorant's default figures are old-style ("1" reads as "I", "Rs. 11,000" as "Rs. I I,000").
+     Use lining figures wherever the heading font shows numbers; setting the Tailwind
+     variable keeps this working together with the tabular-nums utility. */
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    --tw-numeric-figure: lining-nums;
+    font-variant-numeric: lining-nums;
+  }
+
+  /* Screen-reader-only labels inside scrollable tables are absolutely positioned;
+     without a positioned scroll container they escape it and widen the whole page on phones. */
+  .overflow-x-auto {
+    position: relative;
+  }
+
   ::selection {
     background: hsl(var(--primary) / 0.2);
     color: hsl(var(--primary));

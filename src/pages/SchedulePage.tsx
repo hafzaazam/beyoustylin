@@ -256,7 +256,7 @@ const SchedulePage = () => {
                           type="button"
                           onClick={e => { e.stopPropagation(); setSelectedId(b.id); }}
                           className={cn(
-                            'absolute rounded-md border-l-4 px-2 py-1 text-left overflow-hidden shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                            'absolute flex flex-col justify-start rounded-md border-l-4 px-2 py-1 text-left overflow-hidden shadow-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                             blockStyle[b.status] ?? 'bg-muted border-l-muted-foreground/40 hover:bg-muted/80',
                           )}
                           style={{ top: p.top + 1, height: p.height, left: `calc(${p.lane * width}% + 2px)`, width: `calc(${width}% - 4px)` }}
