@@ -20,3 +20,27 @@ export const SITE = {
   scheduleStartHour: 9,
   scheduleEndHour: 22,
 } as const;
+
+// Terms quoted on the Privacy, Terms and Refund pages. Change a number here
+// and every page that mentions it updates.
+//
+// TODO(owner): confirm these match how the salon actually works.
+export const POLICY = {
+  lastUpdated: '2026-09-26',
+  /** Free cancellation / reschedule window for regular appointments. */
+  cancelNoticeHours: 24,
+  /** Free cancellation window for bridal and event bookings. */
+  bridalCancelNoticeDays: 14,
+  /** Share of a bridal/event booking taken as an advance to secure the date. */
+  bridalAdvancePercent: 30,
+  /** Minutes late before an appointment may be shortened or rebooked. */
+  lateGraceMinutes: 15,
+  /** Days a customer has to raise a problem with a service. */
+  serviceComplaintDays: 3,
+  /** Days an unopened, unused product can be returned. */
+  productReturnDays: 7,
+  /** Default gift voucher validity when no expiry is printed on it. */
+  voucherValidityMonths: 12,
+  /** Days to process an approved refund. */
+  refundProcessingDays: 10,
+} as const;

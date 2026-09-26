@@ -206,6 +206,11 @@ const Auth = () => {
                     <p className="text-xs text-muted-foreground text-center">
                       Track your appointments, invoices and rewards in one place.
                     </p>
+                    <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+                      By creating an account you agree to our{' '}
+                      <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms</Link> and{' '}
+                      <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>.
+                    </p>
                   </form>
                 )}
               </TabsContent>

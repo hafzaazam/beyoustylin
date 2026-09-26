@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { SalonProvider } from '@/context/SalonContext';
 import { AuthProvider } from '@/hooks/useAuth';
 import ProtectedRoute, { CustomerRoute, ManagerRoute } from '@/components/ProtectedRoute';
+import RouteMeta from '@/components/RouteMeta';
 import Landing from './pages/Landing';
 
 // Everything except the landing page is split into its own chunk so first-time
@@ -18,6 +19,9 @@ const MehndiPublic = lazy(() => import('./pages/MehndiPublic'));
 const ServiceDetail = lazy(() => import('./pages/ServiceDetail'));
 const Auth = lazy(() => import('./pages/Auth'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const RefundPolicy = lazy(() => import('./pages/RefundPolicy'));
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const SchedulePage = lazy(() => import('./pages/SchedulePage'));
@@ -63,6 +67,7 @@ const App = () => (
       <Toaster />
       <Sonner richColors closeButton />
       <BrowserRouter>
+        <RouteMeta />
         <AuthProvider>
           <SalonProvider>
             <Suspense fallback={<PageFallback />}>
@@ -74,6 +79,9 @@ const App = () => (
                 <Route path="/mehndi" element={<MehndiPublic />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
 
                 <Route path="/admin" element={<Protected><Dashboard /></Protected>} />
                 <Route path="/admin/schedule" element={<Protected><SchedulePage /></Protected>} />

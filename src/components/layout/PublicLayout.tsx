@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
 import { SITE } from '@/config/site';
+import { LEGAL_LINKS } from '@/config/legal';
 
 const navLinks = [
   { to: '/services', label: 'Services' },
@@ -196,7 +197,12 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
         <div className="border-t border-border/60">
           <div className="max-w-7xl mx-auto px-4 lg:px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
             <p>© {new Date().getFullYear()} {SITE.name}</p>
-            <Link to="/auth" className="hover:text-primary transition-colors">Staff &amp; client sign in</Link>
+            <nav aria-label="Legal" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+              {LEGAL_LINKS.map(l => (
+                <Link key={l.to} to={l.to} className="hover:text-primary transition-colors">{l.label}</Link>
+              ))}
+              <Link to="/auth" className="hover:text-primary transition-colors">Staff &amp; client sign in</Link>
+            </nav>
           </div>
         </div>
       </footer>
