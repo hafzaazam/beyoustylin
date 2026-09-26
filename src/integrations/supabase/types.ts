@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       appointment_requests: {
         Row: {
+          booking_id: string | null
           budget: string | null
           created_at: string
           deal_id: string | null
@@ -34,6 +35,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          booking_id?: string | null
           budget?: string | null
           created_at?: string
           deal_id?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          booking_id?: string | null
           budget?: string | null
           created_at?: string
           deal_id?: string | null
@@ -90,10 +93,12 @@ export type Database = {
         Row: {
           chair_id: string
           created_at: string
+          custom_total: number | null
           customer_id: string
           deal_id: string | null
           end_time: string
           id: string
+          notes: string | null
           service_ids: string[]
           staff_id: string
           start_time: string
@@ -105,10 +110,12 @@ export type Database = {
         Insert: {
           chair_id: string
           created_at?: string
+          custom_total?: number | null
           customer_id: string
           deal_id?: string | null
-          end_time: string
+          end_time?: string
           id?: string
+          notes?: string | null
           service_ids?: string[]
           staff_id: string
           start_time: string
@@ -120,10 +127,12 @@ export type Database = {
         Update: {
           chair_id?: string
           created_at?: string
+          custom_total?: number | null
           customer_id?: string
           deal_id?: string | null
           end_time?: string
           id?: string
+          notes?: string | null
           service_ids?: string[]
           staff_id?: string
           start_time?: string
@@ -303,6 +312,8 @@ export type Database = {
           id: string
           invoice_number: string
           items: Json
+          paid_at: string | null
+          payment_method: string | null
           pdf_data_url: string | null
           pdf_generated_at: string | null
           staff_id: string
@@ -315,8 +326,10 @@ export type Database = {
           created_at?: string
           customer_id: string
           id?: string
-          invoice_number: string
+          invoice_number?: string
           items?: Json
+          paid_at?: string | null
+          payment_method?: string | null
           pdf_data_url?: string | null
           pdf_generated_at?: string | null
           staff_id: string
@@ -331,6 +344,8 @@ export type Database = {
           id?: string
           invoice_number?: string
           items?: Json
+          paid_at?: string | null
+          payment_method?: string | null
           pdf_data_url?: string | null
           pdf_generated_at?: string | null
           staff_id?: string
@@ -493,6 +508,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_my_booking: { Args: { _booking_id: string }; Returns: undefined }
+      ensure_customer_record: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -501,6 +518,48 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      link_customer_account: {
+        Args: { _customer_id: string; _email: string | null }
+        Returns: string | null
+      }
+      list_team_members: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
+      my_bookings: {
+        Args: never
+        Returns: {
+          chair_name: string | null
+          deal_id: string | null
+          end_time: string
+          id: string
+          invoice_id: string | null
+          invoice_number: string | null
+          invoice_status: Database["public"]["Enums"]["invoice_status"] | null
+          notes: string | null
+          service_ids: string[]
+          staff_name: string | null
+          start_time: string
+          status: Database["public"]["Enums"]["booking_status"]
+          total_duration: number
+          total_price: number
+        }[]
+      }
+      remove_team_member: { Args: { _user_id: string }; Returns: undefined }
+      set_member_role: {
+        Args: {
+          _email: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: string
+      }
+      withdraw_my_request: { Args: { _request_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "owner" | "manager" | "stylist" | "receptionist"
@@ -511,8 +570,8 @@ export type Database = {
         | "completed"
         | "canceled"
       entity_status: "active" | "disabled"
-      invoice_status: "paid" | "unpaid"
-      request_status: "pending" | "approved" | "dismissed"
+      invoice_status: "paid" | "unpaid" | "void"
+      request_status: "pending" | "approved" | "dismissed" | "withdrawn"
       request_type: "booking" | "quote"
     }
     CompositeTypes: {
@@ -650,8 +709,8 @@ export const Constants = {
         "canceled",
       ],
       entity_status: ["active", "disabled"],
-      invoice_status: ["paid", "unpaid"],
-      request_status: ["pending", "approved", "dismissed"],
+      invoice_status: ["paid", "unpaid", "void"],
+      request_status: ["pending", "approved", "dismissed", "withdrawn"],
       request_type: ["booking", "quote"],
     },
   },
