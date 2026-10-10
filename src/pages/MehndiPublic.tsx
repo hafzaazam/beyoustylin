@@ -1,3 +1,5 @@
+import mehndiHero from '@/assets/mehndi-hero.jpg';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -53,63 +55,21 @@ const MehndiPublic = () => {
   );
 
   return (
-    <PublicLayout>
+    <PublicLayout polished>
       <div
         className="w-full font-montserrat"
         style={{ background: C.ink, color: C.parchment }}
       >
-        {/* ─── 1. HERO ─── */}
-        <section className="relative min-h-[92vh] flex flex-col items-center justify-center overflow-hidden px-6 py-24">
-          {/* radial glow */}
-          <div
-            className="absolute inset-0 opacity-30 pointer-events-none"
-            style={{
-              background: `radial-gradient(circle at 50% 40%, ${C.gold}22 0%, transparent 55%)`,
-            }}
-          />
-          {/* decorative arch */}
-          <div
-            className="absolute inset-6 md:inset-16 pointer-events-none border border-b-0 rounded-t-full"
-            style={{ borderColor: `${C.gold}33` }}
-          />
-
-          <div className="relative z-10 text-center max-w-4xl">
-            <span
-              className="uppercase tracking-[0.2em] text-[11px] font-medium mb-8 block"
-              style={{ color: C.gold }}
-            >
-              The House of Henna
-            </span>
-            <h1
-              className="font-cormorant font-light italic mb-10 leading-[0.85] text-6xl md:text-8xl lg:text-9xl"
-              style={{ color: C.parchment }}
-            >
-              The Art of <br />
-              <span className="not-italic font-semibold" style={{ color: C.gold }}>
-                Mehndi
-              </span>
-            </h1>
-            <p
-              className="max-w-xl mx-auto text-base md:text-lg leading-relaxed font-light"
-              style={{ color: `${C.parchment}b3` }}
-            >
-              Bridging ancient Mughal tradition with contemporary bridal elegance. A ritual of
-              patience, pattern, and poetry.
-            </p>
+        <section className="studio-mehndi-hero">
+          <div className="studio-mehndi-copy">
+            <h1 className="font-cormorant">The Art of <em>Mehndi</em></h1>
+            <p>Bridging ancient Mughal tradition with contemporary bridal elegance. A ritual of patience, pattern, and poetry.</p>
+            <div className="flex flex-wrap gap-5 mt-9">
+              <Link to="/?mode=quote#book" className="studio-henna-book">Book a session <ArrowUpRight size={17} /></Link>
+              <a href="#styles" className="studio-henna-explore">Explore the styles <ArrowDown size={17} /></a>
+            </div>
           </div>
-
-          <div className="absolute bottom-12 flex flex-col items-center gap-4">
-            <span
-              className="text-xs uppercase tracking-widest"
-              style={{ color: C.gold }}
-            >
-              Scroll to Explore
-            </span>
-            <div
-              className="w-px h-12"
-              style={{ background: `linear-gradient(to bottom, ${C.gold}, transparent)` }}
-            />
-          </div>
+          <div className="studio-mehndi-image"><img src={mehndiHero} alt="Intricate bridal mehndi artistry" width={1024} height={1024} /></div>
         </section>
 
         {/* ─── 2. STYLES MENU ─── */}
@@ -149,7 +109,7 @@ const MehndiPublic = () => {
                     loading="lazy"
                     width={1024}
                     height={1024}
-                    className="w-full h-full object-cover grayscale scale-110 transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-100"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div
                     className="absolute inset-0 opacity-80"
@@ -204,7 +164,7 @@ const MehndiPublic = () => {
             ) : mehndiServices.length === 0 ? (
               <p
                 className="text-center text-sm"
-                style={{ color: `${C.parchment}80` }}
+                style={{ color: `${C.parchment}cc` }}
               >
                 Our mehndi menu is being updated. <Link to="/?mode=quote#book" className="underline" style={{ color: C.gold }}>Ask for a quote</Link>.
               </p>
@@ -261,7 +221,7 @@ const MehndiPublic = () => {
                     {svc.description && (
                       <p
                         className="text-sm leading-relaxed font-light"
-                        style={{ color: `${C.parchment}80` }}
+                        style={{ color: `${C.parchment}cc` }}
                       >
                         {svc.description}
                       </p>

@@ -1,3 +1,5 @@
+import StudioIntro from '@/components/layout/StudioIntro';
+import { SITE } from '@/config/site';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSalon } from '@/context/SalonContext';
@@ -47,23 +49,12 @@ const ServicesPublic = () => {
   }, [filtered]);
 
   return (
-    <PublicLayout>
-      {/* Hero */}
-      <section className="relative py-24 px-4 lg:px-8 border-b border-border/60">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-6">
-            Our <span className="italic text-primary">services.</span>
-          </h1>
-          <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
-            Explore our complete menu of makeup, hair and skincare, thoughtfully priced and crafted.
-            Looking for mehndi? See our <Link to="/mehndi" className="text-primary hover:underline">mehndi menu</Link>.
-          </p>
-        </div>
-      </section>
+    <PublicLayout polished>
+      <StudioIntro title={<>Our <em>services.</em></>} image={SITE.heroImage} imageAlt={SITE.heroImageAlt} target="#service-menu" action="Explore the menu"><p>Explore our complete menu of makeup, hair and skincare, thoughtfully priced and crafted. Looking for mehndi? See our <Link to="/mehndi" className="text-primary underline underline-offset-4">mehndi menu</Link>.</p></StudioIntro>
 
 
       {/* Filters */}
-      <section className="px-4 lg:px-8 pt-10">
+      <section id="service-menu" className="studio-filters px-4 lg:px-8 pt-10">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row gap-4 md:items-center pb-6 border-b border-border/60">
             <div className="relative flex-1">
@@ -129,17 +120,17 @@ const ServicesPublic = () => {
                     {String(items.length).padStart(2, '0')} · service{items.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-border/60">
+                <div className="studio-service-list">
                   {items.map(s => (
-                    <div key={s.id} className="group p-8 border-r border-b border-border/60 flex flex-col gap-4 hover:bg-muted/30 transition-colors">
+                    <div key={s.id} className="studio-service-item group">
                       <div className="flex items-start justify-between">
-                        <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{s.category}</span>
+
                         <span className="text-xs uppercase tracking-widest text-muted-foreground tabular-nums flex items-center gap-1">
                           <Clock className="w-3 h-3" strokeWidth={1.25} /> {formatDuration(s.duration)}
                           <FavoriteButton type="service" id={s.id} name={s.name} className="-my-1.5 -mr-1.5 ml-1" />
                         </span>
                       </div>
-                      <Link to={`/services/${s.id}`} className="font-heading text-2xl font-light tracking-tight hover:text-primary transition-colors">
+                      <Link to={`/services/${s.id}`} className="studio-service-name font-heading text-2xl font-normal tracking-tight hover:text-primary transition-colors">
                         {s.name}
                       </Link>
                       <div className="flex items-center justify-between mt-auto pt-6 border-t border-border/60">

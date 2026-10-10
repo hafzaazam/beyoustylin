@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
 import { SITE } from '@/config/site';
 import { LEGAL_LINKS } from '@/config/legal';
+import StudioHeader from './StudioHeader';
 import PromoPopup from '@/components/PromoPopup';
 
 const navLinks = [
@@ -84,72 +85,7 @@ const SocialLinks = () => (
   </>
 );
 
-const PublicLayout = ({ children }: { children: ReactNode }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const favorites = useFavorites();
-
-  return (
-    <FavoritesContext.Provider value={favorites}>
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <nav className="fixed top-0 inset-x-0 z-50 bg-background/85 backdrop-blur border-b border-border/60">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
-            <Logo className="h-12 lg:h-14 w-auto" />
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            {navLinks.map(l => (
-              <NavLink
-                key={l.label}
-                to={l.to}
-                end
-                className={({ isActive }) =>
-                  `hover:text-foreground transition-colors ${isActive && !l.to.includes('#') ? 'text-foreground' : ''}`
-                }
-              >
-                {l.label}
-              </NavLink>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <AccountButton className="hidden sm:block" />
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <button className="md:hidden inline-flex items-center justify-center w-11 h-11 border border-border/60" aria-label="Open menu">
-                  <Menu className="w-4 h-4" strokeWidth={1.25} />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <SheetHeader>
-                  <SheetTitle className="font-heading font-light text-2xl text-left">{SITE.name}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-8 flex flex-col">
-                  {navLinks.map(l => (
-                    <Link
-                      key={l.label}
-                      to={l.to}
-                      onClick={() => setMenuOpen(false)}
-                      className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground"
-                    >
-                      {l.label}
-                    </Link>
-                  ))}
-                  <div className="mt-6" onClick={() => setMenuOpen(false)}>
-                    <AccountButton />
-                  </div>
-                  <a href={SITE.phoneHref} className="mt-6 min-h-11 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} /> {SITE.phoneDisplay}
-                  </a>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </nav>
-
-      <main className="flex-1 pt-16">{children}</main>
-      <PromoPopup />
-
+export const PublicFooter = () => (
       <footer className="border-t border-border/60 mt-16">
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-2 space-y-6">
@@ -208,6 +144,75 @@ const PublicLayout = ({ children }: { children: ReactNode }) => {
           </div>
         </div>
       </footer>
+);
+
+const PublicLayout = ({ children, polished = false }: { children: ReactNode; polished?: boolean }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const favorites = useFavorites();
+
+  return (
+    <FavoritesContext.Provider value={favorites}>
+    <div className={`${polished ? 'studio-site ' : ''}min-h-screen bg-background text-foreground flex flex-col`}>
+      {polished ? <StudioHeader /> : <nav className="fixed top-0 inset-x-0 z-50 bg-background/85 backdrop-blur border-b border-border/60">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
+            <Logo className="h-12 lg:h-14 w-auto" />
+          </Link>
+          <div className="hidden md:flex items-center gap-8 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            {navLinks.map(l => (
+              <NavLink
+                key={l.label}
+                to={l.to}
+                end
+                className={({ isActive }) =>
+                  `hover:text-foreground transition-colors ${isActive && !l.to.includes('#') ? 'text-foreground' : ''}`
+                }
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <AccountButton className="hidden sm:block" />
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              <SheetTrigger asChild>
+                <button className="md:hidden inline-flex items-center justify-center w-11 h-11 border border-border/60" aria-label="Open menu">
+                  <Menu className="w-4 h-4" strokeWidth={1.25} />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="font-heading font-light text-2xl text-left">{SITE.name}</SheetTitle>
+                </SheetHeader>
+                <div className="mt-8 flex flex-col">
+                  {navLinks.map(l => (
+                    <Link
+                      key={l.label}
+                      to={l.to}
+                      onClick={() => setMenuOpen(false)}
+                      className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground"
+                    >
+                      {l.label}
+                    </Link>
+                  ))}
+                  <div className="mt-6" onClick={() => setMenuOpen(false)}>
+                    <AccountButton />
+                  </div>
+                  <a href={SITE.phoneHref} className="mt-6 min-h-11 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Phone className="w-3.5 h-3.5 text-primary" strokeWidth={1.25} /> {SITE.phoneDisplay}
+                  </a>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </nav>}
+
+      <main id="public-content" className={polished ? "flex-1 studio-main" : "flex-1 pt-16"}>{children}</main>
+      <PromoPopup />
+
+      <PublicFooter />
     </div>
     </FavoritesContext.Provider>
   );

@@ -1,3 +1,5 @@
+import StudioIntro from '@/components/layout/StudioIntro';
+import mehndiHero from '@/assets/mehndi-hero.jpg';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useSalon } from '@/context/SalonContext';
@@ -14,21 +16,11 @@ const PackagesPublic = () => {
   const activeDeals = useMemo(() => deals.filter(d => d.status === 'active'), [deals]);
 
   return (
-    <PublicLayout>
-      {/* Hero */}
-      <section className="relative py-24 px-4 lg:px-8 border-b border-border/60">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="font-heading text-5xl md:text-7xl font-light tracking-tight mb-6">
-            Complete <span className="italic text-primary">packages.</span>
-          </h1>
-          <p className="text-base text-muted-foreground max-w-xl font-light leading-relaxed">
-            All-inclusive bridal and party bundles: every service you need for your special day, thoughtfully priced together.
-          </p>
-        </div>
-      </section>
+    <PublicLayout polished>
+      <StudioIntro title={<>Complete <em>packages.</em></>} image={mehndiHero} imageAlt={'Bridal mehndi artistry'} target="#package-menu" action="Find your package"><p>All-inclusive bridal and party bundles: every service you need for your special day, thoughtfully priced together.</p></StudioIntro>
 
       {/* Packages grid */}
-      <Reveal as="section" className="py-20 px-4 lg:px-8">
+      <Reveal as="section" id="package-menu" className="py-20 px-4 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-px" aria-busy="true" aria-label="Loading packages">
@@ -39,7 +31,7 @@ const PackagesPublic = () => {
               No packages available right now.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 border-t border-l border-border/60">
+            <div className="studio-package-grid">
               {activeDeals.map((d, idx) => {
                 const isPopular = idx === 0;
                 const items = d.serviceIds
@@ -51,14 +43,14 @@ const PackagesPublic = () => {
                 return (
                   <div
                     key={d.id}
-                    className={`relative p-10 border-r border-b border-border/60 ${isPopular ? 'bg-muted/30' : ''}`}
+                    className={`studio-package ${isPopular ? 'studio-package-featured' : ''}`}
                   >
                     {isPopular && (
                       <span className="absolute top-6 right-6 text-xs uppercase tracking-[0.25em] text-primary">
                         Most Popular
                       </span>
                     )}
-                    <div className="flex items-start gap-2 mb-8 pr-20">
+                    <div className="flex items-start justify-between gap-4 mb-8 pt-7">
                       <h3 className="font-heading text-3xl md:text-4xl font-light tracking-tight">{d.name}</h3>
                       <FavoriteButton type="deal" id={d.id} name={d.name} className="mt-2" />
                     </div>
@@ -82,7 +74,7 @@ const PackagesPublic = () => {
                     <div className="text-xs uppercase tracking-[0.18em] text-primary mb-4 font-medium pt-6 border-t border-border/60">
                       What's included
                     </div>
-                    <ul className="space-y-3 mb-10">
+                    <ul className="space-y-3 mb-10 flex-1">
                       {items.map(svc =>
                         svc ? (
                           <li key={svc.id} className="flex items-start gap-3 text-sm text-muted-foreground font-light">

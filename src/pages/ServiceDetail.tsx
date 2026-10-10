@@ -35,7 +35,7 @@ const ServiceDetail = () => {
 
   if (!service && loading) {
     return (
-      <PublicLayout>
+      <PublicLayout polished>
         <section className="py-20 md:py-24 px-4 lg:px-8" aria-busy="true" aria-label="Loading service">
           <div className="max-w-5xl mx-auto space-y-6">
             <div className="h-3 w-24 bg-muted animate-pulse" />
@@ -49,7 +49,7 @@ const ServiceDetail = () => {
 
   if (!service) {
     return (
-      <PublicLayout>
+      <PublicLayout polished>
         <section className="py-32 px-4 lg:px-8 text-center">
           <div className="max-w-lg mx-auto">
             <h1 className="font-heading text-4xl font-light mb-3">Service not found</h1>
@@ -71,9 +71,9 @@ const ServiceDetail = () => {
   ];
 
   return (
-    <PublicLayout>
+    <PublicLayout polished>
       {/* Hero */}
-      <section className="relative py-20 md:py-24 px-4 lg:px-8 border-b border-border/60">
+      <section className="studio-detail-hero relative py-20 md:py-24 px-4 lg:px-8 border-b border-border/60">
         <div className="max-w-5xl mx-auto">
           <Link to="/services" className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors mb-10">
             <ArrowLeft className="w-3.5 h-3.5" strokeWidth={1.25} /> All services
@@ -170,7 +170,7 @@ const ServiceDetail = () => {
           </div>
 
           {/* Sticky booking card */}
-          <aside className="md:sticky md:top-24 h-fit">
+          <aside className="studio-detail-booking md:sticky md:top-24 h-fit">
             <div className="border border-border/60 p-8">
               <h3 className="font-heading text-2xl font-light tracking-tight mb-1">{service.name}</h3>
               <div className="text-xs uppercase tracking-widest text-muted-foreground mb-6">{service.category}</div>

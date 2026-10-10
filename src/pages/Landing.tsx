@@ -6,23 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useSalon } from '@/context/SalonContext';
 import { useAuth } from '@/hooks/useAuth';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { supabase } from '@/integrations/supabase/client';
-import { AccountButton } from '@/components/layout/PublicLayout';
+import { PublicFooter } from '@/components/layout/PublicLayout';
+import StudioHeader from '@/components/layout/StudioHeader';
 import { SITE } from '@/config/site';
 import { bookingRequestSchema, firstError, quoteRequestSchema } from '@/lib/validation';
 import { formatDuration, formatPKR, toLocalDateKey } from '@/lib/format';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
-import Logo from '@/components/Logo';
-import ThemeToggle from '@/components/ThemeToggle';
 import Reveal from '@/components/Reveal';
 import {
   Sparkles, Flower2, Crown,
   Star, MapPin, Phone, Mail,
-  Instagram, Facebook, ArrowRight, Check, Send, CheckCircle2, Loader2, Menu,
+  ArrowRight, Check, Send, CheckCircle2, Loader2,
 } from 'lucide-react';
 
 // The three things the studio is known for. Copy comes from the original service descriptions.
@@ -64,7 +62,6 @@ const Landing = () => {
   usePageTitle();
   const { deals, services, addAppointmentRequest, loading } = useSalon();
   const { user, isCustomer } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const featuredDeals = deals.filter(d => d.status === 'active').slice(0, 4);
   const featuredServices = services.filter(s => s.status === 'active' && s.price > 0).slice(0, 6);
@@ -214,54 +211,13 @@ const Landing = () => {
   }, [activeServices]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 backdrop-blur-md bg-background/70 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <Logo className="h-14 lg:h-16 w-auto" />
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <Link to="/services" className="hover:text-foreground transition-colors">Services</Link>
-            <Link to="/packages" className="hover:text-foreground transition-colors">Packages</Link>
-            <Link to="/mehndi" className="hover:text-foreground transition-colors">Mehndi</Link>
-
-            <a href="#book" className="hover:text-foreground transition-colors">Book</a>
-            <a href="#about" className="hover:text-foreground transition-colors">About</a>
-            <a href="#contact" className="hover:text-foreground transition-colors">Contact</a>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <AccountButton className="hidden sm:block" />
-            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-              <SheetTrigger asChild>
-                <button className="md:hidden inline-flex items-center justify-center w-11 h-11 border border-border/60" aria-label="Open menu">
-                  <Menu className="w-4 h-4" strokeWidth={1.25} />
-                </button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-72">
-                <SheetHeader>
-                  <SheetTitle className="font-heading font-light text-2xl text-left">{SITE.name}</SheetTitle>
-                </SheetHeader>
-                <div className="mt-8 flex flex-col" onClick={() => setMenuOpen(false)}>
-                  {[['/services', 'Services'], ['/packages', 'Packages'], ['/mehndi', 'Mehndi']].map(([to, label]) => (
-                    <Link key={to} to={to} className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground">{label}</Link>
-                  ))}
-                  {[['#book', 'Book'], ['#about', 'About'], ['#contact', 'Contact']].map(([href, label]) => (
-                    <a key={href} href={href} className="py-3.5 min-h-11 border-b border-border/60 text-sm uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground">{label}</a>
-                  ))}
-                  <div className="mt-6"><AccountButton /></div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </nav>
-
+    <div className="studio-site min-h-screen bg-background text-foreground">
+      <StudioHeader />
+      <main id="public-content">
       {/* Hero: text on the page colour, photo shown at full strength beside it.
           The placeholder photo is cropped to its right side (SITE.heroImagePosition). */}
-      <section className="relative pt-16 border-b border-border/60 lg:min-h-[88vh] lg:grid lg:grid-cols-12">
-        <div className="lg:col-span-7 flex items-center px-4 lg:pl-8 lg:pr-12 xl:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] pt-10 pb-12 lg:py-20">
+      <section className="studio-hero">
+        <div className="studio-hero-copy">
           <div className="max-w-2xl">
             <h1 className="font-heading text-[3.25rem] leading-[1] sm:text-7xl lg:text-8xl font-light tracking-tight mb-6 text-balance">
               Where every bride becomes <span className="italic text-primary">iconic.</span>
@@ -300,7 +256,7 @@ const Landing = () => {
               <Link to="/packages" className="sm:w-auto"><Button size="lg" variant="outline" className="w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">See bridal packages</Button></Link>
             </div>
 
-            <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
+            <ul className="studio-perks">
               {perks.map(p => (
                 <li key={p.label} className="flex items-center gap-2">
                   <Check className="w-3.5 h-3.5 text-primary shrink-0" strokeWidth={1.5} aria-hidden />
@@ -310,7 +266,7 @@ const Landing = () => {
             </ul>
           </div>
         </div>
-        <div className="lg:col-span-5 relative h-[46vh] min-h-[280px] lg:h-auto">
+        <div className="studio-hero-image">
           <img
             src={SITE.heroImage}
             alt={SITE.heroImageAlt}
@@ -319,6 +275,7 @@ const Landing = () => {
             width={1600}
             height={1024}
           />
+          <div className="studio-photo-caption"><span>{SITE.tagline}</span><span>{SITE.city}</span></div>
         </div>
       </section>
 
@@ -335,7 +292,7 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-px bg-border/60 border border-border/60">
+          <div className="studio-pillars grid grid-cols-1 md:grid-cols-12">
             {pillars.map(p => (
               <Link
                 key={p.title}
@@ -609,7 +566,7 @@ const Landing = () => {
       <Reveal as="section" id="book" className="py-24 px-4 lg:px-8 border-t border-border/60 scroll-mt-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-12 items-start">
           <div className="lg:col-span-2">
-            <h2 className="font-heading text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="font-heading text-4xl md:text-5xl font-normal mb-4">
               {mode === 'booking' ? 'Reserve Your Glow Session' : 'Get a Personalised Quote'}
             </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
@@ -638,13 +595,14 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 studio-booking-panel">
             {/* Mode tabs */}
             <div className="inline-flex p-1 rounded-full bg-card border border-border mb-5">
               {(['booking', 'quote'] as const).map(m => (
                 <button
                   key={m}
                   type="button"
+                  aria-pressed={mode === m}
                   onClick={() => { setMode(m); setSubmitted(null); }}
                   className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
                     mode === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
@@ -831,24 +789,8 @@ const Landing = () => {
         </div>
       </Reveal>
 
-      {/* Footer */}
-      <footer className="py-10 px-4 lg:px-8 border-t border-border/60">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Logo className="h-8 w-auto" />
-            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} {SITE.name}</span>
-          </div>
-          <div className="flex items-center gap-5 text-muted-foreground">
-            {SITE.instagramUrl && (
-              <a href={SITE.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="w-11 h-11 inline-flex items-center justify-center hover:text-primary transition-colors"><Instagram className="w-4 h-4" strokeWidth={1.25} /></a>
-            )}
-            {SITE.facebookUrl && (
-              <a href={SITE.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="w-11 h-11 inline-flex items-center justify-center hover:text-primary transition-colors"><Facebook className="w-4 h-4" strokeWidth={1.25} /></a>
-            )}
-            <Link to="/auth" className="min-h-11 inline-flex items-center text-xs uppercase tracking-[0.16em] hover:text-primary transition-colors">Staff &amp; client sign in</Link>
-          </div>
-        </div>
-      </footer>
+      </main>
+      <PublicFooter />
 
     </div>
   );
