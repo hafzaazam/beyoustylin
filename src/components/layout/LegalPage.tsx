@@ -22,8 +22,8 @@ const LegalPage = ({ eyebrow, title, intro, sections }: {
   usePageTitle(title);
 
   return (
-    <PublicLayout>
-      <section className="py-20 md:py-24 px-4 lg:px-8 border-b border-border/60">
+    <PublicLayout polished>
+      <section className="legal-intro py-20 md:py-24 px-4 lg:px-8 border-b border-border/60">
         <div className="max-w-5xl mx-auto">
           <p className="text-[10px] uppercase tracking-[0.4em] text-primary/80 mb-6 font-medium">{eyebrow}</p>
           <h1 className="font-heading text-4xl md:text-6xl font-light tracking-tight mb-6">{title}</h1>
@@ -34,7 +34,7 @@ const LegalPage = ({ eyebrow, title, intro, sections }: {
         </div>
       </section>
 
-      <section className="py-16 px-4 lg:px-8">
+      <section className="legal-content py-16 px-4 lg:px-8">
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[14rem_1fr] gap-12">
           <nav aria-label="On this page" className="lg:sticky lg:top-24 h-fit">
             <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 mb-4 font-medium">On this page</p>

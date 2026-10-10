@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Logo from '@/components/Logo';
 import { SITE } from '@/config/site';
+import authSalon from '@/assets/hero-salon.jpg';
 import { firstError, signUpSchema } from '@/lib/validation';
 
 type View = 'signin' | 'signup' | 'forgot';
@@ -97,9 +98,11 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background to-muted p-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary mb-6">
+    <div className="auth-page min-h-screen grid place-items-center bg-gradient-to-br from-background to-muted p-4">
+      <div className="auth-layout w-full max-w-6xl">
+        <div className="auth-visual" aria-hidden="true"><img src={authSalon} alt="" /><div><span>BEAUTY, WITH INTENTION</span><p>Feel like <i>yourself.</i><br />At your most iconic.</p><small>{SITE.city} · {SITE.tagline}</small></div></div>
+        <div className="auth-content">
+        <Link to="/" className="auth-back inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary mb-6">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to {SITE.name}
         </Link>
         <div className="flex items-center gap-3 justify-center mb-8">
@@ -114,7 +117,7 @@ const Auth = () => {
           </div>
         </div>
 
-        <div className="bg-card rounded-2xl border p-6 shadow-sm">
+        <div className="auth-card bg-card rounded-2xl border p-6 shadow-sm">
           {view === 'forgot' ? (
             resetSent ? (
               <div className="text-center space-y-4 py-4">
@@ -216,6 +219,7 @@ const Auth = () => {
               </TabsContent>
             </Tabs>
           )}
+        </div>
         </div>
       </div>
     </div>

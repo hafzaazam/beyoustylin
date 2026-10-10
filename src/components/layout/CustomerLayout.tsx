@@ -39,7 +39,7 @@ const CustomerLayout = ({ children, title, subtitle }: Props) => {
   const initial = (user?.email?.[0] || 'U').toUpperCase();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="customer-app flex min-h-screen bg-background">
       {open && (
         <div className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />
       )}

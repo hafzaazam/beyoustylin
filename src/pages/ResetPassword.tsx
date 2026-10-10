@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SITE } from '@/config/site';
+import authSalon from '@/assets/hero-salon.jpg';
 
 // Supabase signs the user in with a short-lived recovery session when they
 // open the emailed link (redirectTo = /reset-password), so updateUser works here.
@@ -32,8 +33,10 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background to-muted p-4">
-      <div className="w-full max-w-md bg-card rounded-2xl border p-6 shadow-sm">
+    <div className="auth-page reset-page min-h-screen grid place-items-center bg-gradient-to-br from-background to-muted p-4">
+      <div className="auth-layout reset-layout w-full max-w-6xl">
+      <div className="auth-visual" aria-hidden="true"><img src={authSalon} alt="" /><div><span>BEAUTY, WITH INTENTION</span><p>A fresh start,<br />a fresh <i>glow.</i></p><small>{SITE.city} · {SITE.tagline}</small></div></div>
+      <div className="auth-card reset-card bg-card rounded-2xl border p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
             <KeyRound className="w-5 h-5" />
@@ -69,6 +72,7 @@ const ResetPassword = () => {
             </Button>
           </form>
         )}
+      </div>
       </div>
     </div>
   );

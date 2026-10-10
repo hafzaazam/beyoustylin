@@ -77,7 +77,7 @@ const AdminLayout = ({ children, title, actions }: AdminLayoutProps) => {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="admin-app flex min-h-screen">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-card focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-foreground focus:shadow-lg focus:ring-2 focus:ring-ring"

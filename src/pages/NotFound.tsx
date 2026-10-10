@@ -7,8 +7,8 @@ const NotFound = () => {
   usePageTitle('Page not found');
 
   return (
-    <PublicLayout>
-      <section className="py-32 px-4 lg:px-8 text-center">
+    <PublicLayout polished>
+      <section className="not-found-page py-32 px-4 lg:px-8 text-center">
         <div className="max-w-lg mx-auto">
           <p className="text-xs uppercase tracking-[0.2em] text-primary mb-6 font-medium">Error 404</p>
           <h1 className="font-heading text-5xl md:text-6xl font-light tracking-tight mb-4">
