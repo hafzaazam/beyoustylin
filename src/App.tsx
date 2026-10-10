@@ -10,6 +10,7 @@ import { AuthProvider } from '@/hooks/useAuth';
 import ProtectedRoute, { CustomerRoute, ManagerRoute } from '@/components/ProtectedRoute';
 import RouteMeta from '@/components/RouteMeta';
 import Landing from './pages/Landing';
+import ChatWidget from '@/components/chat/ChatWidget';
 
 // Everything except the landing page is split into its own chunk so first-time
 // visitors don't download the admin panel, PDF library and charts.
@@ -112,6 +113,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            <ChatWidget />
           </SalonProvider>
         </AuthProvider>
       </BrowserRouter>
