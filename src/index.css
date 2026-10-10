@@ -162,6 +162,40 @@
   .status-muted {
     @apply bg-muted text-muted-foreground ring-border;
   }
+
+  /* Public-site accents. A light band sweeps across the button / word. */
+  .shimmer-btn {
+    background-image: linear-gradient(110deg, hsl(var(--primary)) 40%, hsl(var(--primary-bright)) 50%, hsl(var(--primary)) 60%);
+    background-size: 200% 100%;
+    animation: shimmer 2.8s linear infinite;
+  }
+  .shimmer-text {
+    background-image: linear-gradient(90deg, hsl(var(--primary)) 35%, hsl(var(--primary-bright)) 50%, hsl(var(--primary)) 65%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-inline-end: 0.08em; /* keeps the italic overhang from being clipped */
+    animation: shimmer 4s linear infinite;
+  }
+  .marquee-track {
+    animation: marquee 30s linear infinite;
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .shimmer-btn, .shimmer-text, .marquee-track { animation: none; }
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @layer base {

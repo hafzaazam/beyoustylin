@@ -48,6 +48,7 @@ const AccountFavorites = lazy(() => import('./pages/account/AccountFavorites'));
 const AccountProfile = lazy(() => import('./pages/account/AccountProfile'));
 
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AnimationLab = lazy(() => import('./pages/AnimationLab'));
 
 const queryClient = new QueryClient();
 
@@ -107,6 +108,7 @@ const App = () => (
                 <Route path="/account/favorites" element={<CustomerRoute><AccountFavorites /></CustomerRoute>} />
                 <Route path="/account/profile" element={<CustomerRoute><AccountProfile /></CustomerRoute>} />
 
+                <Route path="/animation-lab" element={<AnimationLab />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -17,6 +17,10 @@ import { bookingRequestSchema, firstError, quoteRequestSchema } from '@/lib/vali
 import { formatDuration, formatPKR, toLocalDateKey } from '@/lib/format';
 import mehndiHero from '@/assets/mehndi-hero.jpg';
 import Reveal from '@/components/Reveal';
+import ServiceMarquee from '@/components/ServiceMarquee';
+
+// GSAP is only needed for this one scene, so keep it out of the first download.
+const MehndiScrollStory = lazy(() => import('@/components/MehndiScrollStory'));
 import {
   Sparkles, Flower2, Crown,
   Star, MapPin, Phone, Mail,
@@ -220,7 +224,7 @@ const Landing = () => {
         <div className="studio-hero-copy">
           <div className="max-w-2xl">
             <h1 className="font-heading text-[3.25rem] leading-[1] sm:text-7xl lg:text-8xl font-light tracking-tight mb-6 text-balance">
-              Where every bride becomes <span className="italic text-primary">iconic.</span>
+              Where every bride becomes <span className="italic shimmer-text">iconic.</span>
             </h1>
             <p className="text-base md:text-lg text-muted-foreground mb-6 max-w-xl leading-relaxed">
               Bridal makeup, hair, mehndi and skincare by senior artists in {SITE.city.split(',')[0]}.
@@ -252,7 +256,7 @@ const Landing = () => {
             </dl>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <a href="#book" className="sm:w-auto"><Button size="lg" className="w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">Book appointment</Button></a>
+              <a href="#book" className="sm:w-auto"><Button size="lg" className="shimmer-btn w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">Book appointment</Button></a>
               <Link to="/packages" className="sm:w-auto"><Button size="lg" variant="outline" className="w-full rounded-none px-8 h-12 text-xs uppercase tracking-[0.2em]">See bridal packages</Button></Link>
             </div>
 
@@ -279,6 +283,7 @@ const Landing = () => {
         </div>
       </section>
 
+      <ServiceMarquee />
 
       {/* What we do: three real pillars instead of a grid of same-size feature cards */}
       <Reveal as="section" id="services" className="py-20 md:py-28 px-4 lg:px-8">
@@ -397,6 +402,11 @@ const Landing = () => {
       </Reveal>
       )}
 
+
+      {/* Scroll scene: a henna mandala draws itself, then real mehndi hands rise in */}
+      <Suspense fallback={<div className="h-[100svh] min-h-[600px]" style={{ background: '#0b1a12' }} />}>
+        <MehndiScrollStory />
+      </Suspense>
 
       {/* Mehndi highlight — henna green + gold palette */}
       <Reveal as="section"
